@@ -20,7 +20,7 @@ int main() {
     }
 
     //establish window hints
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
@@ -59,6 +59,8 @@ int main() {
 
     int display_w, display_h, previous_display_w, previous_display_h;
     double previous_time = glfwGetTime();
+
+    main_renderer.Init();
 
     while (!glfwWindowShouldClose(window)) {
         //get current display window size & update rendering

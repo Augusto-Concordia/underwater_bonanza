@@ -1,6 +1,6 @@
 //default line vertex shader
 
-#version 410 core
+#version 330 core
 
 uniform mat4 u_model_transform; //model matrix
 uniform mat4 u_view_projection; //view projection matrix

@@ -1,4 +1,4 @@
-//default line fragment shader
+//default unlit fragment shader
 
 #version 330 core
 

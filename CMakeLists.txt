@@ -3,6 +3,10 @@ project(underwater_bonanza)
 
 set(CMAKE_CXX_STANDARD 20)
 
+IF (WIN32)
+    set(CMAKE_EXE_LINKER_FLAGS "-static")
+ENDIF()
+
 # finds our own OpenGL dependency from installed binaries
 find_package(OpenGL REQUIRED)
 
@@ -14,4 +18,10 @@ file(GLOB_RECURSE UNDERWATER_BONANZA_FILES source/**.cpp)
 add_executable(underwater_bonanza ${UNDERWATER_BONANZA_FILES})
 
 target_include_directories(underwater_bonanza PRIVATE source)
-target_link_libraries(underwater_bonanza PRIVATE glfw OpenGL::GL glm glad -static-libgcc -static-libstdc++)
+
+
+IF (WIN32)
+    target_link_libraries(underwater_bonanza PRIVATE glfw OpenGL::GL glm glad -static-libgcc -static-libstdc++)
+ELSE()
+    target_link_libraries(underwater_bonanza PRIVATE glfw OpenGL::GL glm glad)
+ENDIF()

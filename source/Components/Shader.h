@@ -1,9 +1,12 @@
+// Inspiration for this class and its functionality (shader reading from a text file & library caching) comes from an unreleased personal project
+
 #pragma once
 
 #include "glad/glad.h" // include glad to get all the required OpenGL headers
 #include "glm/vec2.hpp"
 #include "glm/mat4x4.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "Light.h"
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -15,26 +18,26 @@ class Shader {
 public:
     class Library {
     private:
-        inline static std::unordered_map<const char*, uint32_t> shader_library;
-        inline static std::unordered_map<const char*, std::shared_ptr<Shader>> compiled_shader_library;
+        inline static std::unordered_map<std::string, uint32_t> shader_library;
+        inline static std::unordered_map<std::string, std::shared_ptr<Shader>> compiled_shader_library;
 
     public:
         Library();
 
-        static std::shared_ptr<Shader> CreateShader(const char* _vertexShaderPath, const char* _fragmentShaderPath);
+        static std::shared_ptr<Shader> CreateShader(const std::string& _vertexShaderPath, const std::string& _fragmentShaderPath);
         static std::shared_ptr<Shader> CreateShader(uint32_t _vertexShaderId, uint32_t _fragmentShaderPath);
 
-        static uint32_t AddShader(const char* _name, GLenum _type, GLsizei _count, const char* _code, const GLint* _length = nullptr);
-        static std::shared_ptr<Shader> AddProgram(const char* _name, uint32_t _vertexId, uint32_t _fragmentId);
+        static uint32_t AddShader(const std::string& _name, GLenum _type, GLsizei _count, const char* _code, const GLint* _length = nullptr);
+        static std::shared_ptr<Shader> AddProgram(const std::string& _name, uint32_t _vertexId, uint32_t _fragmentId);
 
     private:
-        static std::string ReadShaderCode(const char* shaderCodePath);
+        static std::string ReadShaderCode(const std::string& shaderCodePath);
     };
 
-    struct Descriptor {
+    // Describes all of a shader's properties (regardless of whether they are used or not)
+    struct Material {
     public:
-        const char* vertex_shader_path = "shaders/default.vert";
-        const char* fragment_shader_path = "shaders/default.frag";
+        std::shared_ptr<Shader> shader = std::make_shared<Shader>(-1, -1, -1);
 
         float line_thickness = 1.0f;
         float point_size = 1.0f;
@@ -42,11 +45,8 @@ public:
         glm::vec3 color = glm::vec3(1.0f);
         float alpha = 1.0f;
 
-        glm::vec3 light_position = glm::vec3(0.0f);
-        glm::vec3 light_color = glm::vec3(1.0f);
+        std::shared_ptr<Light> main_light = std::make_shared<Light>();
 
-        float ambient_strength = 0.1f;
-        float specular_strength = 0.5f;
         int shininess = 32;
     };
 
@@ -69,6 +69,9 @@ public:
     void SetVec3(const char *_name, float _valueX, float _valueY, float _valueZ) const;
     void SetVec3(const char *_name, const glm::vec3& _value) const;
 
+    void SetMat4(const char *_name, const glm::mat4 &_value) const; // utility function to set a matrix 4x4
+
+    void SetTexture(const char *_name, GLint _value) const; // utility function to set a texture
     void SetModelMatrix(const glm::mat4& _transform) const; // utility function to set model matrix
     void SetViewProjectionMatrix(const glm::mat4& _transform) const; // utility function to set projection matrix
 };

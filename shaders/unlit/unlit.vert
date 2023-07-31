@@ -1,4 +1,4 @@
-//default grid vertex shader
+//default unlit vertex shader
 
 #version 330 core
 

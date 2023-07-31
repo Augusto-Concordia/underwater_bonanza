@@ -7,11 +7,13 @@
 #include "GLFW/glfw3.h"
 #include "Components/Visual/VisualLine.h"
 #include "Components/Visual/VisualCube.h"
+#include "Screen.h"
 
 class Renderer {
 private:
+    std::unique_ptr<Screen> main_screen;
     std::shared_ptr<Camera> main_camera;
-    std::shared_ptr<Shader> default_shader;
+    std::unique_ptr<Shader::Material> shadow_mapper_material;
 
     std::unique_ptr<VisualGrid> main_grid;
 
@@ -19,17 +21,22 @@ private:
     std::unique_ptr<VisualLine> main_y_line;
     std::unique_ptr<VisualLine> main_z_line;
 
-    std::vector<VisualCube> racket_cubes;
+    std::shared_ptr<Light> main_light;
+    std::unique_ptr<VisualCube> main_light_cube;
 
-    int racket_render_mode = GL_TRIANGLES;
-    glm::vec3 racket_position;
-    glm::vec3 racket_rotation;
-    glm::vec3 racket_scale;
+    std::unique_ptr<VisualCube> test_cube;
+
+    int viewport_width, viewport_height;
+
+    GLuint shadow_map_fbo = 0;
+    GLuint shadow_map_depth_tex = 0;
 
 public:
     Renderer(int _initialWidth, int _initialHeight);
 
+    void Init();
     void Render(GLFWwindow* _window, double _deltaTime);
+
     void ResizeCallback(GLFWwindow* _window, int _displayWidth, int _displayHeight);
     void InputCallback(GLFWwindow* _window, double _deltaTime);
 };

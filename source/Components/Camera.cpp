@@ -23,10 +23,10 @@ void Camera::OneAxisMove(Camera::Translation _translation, float _delta) {
 
     switch (_translation) {
         case UP:
-            delta_target = delta_cam = _delta * translation_speed * Transforms::UP;
+            delta_target = delta_cam = _delta * translation_speed * Transform::UP;
             break;
         case DOWN:
-            delta_target = delta_cam = -_delta * translation_speed * Transforms::UP;
+            delta_target = delta_cam = -_delta * translation_speed * Transform::UP;
             break;
         case CAMERA_UP:
             delta_target = delta_cam = -_delta * translation_speed * cam_up;
@@ -44,10 +44,10 @@ void Camera::OneAxisMove(Camera::Translation _translation, float _delta) {
             //we take the cross because we want to move forward,
             //parallel to the ground (similar to other programs' world space toggle)
         case FORWARD:
-            delta_target = delta_cam = _delta * translation_speed * glm::cross(cam_right, Transforms::UP);
+            delta_target = delta_cam = _delta * translation_speed * glm::cross(cam_right, Transform::UP);
             break;
         case BACKWARD:
-            delta_target = delta_cam = -_delta * translation_speed * glm::cross(cam_right, Transforms::UP);
+            delta_target = delta_cam = -_delta * translation_speed * glm::cross(cam_right, Transform::UP);
             break;
 
             //camera forward & backward follows the center of the camera's view
@@ -121,10 +121,10 @@ void Camera::OneAxisOrbit(Camera::Orbitation _orbitation, float _delta) {
             rotation_axis = -cam_right;
             break;
         case ORBIT_RIGHT:
-            rotation_axis = Transforms::UP;
+            rotation_axis = Transform::UP;
             break;
         case ORBIT_LEFT:
-            rotation_axis = -Transforms::UP;
+            rotation_axis = -Transform::UP;
             break;
     }
 
@@ -166,7 +166,7 @@ void Camera::UpdateView() {
 
     //cheap, but effective way of constraining the camera to avoid looking straight up or down
     cam_forward = glm::clamp(glm::normalize(cam_position - cam_target), -glm::vec3(infinity, infinity, 0.94f), glm::vec3(infinity, infinity, 0.94f));
-    cam_right = glm::normalize(glm::cross(cam_forward, Transforms::UP));
+    cam_right = glm::normalize(glm::cross(cam_forward, Transform::UP));
     cam_up = glm::normalize(glm::cross(cam_right, cam_forward));
 
     view_matrix = glm::lookAt(cam_position, cam_target, cam_up);
