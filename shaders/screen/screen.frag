@@ -2,8 +2,10 @@
 
 #version 330 core
 
+uniform vec3 u_fog_color = vec3(0.0, 0.36, 0.73); //fog color
+
 uniform sampler2D u_scene_color_texture; //scene render texture
-uniform sampler2D u_scene_depth_texture; //scene depth texture
+uniform sampler2D u_scene_true_depth_texture; //scene depth texture
 
 in vec3 FragPos; //fragment position
 in vec2 FragUv; //texture coordinates
@@ -22,15 +24,18 @@ float map(float value, float min1, float max1, float min2, float max2) {
 //entrypoint
 void main() {
     // for better depth visibility when testing the shader
-    //OutColor = vec4(map(texture(u_scene_depth_texture, FragUv).rrr, vec3(0.95), vec3(1.0), vec3(0.0), vec3(1.0)), 1.0);
+    vec4 sceneColor = texture(u_scene_color_texture, FragUv).rgba;
+    float trueDepth = texture(u_scene_true_depth_texture, FragUv).r;
 
-    float depth = (400.0 - texture(u_scene_depth_texture, FragUv).r * 400.0) / 400.0;
+    // if the depth is too small, it's probably a background pixel
+    // so we just color it the fog color
+    if (trueDepth < 0.00001) {
+        OutColor = vec4(u_fog_color, 1.0);
+        return;
+    }
 
-    OutColor = mix(texture(u_scene_color_texture, FragUv), vec4(0.0, 0.0, 0.0, 1.0), depth);
+    float fogFactor = map(trueDepth, 2.0, 50.0, 0.0, 1.0);
+    fogFactor = clamp(1.0 / pow(exp(fogFactor * 0.66), 2.0), 0.0, 1.0); // exponential fog
 
-    //OutColor = mix(texture(u_scene_color_texture, FragUv), vec4(FragUv, 1.0, 1.0), 0.5);
-
-    //OutColor = vec4(vec3(FragUv, 1.0), 1.0);
-
-    //OutColor = vec4(FragPos, 1.0);
+    OutColor = mix(vec4(u_fog_color, 1.0), sceneColor, fogFactor);
 }

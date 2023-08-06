@@ -11,13 +11,15 @@
 class Screen : public VisualObject
 {
 private:
-    GLsizei original_screen_width, screen_width = 0;
-    GLsizei original_screen_height, screen_height = 0;
+    GLsizei screen_width = 0;
+    GLsizei screen_height = 0;
 
     GLuint screen_framebuffer = 0;
     GLuint screen_base_texture_unit = 0;
-    GLuint screen_color_texture = 0;
-    GLuint screen_depth_texture = 0;
+
+    GLuint scene_color_texture = 0;
+    GLuint scene_true_depth_texture = 0;
+    GLuint scene_depth_texture = 0;
 
 public:
     explicit Screen(GLsizei _width, GLsizei _height, GLuint _textureUnit = 15, Shader::Material _material = Shader::Material());

@@ -222,30 +222,30 @@ void Renderer::InputCallback(GLFWwindow* _window, const double _deltaTime) {
     //keyboard triggers
     //camera translates (side to side and zoom forwards & back)
     if (Input::IsKeyPressed(_window, GLFW_KEY_KP_7) || Input::IsKeyPressed(_window, GLFW_KEY_Q))
-        main_camera->OneAxisMove(Camera::Translation::UP, (float)_deltaTime);
+        main_camera->OneAxisMove(Camera::Translation::UP, 0.1f);
     if (Input::IsKeyPressed(_window, GLFW_KEY_KP_9) || Input::IsKeyPressed(_window, GLFW_KEY_E))
-        main_camera->OneAxisMove(Camera::Translation::DOWN, (float)_deltaTime);
+        main_camera->OneAxisMove(Camera::Translation::DOWN, 0.1f);
     if (Input::IsKeyPressed(_window, GLFW_KEY_KP_4) || Input::IsKeyPressed(_window, GLFW_KEY_W))
-        main_camera->OneAxisMove(Camera::Translation::FORWARD, (float)_deltaTime);
+        main_camera->OneAxisMove(Camera::Translation::FORWARD, 0.1f);
     if (Input::IsKeyPressed(_window, GLFW_KEY_KP_6) || Input::IsKeyPressed(_window, GLFW_KEY_A))
-        main_camera->OneAxisMove(Camera::Translation::LEFT, (float)_deltaTime);
+        main_camera->OneAxisMove(Camera::Translation::LEFT, 0.1f);
     if (Input::IsKeyPressed(_window, GLFW_KEY_KP_8) || Input::IsKeyPressed(_window, GLFW_KEY_S))
-        main_camera->OneAxisMove(Camera::Translation::BACKWARD, (float)_deltaTime);
+        main_camera->OneAxisMove(Camera::Translation::BACKWARD, 0.1f);
     if (Input::IsKeyPressed(_window, GLFW_KEY_KP_2) || Input::IsKeyPressed(_window, GLFW_KEY_D))
-        main_camera->OneAxisMove(Camera::Translation::RIGHT, (float)_deltaTime);
+        main_camera->OneAxisMove(Camera::Translation::RIGHT, 0.1f);
 
     //mouse triggers
     //forwards & back in camera local coordinates
     if (Input::IsMouseButtonPressed(_window, GLFW_MOUSE_BUTTON_LEFT))
-        main_camera->OneAxisMove(Camera::Translation::CAMERA_FORWARD, (float)(_deltaTime * Input::cursor_delta_y));
+        main_camera->OneAxisMove(Camera::Translation::CAMERA_FORWARD, (float)Input::cursor_delta_y / 10.0f);
 
     //tilt control
     if (Input::IsMouseButtonPressed(_window, GLFW_MOUSE_BUTTON_MIDDLE))
-        main_camera->OneAxisRotate(Camera::Rotation::POSITIVE_PITCH, (float)(_deltaTime * Input::cursor_delta_y));
+        main_camera->OneAxisRotate(Camera::Rotation::POSITIVE_PITCH, (float)Input::cursor_delta_y / 10.0f);
 
     //pan control
     if (Input::IsMouseButtonPressed(_window, GLFW_MOUSE_BUTTON_RIGHT))
-        main_camera->OneAxisRotate(Camera::Rotation::POSITIVE_YAW, (float) (_deltaTime * Input::cursor_delta_x));
+        main_camera->OneAxisRotate(Camera::Rotation::POSITIVE_YAW, (float)Input::cursor_delta_x / 10.0f);
 
     //camera rotation reset
     if (Input::IsKeyPressed(_window, GLFW_KEY_HOME) || Input::IsKeyPressed(_window, GLFW_KEY_KP_5))
@@ -254,11 +254,11 @@ void Renderer::InputCallback(GLFWwindow* _window, const double _deltaTime) {
     //keyboard triggers
     //camera orbit
     if (Input::IsKeyPressed(_window, GLFW_KEY_UP))
-        main_camera->OneAxisOrbit(Camera::Orbitation::ORBIT_UP, (float)_deltaTime);
+        main_camera->OneAxisOrbit(Camera::Orbitation::ORBIT_UP, 0.1f);
     if (Input::IsKeyPressed(_window, GLFW_KEY_DOWN))
-        main_camera->OneAxisOrbit(Camera::Orbitation::ORBIT_DOWN, (float)_deltaTime);
+        main_camera->OneAxisOrbit(Camera::Orbitation::ORBIT_DOWN, 0.1f);
     if (Input::IsKeyPressed(_window, GLFW_KEY_RIGHT))
-        main_camera->OneAxisOrbit(Camera::Orbitation::ORBIT_RIGHT, (float)_deltaTime);
+        main_camera->OneAxisOrbit(Camera::Orbitation::ORBIT_RIGHT, 0.1f);
     if (Input::IsKeyPressed(_window, GLFW_KEY_LEFT))
-        main_camera->OneAxisOrbit(Camera::Orbitation::ORBIT_LEFT, (float)_deltaTime);
+        main_camera->OneAxisOrbit(Camera::Orbitation::ORBIT_LEFT, 0.1f);
 }

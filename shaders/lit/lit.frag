@@ -38,6 +38,7 @@ in vec4 FragPosLightSpace[4];
 in vec2 FragUv;
 
 layout(location = 0) out vec4 out_color; //rgba color output
+layout(location = 1) out vec4 true_depth; //true depth output
 
 vec3 calculateSpotLight(Light light, vec4 fragPosLightSpace, int index) {
     //diffuse lighting calculation
@@ -130,5 +131,6 @@ void main() {
 
     vec3 colorResult = (approximateAmbient + lightsColor) * vec3(mix(vec4(u_color, 1.0), texture(u_texture, FragUv), u_texture_influence)); //pure color or texture, mixed with lighting
 
+    true_depth = vec4(vec3(gl_FragCoord.z / gl_FragCoord.w), 1.0); //true depth output
     out_color = vec4(colorResult, u_alpha);
 }

@@ -6,8 +6,8 @@
 
 Screen::Screen(GLsizei _width, GLsizei _height, GLuint _textureUnit, Shader::Material _material) : VisualObject(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), std::move(_material))
 {
-    original_screen_width = screen_width = _width;
-    original_screen_height = screen_height = _height;
+    screen_width = _width;
+    screen_height = _height;
     screen_base_texture_unit = _textureUnit;
 
     // quad vertices with their uvs
@@ -32,46 +32,59 @@ void Screen::Init() {
     glBindFramebuffer(GL_FRAMEBUFFER, screen_framebuffer);
 
     // COLOR
+    {
+        // initializes the screen color texture
+        glGenTextures(1, &scene_color_texture);
+        glBindTexture(GL_TEXTURE_2D, scene_color_texture);
 
-    // initializes the screen color texture
-    glGenTextures(1, &screen_color_texture);
-    glBindTexture(GL_TEXTURE_2D, screen_color_texture);
+        // sets the texture parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
-    // sets the texture parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        // sets the texture data
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_width, screen_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
-    // sets the texture data
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_width, screen_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+        // attaches the render color texture to the framebuffer
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, scene_color_texture, 0);
+    }
 
-    // attaches the render color texture to the framebuffer
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, screen_color_texture, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    // TRUE DEPTH
+    {
+        // initializes the screen depth texture
+        glGenTextures(1, &scene_true_depth_texture);
+        glBindTexture(GL_TEXTURE_2D, scene_true_depth_texture);
 
-    // DEPTH
+        // sets the texture parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
-    // initializes the screen depth texture
-    glGenTextures(1, &screen_depth_texture);
-    glBindTexture(GL_TEXTURE_2D, screen_depth_texture);
+        // sets the true depth texture data
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT, nullptr);
 
-    // sets the texture parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        // attaches the true depth texture to the framebuffer
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, scene_true_depth_texture, 0);
+    }
 
-    // sets the render buffer data
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, screen_width, screen_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    // DEPTH & STENCIL
+    {
+        // initializes the screen depth render buffer
+        glGenRenderbuffers(1, &scene_depth_texture);
+        glBindRenderbuffer(GL_RENDERBUFFER, scene_depth_texture);
 
-    // attaches the render color texture to the framebuffer
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, screen_depth_texture, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
+        // creates memory space for the depth render buffer
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screen_width, screen_height);
+
+        // attaches the render buffer to the framebuffer
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, scene_depth_texture);
+    }
 
     // disable color draw & read buffer for this framebuffer
-    GLenum draw_buffers[1] = { GL_COLOR_ATTACHMENT0 };
-    glDrawBuffers(1, draw_buffers);
+    GLenum draw_buffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+    glDrawBuffers(2, draw_buffers);
 
     Graphics::ValidateFramebufferStatus();
 }
@@ -100,12 +113,16 @@ void Screen::ResizeCallback(GLsizei _width, GLsizei _height) {
     glBindFramebuffer(GL_FRAMEBUFFER, screen_framebuffer);
 
     // resize the screen color texture
-    glBindTexture(GL_TEXTURE_2D, screen_color_texture);
+    glBindTexture(GL_TEXTURE_2D, scene_color_texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_width, screen_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
     // resize the screen depth texture
-    glBindTexture(GL_TEXTURE_2D, screen_depth_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, screen_width, screen_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    glBindTexture(GL_TEXTURE_2D, scene_true_depth_texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT, nullptr);
+
+    // resize the screen depth render buffer
+    glBindRenderbuffer(GL_RENDERBUFFER, scene_depth_texture);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screen_width, screen_height);
 }
 
 void Screen::Draw(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, int _renderMode, const Shader::Material *material)
@@ -131,17 +148,13 @@ void Screen::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::vec3 &_
 
     current_material->shader->Use();
 
-    //current_material->shader->SetMat4("u_screen", glm::scale(glm::mat4(1.0f), 1.0f / glm::vec3(original_screen_width / (float)screen_width, original_screen_height / (float)screen_height, 1.0f)));
-
-    //current_material->shader->SetVec2("u_uv_scalar", (float)screen_width, (float)screen_height);
-
     glActiveTexture(GL_TEXTURE0 + screen_base_texture_unit);
-    glBindTexture(GL_TEXTURE_2D, screen_color_texture);
+    glBindTexture(GL_TEXTURE_2D, scene_color_texture);
     current_material->shader->SetTexture("u_scene_color_texture", (GLint)screen_base_texture_unit);
 
     glActiveTexture(GL_TEXTURE0 + screen_base_texture_unit + 1);
-    glBindTexture(GL_TEXTURE_2D, screen_depth_texture);
-    current_material->shader->SetTexture("u_scene_depth_texture", (GLint)screen_base_texture_unit + 1);
+    glBindTexture(GL_TEXTURE_2D, scene_true_depth_texture);
+    current_material->shader->SetTexture("u_scene_true_depth_texture", (GLint)screen_base_texture_unit + 1);
 
     // draw vertices according to their indices
     glDrawElements(_renderMode, indices.size(), GL_UNSIGNED_INT, nullptr);
