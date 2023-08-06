@@ -1,6 +1,6 @@
 #include "Renderer.h"
 #include "Utility/Input.hpp"
-#include "Utility/Transform.hpp"
+#include "Utility/Graphics.hpp"
 #include "Texture.h"
 
 Renderer::Renderer(int _initialWidth, int _initialHeight) {
@@ -20,10 +20,16 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     auto unlit_shader = Shader::Library::CreateShader("shaders/unlit/unlit.vert", "shaders/unlit/unlit.frag");
     auto line_shader = Shader::Library::CreateShader("shaders/line/line.vert", "shaders/line/line.frag");
 
+    auto screen_shader = Shader::Library::CreateShader("shaders/screen/screen.vert", "shaders/screen/screen.frag");
     auto shadow_mapper_shader = Shader::Library::CreateShader("shaders/shadows/shadow_mapper.vert", "shaders/shadows/shadow_mapper.frag");
 
     shadow_mapper_material = std::make_unique<Shader::Material>();
     shadow_mapper_material->shader = shadow_mapper_shader;
+
+    Shader::Material screen_material = {
+            .shader = screen_shader,
+    };
+    main_screen = std::make_unique<Screen>(viewport_width, viewport_height, 15, screen_material);
 
     Shader::Material main_light_cube_material = {
             .shader = unlit_shader,
@@ -73,6 +79,8 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
 }
 
 void Renderer::Init() {
+    // SHADOW MAP FRAMEBUFFER
+
     // initializes the shadow map framebuffer
     glGenFramebuffers(1, &shadow_map_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, shadow_map_fbo);
@@ -103,35 +111,10 @@ void Renderer::Init() {
     glReadBuffer(GL_NONE);
     glDrawBuffer(GL_NONE);
 
-    // checks if the framebuffer is complete
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    {
-        std::cerr << "ERROR -> Framebuffer is not complete! (" << glCheckFramebufferStatus(GL_FRAMEBUFFER) << "): ";
+    Graphics::ValidateFramebufferStatus();
 
-        switch (glCheckFramebufferStatus(GL_FRAMEBUFFER)) {
-            case GL_FRAMEBUFFER_UNDEFINED:
-                std::cerr << "GL_FRAMEBUFFER_UNDEFINED" << std::endl;
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-                std::cerr << "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT" << std::endl;
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-                std::cerr << "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT" << std::endl;
-                break;
-            case GL_FRAMEBUFFER_UNSUPPORTED:
-                std::cerr << "GL_FRAMEBUFFER_UNSUPPORTED" << std::endl;
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-                std::cerr << "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE" << std::endl;
-                break;
-            default:
-                std::cerr << "Unknown error" << std::endl;
-                break;
-        }
-    }
-
-    // cleanup the framebuffer bind
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    // SCREEN FRAMEBUFFER
+    main_screen->Init();
 }
 
 void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
@@ -173,49 +156,66 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), second_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
     }
 
-    // unbind the shadow map texture & framebuffer
-    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
     // COLOR PASS
 
-    // resets the viewport to the window size
-    glViewport(0, 0, viewport_width, viewport_height);
+    // binds the screen to draw on it
+    main_screen->Bind();
 
-    // activates the shadow map depth texture & binds it to the second texture unit, so that it can be used
+    // activates the shadow map depth texture & binds it to the second texture unit, so that it can be used for shadow mapping
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, shadow_map_texture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, shadow_map_texture);
 
-    // clears the color & depth canvas to black
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //todo: Draw colored elements HERE (i.e. the cubes, light cubes, grid, etc. below)
+    {
+        // draws the main light cube
+        for (const auto &light: *lights) {
+            main_light_cube->position = light.GetPosition();
+            main_light_cube->material.color = light.GetColor();
+            main_light_cube->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
+        }
 
-    // draws the main light cube
-    for (const auto& light: *lights) {
-        main_light_cube->position = light.GetPosition();
-        main_light_cube->material.color = light.GetColor();
-        main_light_cube->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
+        // draws the main grid
+        main_grid->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
+
+        // draws the coordinate axis
+        main_x_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
+        main_y_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
+        main_z_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
+
+        test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), first_world_transform_matrix);
+
+        test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), second_world_transform_matrix);
     }
 
-    // draws the main grid
-    main_grid->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
+    // unbinds the main screen, so that it can be used as a texture
+    main_screen->Unbind();
 
-    // draws the coordinate axis
-    main_x_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
-    main_y_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
-    main_z_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
+    // DEFAULT PASS
+    {
+        // resets the viewport to the window size
+        glViewport(0, 0, viewport_width, viewport_height);
 
-    //todo: Draw colored elements HERE (i.e. the cubes below)
+        // clears the color & depth canvas to black
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), first_world_transform_matrix);
+        // disables depth testing, because there's no need
+        glDisable(GL_DEPTH_TEST);
 
-    test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), second_world_transform_matrix);
+        // used for post-processing effects
+        main_screen->Draw();
 
-    // can be used for post-processing effects
-    //main_screen->Draw();
+        // enables depth testing again
+        glEnable(GL_DEPTH_TEST);
+    }
 }
 
 void Renderer::ResizeCallback(GLFWwindow* _window, int _displayWidth, int _displayHeight) {
+    // updates the viewport size
+    viewport_width = _displayWidth;
+    viewport_height = _displayHeight;
+
     main_camera->SetViewportSize((float)_displayWidth, (float)_displayHeight);
+    main_screen->ResizeCallback(_displayWidth, _displayHeight);
 }
 
 void Renderer::InputCallback(GLFWwindow* _window, const double _deltaTime) {

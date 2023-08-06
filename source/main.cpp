@@ -20,8 +20,8 @@ int main() {
     }
 
     //establish window hints
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     //initialize OS window with GLFW
@@ -69,8 +69,6 @@ int main() {
         {
             previous_display_w = display_w;
             previous_display_h = display_h;
-
-            glViewport(0, 0, display_w, display_h);
 
             main_renderer.ResizeCallback(window, display_w, display_h);
         }
