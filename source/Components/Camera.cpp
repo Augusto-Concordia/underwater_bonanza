@@ -65,7 +65,7 @@ void Camera::OneAxisMove(Camera::Translation _translation, float _delta) {
         distance_to_target = glm::clamp(glm::length(cam_position + delta_cam - cam_target), 0.5f, std::numeric_limits<float>::infinity());
         cam_position = cam_target + cam_forward * distance_to_target;
     }
-    //otherwise, move the target and camera accordingly
+        //otherwise, move the target and camera accordingly
     else
     {
         cam_target += delta_target;
@@ -153,6 +153,19 @@ void Camera::SetDefaultPositionAndTarget() {
     UpdateView();
 }
 
+void Camera::SetPosition(const glm::vec3 &_position) {
+    cam_position = _position;
+    distance_to_target = glm::length(cam_position - cam_target);
+
+    UpdateView();
+}
+
+void Camera::SetTarget(const glm::vec3 &_target) {
+    cam_target = _target;
+
+    UpdateView();
+}
+
 glm::vec3 Camera::GetPosition() const {
     return cam_position;
 }
@@ -161,11 +174,23 @@ glm::mat4 Camera::GetViewProjection() const {
     return projection_matrix * view_matrix;
 }
 
+glm::vec3 Camera::GetCamUp() const {
+    return cam_up;
+}
+
+glm::vec3 Camera::GetCamRight() const {
+    return cam_right;
+}
+
+glm::vec3 Camera::GetCamForward() const {
+    return cam_forward;
+}
+
 void Camera::UpdateView() {
     float infinity = std::numeric_limits<float>::infinity();
 
     //cheap, but effective way of constraining the camera to avoid looking straight up or down
-    cam_forward = glm::clamp(glm::normalize(cam_position - cam_target), -glm::vec3(infinity, infinity, 0.94f), glm::vec3(infinity, infinity, 0.94f));
+    cam_forward = glm::clamp(glm::normalize(cam_position - cam_target), -glm::vec3(infinity, 0.94f, infinity), glm::vec3(infinity, 0.94f, infinity));
     cam_right = glm::normalize(glm::cross(cam_forward, Transform::UP));
     cam_up = glm::normalize(glm::cross(cam_right, cam_forward));
 

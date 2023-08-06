@@ -2,17 +2,19 @@
 
 #pragma once
 
-#include "glad/glad.h" // include glad to get all the required OpenGL headers
-#include "glm/vec2.hpp"
-#include "glm/mat4x4.hpp"
-#include "glm/gtc/type_ptr.hpp"
-#include "Light.h"
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <memory>
 #include <unordered_map>
+#include <vector>
+#include "glad/glad.h" // include glad to get all the required OpenGL headers
+#include "glm/vec2.hpp"
+#include "glm/mat4x4.hpp"
+#include "glm/gtc/type_ptr.hpp"
+#include "Light.h"
+#include "Texture.h"
 
 class Shader {
 public:
@@ -37,7 +39,7 @@ public:
     // Describes all of a shader's properties (regardless of whether they are used or not)
     struct Material {
     public:
-        std::shared_ptr<Shader> shader = std::make_shared<Shader>(-1, -1, -1);
+        std::shared_ptr<Shader> shader = std::make_shared<Shader>(0, 0, 0);
 
         float line_thickness = 1.0f;
         float point_size = 1.0f;
@@ -45,7 +47,11 @@ public:
         glm::vec3 color = glm::vec3(1.0f);
         float alpha = 1.0f;
 
-        std::shared_ptr<Light> main_light = std::make_shared<Light>();
+        std::shared_ptr<std::vector<Light>> lights = std::make_shared<std::vector<Light>>();
+
+        std::shared_ptr<Texture> texture = std::make_shared<Texture>(0, "", 0, 0, 0, 0);
+        float texture_influence = 0.0f;
+        glm::vec2 texture_tiling = glm::vec2(1.0f);
 
         int shininess = 32;
     };
@@ -62,8 +68,12 @@ public:
 
     void SetBool(const char* _name, bool _value) const; // utility function to set a bool value
     void SetInt(const char *_name, int _value) const;  // utility function to set a int _value
+
     void SetFloat(const char *_name, float _value) const; // utility function to set a float _value
+    void SetFloatFast(const char *_name, float _value) const; // utility function to set a flow value on an active program
+
     void SetVec2(const char *_name, float _valueX, float _valueY) const; // utility function to set a vector 2
+    void SetVec2(const char *_name, const glm::vec2& _value) const; // utility function to set a vector 2
 
     // utility functions to set a vector 3
     void SetVec3(const char *_name, float _valueX, float _valueY, float _valueZ) const;
@@ -74,5 +84,7 @@ public:
     void SetTexture(const char *_name, GLint _value) const; // utility function to set a texture
     void SetModelMatrix(const glm::mat4& _transform) const; // utility function to set model matrix
     void SetViewProjectionMatrix(const glm::mat4& _transform) const; // utility function to set projection matrix
+
+    void ApplyLightsToShader(const std::shared_ptr<std::vector<Light>> _lights) const; // utility function to set light information
 };
 

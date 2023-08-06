@@ -16,7 +16,7 @@ VisualLine::VisualLine(glm::vec3 _start, glm::vec3 _end, Shader::Material _mater
     indices = {
             0, 1};
 
-    VisualObject::SetupGlBuffersVerticesOnly();
+    VisualObject::SetupGlBuffersVerticesWithIndices();
 }
 
 void VisualLine::Draw(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, int _renderMode, const Shader::Material *_material)

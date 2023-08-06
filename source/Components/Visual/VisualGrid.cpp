@@ -66,7 +66,7 @@ VisualGrid::VisualGrid(int _width, int _height, float _cellSize, glm::vec3 _posi
         indices.push_back(right_side_index);
     }
 
-    VisualObject::SetupGlBuffersVerticesOnly();
+    VisualObject::SetupGlBuffersVerticesWithIndices();
 }
 
 void VisualGrid::Draw(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, int _renderMode, const Shader::Material *_material)

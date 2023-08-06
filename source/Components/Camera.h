@@ -1,3 +1,5 @@
+// Lightly inspired from: https://learnopengl.com/Getting-started/Camera
+
 #pragma once
 
 #include <iostream>
@@ -43,9 +45,9 @@ public:
 
     float distance_to_target = 0.0f; //up-to-date distance to the target (for quicker camera navigation calculations)
 
-    const float FOV = 75.0f;
-    const float NEAR_PLANE = 0.1f;
-    const float FAR_PLANE = 100.0f;
+    inline constexpr static float FOV = 75.0f;
+    inline constexpr static float NEAR_PLANE = 0.1f;
+    inline constexpr static float FAR_PLANE = 400.0f;
 
 public:
     Camera();
@@ -58,13 +60,19 @@ public:
 
     void SetViewportSize(float _width, float _height);
     void SetDefaultPositionAndTarget();
+    void SetPosition(const glm::vec3& _position);
+    void SetTarget(const glm::vec3& _target);
 
     [[nodiscard]] glm::vec3 GetPosition() const;
     [[nodiscard]] glm::mat4 GetViewProjection() const;
 
+    [[nodiscard]] glm::vec3 GetCamUp() const;
+    [[nodiscard]] glm::vec3 GetCamRight() const;
+    [[nodiscard]] glm::vec3 GetCamForward() const;
+
 private:
-    void UpdateProjection(); //for when the camera's viewport changes (mainly)
     void UpdateView(); //for when the camera's rotation changes
+    void UpdateProjection(); //for when the camera's viewport changes (mainly)
 
 private:
     glm::vec3 cam_position, default_cam_position;

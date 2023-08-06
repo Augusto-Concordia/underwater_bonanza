@@ -1,5 +1,6 @@
 #include "VisualCube.h"
 
+
 #include <utility>
 #include "Utility/Transform.hpp"
 
@@ -8,254 +9,74 @@ VisualCube::VisualCube(glm::vec3 _position, glm::vec3 _rotation, glm::vec3 _scal
     // vertices with their normals
     vertices = {
             // top face, top triangle
-            -0.5f,
-            -0.5f,
-            0.5f,
-            0.0f,
-            0.0f,
-            1.0f,
-            0.5f,
-            -0.5f,
-            0.5f,
-            0.0f,
-            0.0f,
-            1.0f,
-            0.5f,
-            0.5f,
-            0.5f,
-            0.0f,
-            0.0f,
-            1.0f,
+            -0.5f, -0.5f, 0.5f,     0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
+            0.5f, -0.5f, 0.5f,      0.0f, 0.0f, 1.0f,   1.0f, 0.0f,
+            0.5f, 0.5f, 0.5f,       0.0f, 0.0f, 1.0f,   1.0f, 1.0f,
 
             // top face, bottom triangle
-            -0.5f,
-            -0.5f,
-            0.5f,
-            0.0f,
-            0.0f,
-            1.0f,
-            0.5f,
-            0.5f,
-            0.5f,
-            0.0f,
-            0.0f,
-            1.0f,
-            -0.5f,
-            0.5f,
-            0.5f,
-            0.0f,
-            0.0f,
-            1.0f,
+            -0.5f, -0.5f, 0.5f,     0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
+            0.5f, 0.5f, 0.5f,       0.0f, 0.0f, 1.0f,   1.0f, 1.0f,
+            -0.5f, 0.5f, 0.5f,      0.0f, 0.0f, 1.0f,   0.0f, 1.0f,
 
             // right side, top triangle
-            0.5f,
-            0.5f,
-            0.5f,
-            1.0f,
-            0.0f,
-            0.0f,
-            0.5f,
-            -0.5f,
-            0.5f,
-            1.0f,
-            0.0f,
-            0.0f,
-            0.5f,
-            -0.5f,
-            -0.5f,
-            1.0f,
-            0.0f,
-            0.0f,
+            0.5f, 0.5f, 0.5f,       1.0f, 0.0f, 0.0f,   0.0f, 0.0f,
+            0.5f, -0.5f, 0.5f,      1.0f, 0.0f, 0.0f,   1.0f, 0.0f,
+            0.5f, -0.5f, -0.5f,     1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
 
             // right side, bottom triangle
-            0.5f,
-            0.5f,
-            0.5f,
-            1.0f,
-            0.0f,
-            0.0f,
-            0.5f,
-            -0.5f,
-            -0.5f,
-            1.0f,
-            0.0f,
-            0.0f,
-            0.5f,
-            0.5f,
-            -0.5f,
-            1.0f,
-            0.0f,
-            0.0f,
+            0.5f, 0.5f, 0.5f,       1.0f, 0.0f, 0.0f,   0.0f, 0.0f,
+            0.5f, -0.5f, -0.5f,     1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
+            0.5f, 0.5f, -0.5f,      1.0f, 0.0f, 0.0f,   0.0f, 1.0f,
 
             // front side, top triangle
-            -0.5f,
-            0.5f,
-            0.5f,
-            0.0f,
-            1.0f,
-            0.0f,
-            0.5f,
-            0.5f,
-            0.5f,
-            0.0f,
-            1.0f,
-            0.0f,
-            0.5f,
-            0.5f,
-            -0.5f,
-            0.0f,
-            1.0f,
-            0.0f,
+            -0.5f, 0.5f, 0.5f,      0.0f, 1.0f, 0.0f,   0.0f, 0.0f,
+            0.5f, 0.5f, 0.5f,       0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+            0.5f, 0.5f, -0.5f,      0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
 
             // front side, bottom triangle
-            -0.5f,
-            0.5f,
-            0.5f,
-            0.0f,
-            1.0f,
-            0.0f,
-            0.5f,
-            0.5f,
-            -0.5f,
-            0.0f,
-            1.0f,
-            0.0f,
-            -0.5f,
-            0.5f,
-            -0.5f,
-            0.0f,
-            1.0f,
-            0.0f,
+            -0.5f, 0.5f, 0.5f,      0.0f, 1.0f, 0.0f,   0.0f, 0.0f,
+            0.5f, 0.5f, -0.5f,      0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
+            -0.5f, 0.5f, -0.5f,     0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
 
             // left side, top triangle
-            -0.5f,
-            0.5f,
-            0.5f,
-            -1.0f,
-            0.0f,
-            0.0f,
-            -0.5f,
-            -0.5f,
-            0.5f,
-            -1.0f,
-            0.0f,
-            0.0f,
-            -0.5f,
-            -0.5f,
-            -0.5f,
-            -1.0f,
-            0.0f,
-            0.0f,
+            -0.5f, 0.5f, 0.5f,      -1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+            -0.5f, -0.5f, 0.5f,     -1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f,    -1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
 
             // left side, bottom triangle
-            -0.5f,
-            0.5f,
-            0.5f,
-            -1.0f,
-            0.0f,
-            0.0f,
-            -0.5f,
-            -0.5f,
-            -0.5f,
-            -1.0f,
-            0.0f,
-            0.0f,
-            -0.5f,
-            0.5f,
-            -0.5f,
-            -1.0f,
-            0.0f,
-            0.0f,
+            -0.5f, 0.5f, 0.5f,      -1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f,    -1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+            -0.5f, 0.5f, -0.5f,     -1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
 
             // back side, top triangle
-            -0.5f,
-            -0.5f,
-            0.5f,
-            0.0f,
-            -1.0f,
-            0.0f,
-            0.5f,
-            -0.5f,
-            0.5f,
-            0.0f,
-            -1.0f,
-            0.0f,
-            0.5f,
-            -0.5f,
-            -0.5f,
-            0.0f,
-            -1.0f,
-            0.0f,
+            -0.5f, -0.5f, -0.5f,    0.0f, -1.0f, 0.0f,  0.0f, 0.0f,
+            0.5f, -0.5f, -0.5f,     0.0f, -1.0f, 0.0f,  1.0f, 0.0f,
+            0.5f, -0.5f, 0.5f,      0.0f, -1.0f, 0.0f,  1.0f, 1.0f,
 
             // back side, bottom triangle
-            -0.5f,
-            -0.5f,
-            0.5f,
-            0.0f,
-            -1.0f,
-            0.0f,
-            0.5f,
-            -0.5f,
-            -0.5f,
-            0.0f,
-            -1.0f,
-            0.0f,
-            -0.5f,
-            -0.5f,
-            -0.5f,
-            0.0f,
-            -1.0f,
-            0.0f,
+            -0.5f, -0.5f, -0.5f,    0.0f, -1.0f, 0.0f,  0.0f, 0.0f,
+            0.5f, -0.5f, 0.5f,      0.0f, -1.0f, 0.0f,  1.0f, 1.0f,
+            -0.5f, -0.5f, 0.5f,     0.0f, -1.0f, 0.0f,  0.0f, 1.0f,
 
             // bottom face, top triangle
-            -0.5f,
-            -0.5f,
-            -0.5f,
-            0.0f,
-            0.0f,
-            -1.0f,
-            0.5f,
-            -0.5f,
-            -0.5f,
-            0.0f,
-            0.0f,
-            -1.0f,
-            0.5f,
-            0.5f,
-            -0.5f,
-            0.0f,
-            0.0f,
-            -1.0f,
+            -0.5f, -0.5f, -0.5f,    0.0f, 0.0f, -1.0f,  0.0f, 0.0f,
+            0.5f, -0.5f, -0.5f,     0.0f, 0.0f, -1.0f,  1.0f, 0.0f,
+            0.5f, 0.5f, -0.5f,      0.0f, 0.0f, -1.0f,  1.0f, 1.0f,
 
             // bottom face, bottom triangle
-            -0.5f,
-            -0.5f,
-            -0.5f,
-            0.0f,
-            0.0f,
-            -1.0f,
-            0.5f,
-            0.5f,
-            -0.5f,
-            0.0f,
-            0.0f,
-            -1.0f,
-            -0.5f,
-            0.5f,
-            -0.5f,
-            0.0f,
-            0.0f,
-            -1.0f,
+            -0.5f, -0.5f, -0.5f,    0.0f, 0.0f, -1.0f,  0.0f, 0.0f,
+            0.5f, 0.5f, -0.5f,      0.0f, 0.0f, -1.0f,  1.0f, 1.0f,
+            -0.5f, 0.5f, -0.5f,     0.0f, 0.0f, -1.0f,  0.0f, 1.0f,
     };
 
-    for (int i = 0; i < vertices.size(); i += 6)
+    for (int i = 0; i < vertices.size(); i += 8)
     {
         vertices[i] += _transformOffset.x;
         vertices[i + 1] += _transformOffset.y;
         vertices[i + 2] += _transformOffset.z;
     }
 
-    VisualObject::SetupGlBuffersVerticesAndNormalsOnlyNoIndices();
+    VisualObject::SetupGlBuffersVerticesNormalsUvs();
 }
 
 void VisualCube::Draw(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, int _renderMode, const Shader::Material *material)
@@ -283,24 +104,30 @@ void VisualCube::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::vec
     current_material->shader->SetModelMatrix(_transformMatrix);
     current_material->shader->SetViewProjectionMatrix(_viewProjection);
 
-    current_material->shader->SetVec3("u_color", current_material->color);
-    current_material->shader->SetFloat("u_alpha", current_material->alpha);
-
+    // camera properties
     current_material->shader->SetVec3("u_cam_pos", _cameraPosition);
 
-    current_material->shader->SetVec3("u_light_pos", current_material->main_light->GetPosition());
-    current_material->shader->SetVec3("u_light_color", current_material->main_light->GetColor());
+    // lights
+    current_material->shader->ApplyLightsToShader(current_material->lights);
 
-    current_material->shader->SetFloat("u_ambient_strength", current_material->main_light->ambient_strength);
-    current_material->shader->SetFloat("u_specular_strength", current_material->main_light->specular_strength);
+    // material properties
+    current_material->shader->SetVec3("u_color", current_material->color);
+    current_material->shader->SetFloat("u_alpha", current_material->alpha);
     current_material->shader->SetInt("u_shininess", current_material->shininess);
 
-    current_material->shader->SetMat4("u_light_view_projection", current_material->main_light->GetViewProjection());
-    current_material->shader->SetTexture("u_depth_texture", 0);
+    // texture mapping & consumption
+    current_material->texture->Use(GL_TEXTURE1);
+    current_material->shader->SetFloatFast("u_texture_influence", current_material->texture_influence);
+    current_material->shader->SetTexture("u_texture", 1);
+    current_material->shader->SetVec2("u_texture_tiling", current_material->texture_tiling);
 
+    // line & point properties
     glLineWidth(current_material->line_thickness);
     glPointSize(current_material->point_size);
 
     // draw vertices according to their indices
     glDrawArrays(_renderMode, 0, vertices.size());
+
+    // clear the current texture
+    current_material->texture->Clear();
 }

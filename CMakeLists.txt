@@ -21,7 +21,7 @@ target_include_directories(underwater_bonanza PRIVATE source)
 
 
 IF (WIN32)
-    target_link_libraries(underwater_bonanza PRIVATE glfw OpenGL::GL glm glad -static-libgcc -static-libstdc++)
+    target_link_libraries(underwater_bonanza PRIVATE glfw OpenGL::GL glm glad stb_image -static-libgcc -static-libstdc++)
 ELSE()
-    target_link_libraries(underwater_bonanza PRIVATE glfw OpenGL::GL glm glad)
+    target_link_libraries(underwater_bonanza PRIVATE glfw OpenGL::GL glm glad stb_image)
 ENDIF()

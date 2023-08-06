@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 3.20)
 
 set(CMAKE_CXX_STANDARD 20)
 
+#================== STB_IMAGE =================
+
+add_library(stb_image INTERFACE)
+target_sources(stb_image INTERFACE stb_image/stb_image.h)
+target_compile_definitions(stb_image INTERFACE STB_IMAGE_IMPLEMENTATION)
+target_include_directories(stb_image INTERFACE stb_image)
+
 #=================== GLM ===================
 
 # includes GLM source CMake project

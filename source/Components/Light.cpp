@@ -1,14 +1,19 @@
 #include "Light.h"
 #include "Utility/Transform.hpp"
 
-Light::Light(glm::vec3 _position, glm::vec3 _color, float _ambientStrength, float _specularStrength) {
+Light::Light(glm::vec3 _position, glm::vec3 _color, float _ambientStrength, float _specularStrength, float _range, float _cutoff, Type _type) {
     position = _position;
+    target = glm::vec3(0.0f);
     color = _color;
     ambient_strength = _ambientStrength;
     specular_strength = _specularStrength;
+    type = _type;
+    range = _range;
+    cutoff = _cutoff;
 
     UpdateView();
     UpdateProjection();
+    UpdateAttenuation();
 }
 
 void Light::SetPosition(const glm::vec3 &_position) {
@@ -18,17 +23,35 @@ void Light::SetPosition(const glm::vec3 &_position) {
 }
 
 void Light::SetTarget(const glm::vec3 &_target) {
-    position = _target;
+    target = _target;
 
     UpdateView();
+}
+
+void Light::SetRange(float _range) {
+    range = _range;
+
+    UpdateAttenuation();
 }
 
 glm::vec3 Light::GetPosition() const {
     return position;
 }
 
+glm::vec3 Light::GetTarget() const {
+    return target;
+}
+
 glm::vec3 Light::GetColor() const {
     return color;
+}
+
+glm::vec3 Light::GetSpotlightDirection() const {
+    return light_forward;
+}
+
+float Light::GetSpotlightCutoff() const {
+    return glm::cos(glm::radians(cutoff));
 }
 
 glm::mat4 Light::GetViewProjection() const {
@@ -45,4 +68,8 @@ void Light::UpdateView() {
 
 void Light::UpdateProjection() {
     projection_matrix = glm::perspective(glm::radians(Light::FOV), (float)Light::LIGHTMAP_SIZE / (float)Light::LIGHTMAP_SIZE, Light::NEAR_PLANE, Light::FAR_PLANE);
+}
+
+void Light::UpdateAttenuation() {
+    attenuation = glm::vec3(1.0f, 4.5f / range, 75.0f / (range * range)); //values from: https://wiki.ogre3d.org/tiki-index.php?page=-Point+Light+Attenuation
 }

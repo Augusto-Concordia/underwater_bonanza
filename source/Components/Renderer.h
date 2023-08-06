@@ -21,7 +21,7 @@ private:
     std::unique_ptr<VisualLine> main_y_line;
     std::unique_ptr<VisualLine> main_z_line;
 
-    std::shared_ptr<Light> main_light;
+    std::shared_ptr<std::vector<Light>> lights;
     std::unique_ptr<VisualCube> main_light_cube;
 
     std::unique_ptr<VisualCube> test_cube;
@@ -29,7 +29,7 @@ private:
     int viewport_width, viewport_height;
 
     GLuint shadow_map_fbo = 0;
-    GLuint shadow_map_depth_tex = 0;
+    GLuint shadow_map_texture = 0;
 
 public:
     Renderer(int _initialWidth, int _initialHeight);

@@ -18,7 +18,7 @@ Screen::Screen(Shader::Material _material) : VisualObject(glm::vec3(0.0f), glm::
         0, 2, 3
     };
 
-    VisualObject::SetupGlBuffersVerticesAndUvsOnly();
+    VisualObject::SetupGlBuffersVerticesUvsWithIndices();
 }
 
 void Screen::Draw(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, int _renderMode, const Shader::Material *material)

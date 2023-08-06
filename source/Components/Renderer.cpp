@@ -1,12 +1,19 @@
 #include "Renderer.h"
 #include "Utility/Input.hpp"
 #include "Utility/Transform.hpp"
+#include "Texture.h"
 
 Renderer::Renderer(int _initialWidth, int _initialHeight) {
     viewport_width = _initialWidth;
     viewport_height = _initialHeight;
 
-    main_camera = std::make_unique<Camera>(glm::vec3(13.0f, 13.0f, 21.0f), glm::vec3(0.0f), _initialWidth, _initialHeight);
+    main_camera = std::make_unique<Camera>(glm::vec3(8.0f, 8.0f, 8.0f), glm::vec3(0.0f), _initialWidth, _initialHeight);
+
+    lights = std::make_shared<std::vector<Light>>();
+    lights->emplace_back(glm::vec3(2.0f, 14.0f, 2.0f), glm::vec3(0.99f, 0.95f, 0.78f), 0.1f, 0.4f, 50.0f, 50.0f, Light::Type::POINT);
+    lights->emplace_back(glm::vec3(30.0f, 10.0f, 0.0f), glm::vec3(0.09f, 0.95f, 0.08f), 0.2f, 0.4f, 300.0f, 50.0f, Light::Type::SPOT);
+    lights->emplace_back(glm::vec3(-30.0f, 10.0f, 0.0f), glm::vec3(0.99f, 0.05f, 0.08f), 0.2f, 0.4f, 300.0f, 50.0f, Light::Type::SPOT);
+    lights->emplace_back(glm::vec3(0.0f, 34.0f, 36.0f), glm::vec3(0.09f, 0.05f, 0.78f), 0.2f, 0.4f, 400.0f, 40.0f, Light::Type::SPOT);
 
     auto grid_shader = Shader::Library::CreateShader("shaders/grid/grid.vert", "shaders/grid/grid.frag");
     auto lit_shader = Shader::Library::CreateShader("shaders/lit/lit.vert", "shaders/lit/lit.frag");
@@ -18,13 +25,9 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     shadow_mapper_material = std::make_unique<Shader::Material>();
     shadow_mapper_material->shader = shadow_mapper_shader;
 
-    //main light
-    main_light = std::make_unique<Light>(glm::vec3(0.0f, 13.0f, 0.0f), glm::vec3(0.99f, 0.95f, 0.78f), 0.2f, 0.4f);
-
     Shader::Material main_light_cube_material = {
             .shader = unlit_shader,
-            .color = main_light->GetColor(),
-            .main_light = main_light,
+            .lights = lights
     };
     main_light_cube = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), main_light_cube_material);
 
@@ -32,7 +35,7 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     Shader::Material test_material = {
             .shader = lit_shader,
             .color = glm::vec3(0.2f, 0.7f, 0.85f),
-            .main_light = main_light,
+            .lights = lights
     };
 
     test_cube = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), test_material);
@@ -74,24 +77,27 @@ void Renderer::Init() {
     glGenFramebuffers(1, &shadow_map_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, shadow_map_fbo);
 
-    // cleanup the texture bind
-    glBindTexture(GL_TEXTURE_2D, 0);
-
     // initializes the shadow map depth texture
-    glGenTextures(1, &shadow_map_depth_tex);
-    glBindTexture(GL_TEXTURE_2D, shadow_map_depth_tex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, Light::LIGHTMAP_SIZE, Light::LIGHTMAP_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    glGenTextures(1, &shadow_map_texture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, shadow_map_texture);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // sets the texture parameters
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // sets the border color to white, so that the shadow map is white outside the light's view (i.e. no shadow)
+    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+    // the following 2 blocks mitigate shadow map artifacts, coming from: https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
+    // when sampling outside, we don't want a repeating pattern
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+    glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_DEPTH_COMPONENT32, Light::LIGHTMAP_SIZE, Light::LIGHTMAP_SIZE, (GLint)lights->size());
 
     // binds the shadow map depth texture to the framebuffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadow_map_depth_tex, 0);
-
-    // cleanup the texture bind
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadow_map_texture, 0);
 
     // disable color draw & read buffer for this framebuffer
     glReadBuffer(GL_NONE);
@@ -99,7 +105,30 @@ void Renderer::Init() {
 
     // checks if the framebuffer is complete
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "ERROR -> Framebuffer is not complete!" << std::endl;
+    {
+        std::cerr << "ERROR -> Framebuffer is not complete! (" << glCheckFramebufferStatus(GL_FRAMEBUFFER) << "): ";
+
+        switch (glCheckFramebufferStatus(GL_FRAMEBUFFER)) {
+            case GL_FRAMEBUFFER_UNDEFINED:
+                std::cerr << "GL_FRAMEBUFFER_UNDEFINED" << std::endl;
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+                std::cerr << "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT" << std::endl;
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+                std::cerr << "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT" << std::endl;
+                break;
+            case GL_FRAMEBUFFER_UNSUPPORTED:
+                std::cerr << "GL_FRAMEBUFFER_UNSUPPORTED" << std::endl;
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+                std::cerr << "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE" << std::endl;
+                break;
+            default:
+                std::cerr << "Unknown error" << std::endl;
+                break;
+        }
+    }
 
     // cleanup the framebuffer bind
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -111,32 +140,41 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
 
     // moves the main light
     auto light_turning_radius = 4.0f;
-    main_light->SetPosition(glm::vec3(glm::cos(glfwGetTime() * 2.0f) * light_turning_radius, 10.0f * glm::sin(glfwGetTime() / 2.0f) + 10.0f, glm::sin(glfwGetTime()) *  light_turning_radius));
+    for (int i = 1; i < lights->size(); ++i) {
+        auto& light = lights->at(i);
+
+        light.SetPosition(glm::vec3(glm::cos(glfwGetTime() * 2.0f + i) * light_turning_radius, 3.0f * glm::sin(glfwGetTime() / 2.0f + i) + 5.0f, glm::sin(glfwGetTime() + i) *  light_turning_radius));
+    }
 
     // SHADOW MAP PASS
 
     // binds the shadow map framebuffer and the depth texture to draw on it
     glBindFramebuffer(GL_FRAMEBUFFER, shadow_map_fbo);
     glViewport(0, 0, Light::LIGHTMAP_SIZE, Light::LIGHTMAP_SIZE);
-    glBindTexture(GL_TEXTURE_2D, shadow_map_depth_tex);
 
-    // clears the color & depth canvas to black
-    glClear(GL_DEPTH_BUFFER_BIT);
+    glm::mat4 first_world_transform_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, 0.0f));
+    first_world_transform_matrix = glm::scale(first_world_transform_matrix, glm::vec3(2.0f));
 
-    //todo: Draw shadowed elements HERE (i.e. the cube below)
-    glm::mat4 test_world_transform_matrix = glm::mat4(1.0f);
+    glm::mat4 second_world_transform_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
+    second_world_transform_matrix = glm::translate(second_world_transform_matrix, glm::vec3(0.0f, 2.0f, 0.0f));
 
-    test_world_transform_matrix = glm::translate(test_world_transform_matrix, glm::vec3(0.0f, -0.5f, 0.0f));
-    test_world_transform_matrix = glm::scale(test_world_transform_matrix, glm::vec3(2.0f));
+    for (int i = 0; i < lights->size(); ++i) {
+        const auto& light = lights->at(i);
 
-    test_cube->DrawFromMatrix(main_light->GetViewProjection(), main_light->GetPosition(), test_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
+        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadow_map_texture, 0, i);
 
-    test_world_transform_matrix = glm::scale(test_world_transform_matrix, glm::vec3(0.5f));
-    test_world_transform_matrix = glm::translate(test_world_transform_matrix, glm::vec3(0.0f, 2.0f, 0.0f));
+        // clears the depth canvas to black
+        glClear(GL_DEPTH_BUFFER_BIT);
 
-    test_cube->DrawFromMatrix(main_light->GetViewProjection(), main_light->GetPosition(), test_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
+        //todo: Draw shadow-caster elements HERE (i.e. the cubes below)
 
-    // unbind the current framebuffer
+        test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), first_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
+
+        test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), second_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
+    }
+
+    // unbind the shadow map texture & framebuffer
+    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // COLOR PASS
@@ -146,14 +184,17 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
 
     // activates the shadow map depth texture & binds it to the second texture unit, so that it can be used
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, shadow_map_depth_tex);
+    glBindTexture(GL_TEXTURE_2D, shadow_map_texture);
 
     // clears the color & depth canvas to black
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // draws the main light cube
-    main_light_cube->position = main_light->GetPosition();
-    main_light_cube->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
+    for (const auto& light: *lights) {
+        main_light_cube->position = light.GetPosition();
+        main_light_cube->material.color = light.GetColor();
+        main_light_cube->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
+    }
 
     // draws the main grid
     main_grid->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
@@ -163,19 +204,11 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
     main_y_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
     main_z_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
 
-    //todo: Draw colored elements HERE (i.e. the cube below)
+    //todo: Draw colored elements HERE (i.e. the cubes below)
 
-    test_world_transform_matrix = glm::mat4(1.0f);
+    test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), first_world_transform_matrix);
 
-    test_world_transform_matrix = glm::translate(test_world_transform_matrix, glm::vec3(0.0f, -0.5f, 0.0f));
-    test_world_transform_matrix = glm::scale(test_world_transform_matrix, glm::vec3(2.0f));
-
-    test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), test_world_transform_matrix);
-
-    test_world_transform_matrix = glm::scale(test_world_transform_matrix, glm::vec3(0.5f));
-    test_world_transform_matrix = glm::translate(test_world_transform_matrix, glm::vec3(0.0f, 2.0f, 0.0f));
-
-    test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), test_world_transform_matrix);
+    test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), second_world_transform_matrix);
 
     // can be used for post-processing effects
     //main_screen->Draw();
