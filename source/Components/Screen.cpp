@@ -69,6 +69,25 @@ void Screen::Init() {
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, scene_true_depth_texture, 0);
     }
 
+    // TRUE POSITION
+    {
+        // initializes the screen depth texture
+        glGenTextures(1, &scene_true_pos_texture);
+        glBindTexture(GL_TEXTURE_2D, scene_true_pos_texture);
+
+        // sets the texture parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+        // sets the true depth texture data
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT, nullptr);
+
+        // attaches the true depth texture to the framebuffer
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, scene_true_pos_texture, 0);
+    }
+
     // DEPTH & STENCIL
     {
         // initializes the screen depth render buffer
@@ -83,8 +102,8 @@ void Screen::Init() {
     }
 
     // disable color draw & read buffer for this framebuffer
-    GLenum draw_buffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-    glDrawBuffers(2, draw_buffers);
+    GLenum draw_buffers[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+    glDrawBuffers(3, draw_buffers);
 
     Graphics::ValidateFramebufferStatus();
 }
@@ -120,6 +139,10 @@ void Screen::ResizeCallback(GLsizei _width, GLsizei _height) {
     glBindTexture(GL_TEXTURE_2D, scene_true_depth_texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT, nullptr);
 
+    // resize the screen depth texture
+    glBindTexture(GL_TEXTURE_2D, scene_true_pos_texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT, nullptr);
+
     // resize the screen depth render buffer
     glBindRenderbuffer(GL_RENDERBUFFER, scene_depth_texture);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screen_width, screen_height);
@@ -148,6 +171,10 @@ void Screen::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::vec3 &_
 
     current_material->shader->Use();
 
+    current_material->shader->ApplyLightsToShader(current_material->lights);
+
+    current_material->shader->SetVec3("u_cam_pos", _cameraPosition);
+
     glActiveTexture(GL_TEXTURE0 + screen_base_texture_unit);
     glBindTexture(GL_TEXTURE_2D, scene_color_texture);
     current_material->shader->SetTexture("u_scene_color_texture", (GLint)screen_base_texture_unit);
@@ -155,6 +182,10 @@ void Screen::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::vec3 &_
     glActiveTexture(GL_TEXTURE0 + screen_base_texture_unit + 1);
     glBindTexture(GL_TEXTURE_2D, scene_true_depth_texture);
     current_material->shader->SetTexture("u_scene_true_depth_texture", (GLint)screen_base_texture_unit + 1);
+
+    glActiveTexture(GL_TEXTURE0 + screen_base_texture_unit + 2);
+    glBindTexture(GL_TEXTURE_2D, scene_true_depth_texture);
+    current_material->shader->SetTexture("u_scene_true_pos_texture", (GLint)screen_base_texture_unit + 2);
 
     // draw vertices according to their indices
     glDrawElements(_renderMode, indices.size(), GL_UNSIGNED_INT, nullptr);

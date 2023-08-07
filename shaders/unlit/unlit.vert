@@ -12,9 +12,11 @@ layout (location = 1) in vec3 vNormal; //vertex input normal
 layout (location = 2) in vec2 vUv; //vertex input uv
 
 out vec2 FragUv;
+out vec3 FragPos;
 
 void main() {
     gl_Position = u_view_projection * u_model_transform * vec4(vPos, 1.0); //gl_Position is a built-in property of a vertex shader
 
     FragUv = vUv / u_texture_tiling;
+    FragPos = vec3(u_model_transform * vec4(vPos, 1.0));
 }

@@ -60,7 +60,7 @@ void Shader::SetViewProjectionMatrix(const glm::mat4 &_transform) const {
 
 void Shader::ApplyLightsToShader(const std::shared_ptr<std::vector<Light>> _lights) const {
     // shadow map consumption
-    SetTexture("u_depth_texture", 0);
+    SetTexture("u_light_depth_textures", 0);
 
     for (int i = 0; i < _lights->size(); ++i) {
         const auto& light = _lights->at(i);

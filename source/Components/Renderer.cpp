@@ -28,6 +28,7 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
 
     Shader::Material screen_material = {
             .shader = screen_shader,
+            .lights = lights
     };
     main_screen = std::make_unique<Screen>(viewport_width, viewport_height, 15, screen_material);
 
@@ -202,7 +203,7 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         glDisable(GL_DEPTH_TEST);
 
         // used for post-processing effects
-        main_screen->Draw();
+        main_screen->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
 
         // enables depth testing again
         glEnable(GL_DEPTH_TEST);
