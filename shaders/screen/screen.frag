@@ -25,6 +25,8 @@ float map(float value, float min1, float max1, float min2, float max2) {
 
 //entrypoint
 void main() {
+    // CHROMATIC ABERRATION
+
     vec2 colorTexSize = textureSize(u_scene_color_texture, 0);
     vec2 colorTexCoord = gl_FragCoord.xy / colorTexSize;
     vec2 aberrationDirection = colorTexCoord - vec2(0.5);
@@ -34,6 +36,8 @@ void main() {
     sceneColor.g =  texture(u_scene_color_texture, colorTexCoord + aberrationDirection * vec2(u_chromatic_aberration.g, u_chromatic_aberration.b)).g;
     sceneColor.b =  texture(u_scene_color_texture, colorTexCoord + aberrationDirection * vec2(u_chromatic_aberration.b, u_chromatic_aberration.r)).b;
     sceneColor.a = texture(u_scene_color_texture, colorTexCoord).a;
+
+    // FOG
 
     vec2 trueDepthTexSize = textureSize(u_scene_true_depth_texture, 0);
     vec2 trueDepthTexCoord = gl_FragCoord.xy / colorTexSize;
