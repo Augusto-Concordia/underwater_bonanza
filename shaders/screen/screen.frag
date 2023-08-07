@@ -7,7 +7,7 @@ uniform float u_fog_density = 0.66; //fog density
 uniform float u_fog_max_distance = 50.0; //fog max distance
 uniform float u_fog_min_distance = 2.0; //fog min distance
 
-uniform vec3 u_chromatic_aberration = vec3(0.009, 0.006, 0.006); //chromatic aberration
+uniform vec3 u_chromatic_aberration = vec3(-0.009, -0.006, 0.006); //chromatic aberration
 
 uniform sampler2D u_scene_color_texture; //scene render texture
 uniform sampler2D u_scene_true_depth_texture; //scene depth texture
