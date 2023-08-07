@@ -3,12 +3,14 @@
 #version 330 core
 
 uniform vec3 u_fog_color = vec3(0.0, 0.36, 0.73); //fog color
+uniform float u_fog_density = 0.66; //fog density
+uniform float u_fog_max_distance = 50.0; //fog max distance
+uniform float u_fog_min_distance = 2.0; //fog min distance
+
+uniform vec3 u_chromatic_aberration = vec3(0.009, 0.006, 0.006); //chromatic aberration
 
 uniform sampler2D u_scene_color_texture; //scene render texture
 uniform sampler2D u_scene_true_depth_texture; //scene depth texture
-
-in vec3 FragPos; //fragment position
-in vec2 FragUv; //texture coordinates
 
 out vec4 OutColor; //rgba color output
 
@@ -23,9 +25,19 @@ float map(float value, float min1, float max1, float min2, float max2) {
 
 //entrypoint
 void main() {
-    // for better depth visibility when testing the shader
-    vec4 sceneColor = texture(u_scene_color_texture, FragUv).rgba;
-    float trueDepth = texture(u_scene_true_depth_texture, FragUv).r;
+    vec2 colorTexSize = textureSize(u_scene_color_texture, 0);
+    vec2 colorTexCoord = gl_FragCoord.xy / colorTexSize;
+    vec2 aberrationDirection = colorTexCoord - vec2(0.5);
+
+    vec4 sceneColor;
+    sceneColor.r =  texture(u_scene_color_texture, colorTexCoord + aberrationDirection * vec2(u_chromatic_aberration.r, u_chromatic_aberration.g)).r;
+    sceneColor.g =  texture(u_scene_color_texture, colorTexCoord + aberrationDirection * vec2(u_chromatic_aberration.g, u_chromatic_aberration.b)).g;
+    sceneColor.b =  texture(u_scene_color_texture, colorTexCoord + aberrationDirection * vec2(u_chromatic_aberration.b, u_chromatic_aberration.r)).b;
+    sceneColor.a = texture(u_scene_color_texture, colorTexCoord).a;
+
+    vec2 trueDepthTexSize = textureSize(u_scene_true_depth_texture, 0);
+    vec2 trueDepthTexCoord = gl_FragCoord.xy / colorTexSize;
+    float trueDepth = texture(u_scene_true_depth_texture, trueDepthTexCoord).r;
 
     // if the depth is too small, it's probably a background pixel
     // so we just color it the fog color
@@ -34,8 +46,9 @@ void main() {
         return;
     }
 
-    float fogFactor = map(trueDepth, 2.0, 50.0, 0.0, 1.0);
-    fogFactor = clamp(1.0 / pow(exp(fogFactor * 0.66), 2.0), 0.0, 1.0); // exponential fog
+    float fogFactor = map(trueDepth,  u_fog_min_distance, u_fog_max_distance, 0.0, 1.0);
+    fogFactor = clamp(1.0 / pow(exp(fogFactor * u_fog_density), 2.0), 0.0, 1.0); // exponential fog
 
-    OutColor = mix(vec4(u_fog_color, 1.0), sceneColor, fogFactor);
+    vec4 foggedColor = mix(vec4(u_fog_color, 1.0), sceneColor, fogFactor);
+    OutColor = foggedColor;
 }
