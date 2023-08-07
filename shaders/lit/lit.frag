@@ -32,14 +32,14 @@ uniform float u_texture_influence = 0.5; //are textures enabled?
 
 uniform sampler2D u_texture; //object texture
 
-in vec3 FragPos; //position of the fragment
 in vec3 Normal; //normal of the fragment
+in vec3 WorldPos; //position of the fragment in world space
 in vec4 FragPosLightSpace[4]; //light space position of the fragment
 in vec2 FragUv; //uv of the fragment
 
 layout(location = 0) out vec4 out_color; //rgba color output
-layout(location = 1) out vec4 true_depth; //true depth output
-layout(location = 2) out vec4 true_pos; //true depth output
+layout(location = 1) out vec4 camera_pos; //camera-space position output
+layout(location = 2) out vec4 world_pos; //world-space position output
 
 float calculateShadowScalar(int index, vec4 fragPosLightSpace, float influence, vec3 norm, vec3 lightDir) {
     //shadow calculation
@@ -58,8 +58,8 @@ float calculateShadowScalar(int index, vec4 fragPosLightSpace, float influence, 
 vec3 calculateSpotLight(Light light, vec4 fragPosLightSpace, int index) {
     //diffuse lighting calculation
     vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(light.position - FragPos);
-    float lightDistance = length(light.position - FragPos);
+    vec3 lightDir = normalize(light.position - WorldPos);
+    float lightDistance = length(light.position - WorldPos);
 
     //spotlight calculation
     float theta = dot(lightDir, light.spot_dir);
@@ -68,7 +68,7 @@ vec3 calculateSpotLight(Light light, vec4 fragPosLightSpace, int index) {
     vec3 diffuse = diffFactor * light.color;
 
     //specular lighting calculation
-    vec3 viewDir = normalize(u_cam_pos - FragPos);
+    vec3 viewDir = normalize(u_cam_pos - WorldPos);
     vec3 reflectDir = normalize(reflect(-lightDir, norm));
 
     float specularFactor = pow(max(dot(viewDir, reflectDir), 0.0), u_shininess);
@@ -86,14 +86,14 @@ vec3 calculateSpotLight(Light light, vec4 fragPosLightSpace, int index) {
 vec3 calculatePointLight(Light light, vec4 fragPosLightSpace, int index) {
     //diffuse lighting calculation
     vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(light.position - FragPos);
-    float lightDistance = length(light.position - FragPos);
+    vec3 lightDir = normalize(light.position - WorldPos);
+    float lightDistance = length(light.position - WorldPos);
 
     float diffFactor = max(dot(lightDir, norm), 0.0);
     vec3 diffuse = diffFactor * light.color;
 
     //specular lighting calculation
-    vec3 viewDir = normalize(u_cam_pos - FragPos);
+    vec3 viewDir = normalize(u_cam_pos - WorldPos);
     vec3 reflectDir = normalize(reflect(-lightDir, norm));
 
     float specularFactor = pow(max(dot(viewDir, reflectDir), 0.0), u_shininess);
@@ -137,6 +137,6 @@ void main() {
     vec3 colorResult = (approximateAmbient + lightsColor) * vec3(mix(vec4(u_color, 1.0), texture(u_texture, FragUv), u_texture_influence)); //pure color or texture, mixed with lighting
 
     out_color = vec4(colorResult, u_alpha);
-    true_depth = vec4(gl_FragCoord.xyz / gl_FragCoord.w, 1.0); //true depth output
-    true_pos = vec4(FragPos, 1.0); //true position output
+    camera_pos = vec4(gl_FragCoord.xyz / gl_FragCoord.w, 1.0); //true depth output
+    world_pos = vec4(WorldPos, 1.0); //true position output
 }

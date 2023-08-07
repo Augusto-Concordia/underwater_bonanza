@@ -181,11 +181,11 @@ void Screen::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::vec3 &_
 
     glActiveTexture(GL_TEXTURE0 + screen_base_texture_unit + 1);
     glBindTexture(GL_TEXTURE_2D, scene_true_depth_texture);
-    current_material->shader->SetTexture("u_scene_true_depth_texture", (GLint)screen_base_texture_unit + 1);
+    current_material->shader->SetTexture("u_scene_camera_pos_texture", (GLint)screen_base_texture_unit + 1);
 
     glActiveTexture(GL_TEXTURE0 + screen_base_texture_unit + 2);
-    glBindTexture(GL_TEXTURE_2D, scene_true_depth_texture);
-    current_material->shader->SetTexture("u_scene_true_pos_texture", (GLint)screen_base_texture_unit + 2);
+    glBindTexture(GL_TEXTURE_2D, scene_true_pos_texture);
+    current_material->shader->SetTexture("u_scene_world_pos_texture", (GLint)screen_base_texture_unit + 2);
 
     // draw vertices according to their indices
     glDrawElements(_renderMode, indices.size(), GL_UNSIGNED_INT, nullptr);

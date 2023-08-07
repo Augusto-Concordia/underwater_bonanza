@@ -25,7 +25,7 @@ void VisualPlane::Draw(const glm::mat4 &_viewProjection, const glm::vec3 &_camer
 {
     glm::mat4 model_matrix = glm::mat4(1.0f);
     model_matrix = glm::translate(model_matrix, position);
-    model_matrix = Transforms::RotateDegrees(model_matrix, rotation);
+    model_matrix = Transform::RotateDegrees(model_matrix, rotation);
     model_matrix = glm::scale(model_matrix, scale);
 
     DrawFromMatrix(_viewProjection, _cameraPosition, model_matrix, _renderMode, material);
