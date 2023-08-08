@@ -122,8 +122,12 @@ void main() {
             float lightDistance = length(light.position - currentVolumetricPos);
             vec3 lightDir = normalize(light.position - currentVolumetricPos);
 
+            //spotlight calculation
+            float theta = dot(lightDir, light.spot_dir);
+
             if (shadowScalar > 0.5f) {
                 lightsContribution += ComputeScattering(dot(volumetricNormRay, lightDir)) * light.color * //shadows
+                max(theta - light.spot_cutoff, 0.0) *  //spotlight
                 2.0f / (light.attenuation.x + light.attenuation.y * lightDistance + light.attenuation.z * lightDistance * lightDistance) / float(u_lights.length()); //attenuation
             }
         }

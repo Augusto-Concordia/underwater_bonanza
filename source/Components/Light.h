@@ -17,8 +17,8 @@ public:
     bool project_shadows = true;
 
     glm::vec3 attenuation = glm::vec3(1.0f, 0.22f, 0.20f);
-    float range = 20.0f;
-    float cutoff = 45.0f;
+    float range = 450.0f;
+    float cutoff = 50.0f;
 
     float ambient_strength = 0.1f;
     float specular_strength = 0.5f;
@@ -42,7 +42,7 @@ private:
 
 public:
     Light() = default;
-    Light(glm::vec3 _position, glm::vec3 _color, float _ambientStrength, float _specularStrength, float _range = 20.0f, float _cutoff = 45.0f, Type _type = Type::SPOT);
+    Light(glm::vec3 _position, glm::vec3 _color, float _ambientStrength, float _specularStrength, Type _type = Type::SPOT);
 
     void SetPosition(const glm::vec3& _position);
     void SetTarget(const glm::vec3& _target);
@@ -51,7 +51,7 @@ public:
     [[nodiscard]] glm::vec3 GetPosition() const;
     [[nodiscard]] glm::vec3 GetTarget() const;
     [[nodiscard]] glm::vec3 GetColor() const;
-    [[nodiscard]] glm::vec3 GetSpotlightDirection() const;
+    [[nodiscard]] glm::vec3 GetLightDirection() const;
     [[nodiscard]] float GetSpotlightCutoff() const;
 
     [[nodiscard]] glm::mat4 GetViewProjection() const;

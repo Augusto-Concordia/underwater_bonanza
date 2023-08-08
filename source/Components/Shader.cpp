@@ -76,7 +76,7 @@ void Shader::ApplyLightsToShader(const std::shared_ptr<std::vector<Light>> _ligh
         SetFloatFast(("u_lights[" + i_string + "].ambient_strength").c_str(), light.ambient_strength);
         SetFloatFast(("u_lights[" + i_string + "].specular_strength").c_str(), light.specular_strength);
 
-        SetVec3(("u_lights[" + i_string + "].spot_dir").c_str(), light.GetSpotlightDirection());
+        SetVec3(("u_lights[" + i_string + "].spot_dir").c_str(), light.GetLightDirection());
         SetFloatFast(("u_lights[" + i_string + "].spot_cutoff").c_str(), light.GetSpotlightCutoff());
 
         SetMat4(("u_lights[" + i_string + "].light_view_projection").c_str(), light.GetViewProjection());
