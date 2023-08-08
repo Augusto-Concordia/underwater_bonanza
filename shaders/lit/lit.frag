@@ -19,6 +19,7 @@ struct Light {
     mat4 light_view_projection;
 };
 
+uniform float u_time; //time
 uniform vec3 u_cam_pos; //cam position
 
 uniform Light u_lights[4];
@@ -74,12 +75,13 @@ vec3 CalculateDirectionalLight(Light light, vec4 fragPosLightSpace, int index) {
 
     //shadow calculation
     float shadowScalar = CalculateShadowScalar(index, fragPosLightSpace, light.shadows_influence, norm, lightDir);
+    shadowScalar += noise1(vec2(WorldPos.x, WorldPos.y) * u_time / 100.0f) * 0.1;
 
     vec3 colorResult = (diffuse + specular) * //lighting
     shadowScalar * //shadows
     2.0f / (light.attenuation.x + light.attenuation.y * lightDistance + light.attenuation.z * lightDistance * lightDistance); //attenuation
 
-    return colorResult;
+    return vec3(shadowScalar);
 }
 
 vec3 CalculateSpotLight(Light light, vec4 fragPosLightSpace, int index) {

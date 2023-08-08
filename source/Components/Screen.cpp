@@ -148,17 +148,17 @@ void Screen::ResizeCallback(GLsizei _width, GLsizei _height) {
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screen_width, screen_height);
 }
 
-void Screen::Draw(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, int _renderMode, const Shader::Material *material)
+void Screen::Draw(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition,  float _time, int _renderMode, const Shader::Material *material)
 {
     glm::mat4 model_matrix = glm::mat4(1.0f);
     model_matrix = glm::translate(model_matrix, position);
     model_matrix = Transform::RotateDegrees(model_matrix, rotation);
     model_matrix = glm::scale(model_matrix, scale);
 
-    DrawFromMatrix(_viewProjection, _cameraPosition, model_matrix, _renderMode, material);
+    DrawFromMatrix(_viewProjection, _cameraPosition, model_matrix, _time, _renderMode, material);
 }
 
-void Screen::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, const glm::mat4 &_transformMatrix, int _renderMode, const Shader::Material *_material)
+void Screen::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, const glm::mat4 &_transformMatrix,  float _time, int _renderMode, const Shader::Material *_material)
 {
     // bind the vertex array to draw
     glBindVertexArray(vertex_array_o);
@@ -171,7 +171,7 @@ void Screen::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::vec3 &_
 
     current_material->shader->Use();
 
-    current_material->shader->ApplyLightsToShader(current_material->lights);
+    current_material->shader->ApplyLightsToShader(current_material->lights, _time);
 
     current_material->shader->SetVec3("u_cam_pos", _cameraPosition);
 

@@ -58,7 +58,10 @@ void Shader::SetViewProjectionMatrix(const glm::mat4 &_transform) const {
     glProgramUniformMatrix4fv(program_id, glGetUniformLocation(program_id, "u_view_projection"), 1, GL_FALSE, glm::value_ptr(_transform));
 }
 
-void Shader::ApplyLightsToShader(const std::shared_ptr<std::vector<Light>> _lights) const {
+void Shader::ApplyLightsToShader(const std::shared_ptr<std::vector<Light>> _lights, const float _time) const {
+    // global data
+    SetFloatFast("u_time", _time);
+
     // shadow map consumption
     SetTexture("u_light_depth_textures", 0);
 

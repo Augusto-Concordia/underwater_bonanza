@@ -151,5 +151,5 @@ void main() {
     accumulatedColor /= float(volumetricSteps);
 
     // mix fog color with scene color
-    OutColor = mix(vec4(u_fog_color, 1.0f), sceneColor, clamp(fogFactor, 0.0f, 1.0f)) + vec4(accumulatedColor, 1.0f);
+    OutColor = sceneColor;//mix(vec4(u_fog_color, 1.0f), sceneColor, clamp(fogFactor, 0.0f, 1.0f)) + vec4(accumulatedColor, 1.0f);
 }

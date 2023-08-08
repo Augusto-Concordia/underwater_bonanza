@@ -11,9 +11,9 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
 
     lights = std::make_shared<std::vector<Light>>();
     lights->emplace_back(glm::vec3(2.0f, 14.0f, 2.0f), glm::vec3(0.99f, 0.95f, 0.78f), 0.1f, 0.4f, Light::Type::DIRECTIONAL);
-    lights->emplace_back(glm::vec3(30.0f, 10.0f, 0.0f), glm::vec3(0.09f, 0.95f, 0.08f), 0.2f, 0.4f, Light::Type::SPOT);
-    lights->emplace_back(glm::vec3(-30.0f, 10.0f, 0.0f), glm::vec3(0.99f, 0.05f, 0.08f), 0.2f, 0.4f, Light::Type::SPOT);
-    lights->emplace_back(glm::vec3(0.0f, 34.0f, 36.0f), glm::vec3(0.09f, 0.05f, 0.78f), 0.2f, 0.4f, Light::Type::SPOT);
+    //lights->emplace_back(glm::vec3(30.0f, 10.0f, 0.0f), glm::vec3(0.09f, 0.95f, 0.08f), 0.2f, 0.4f, Light::Type::SPOT);
+    //lights->emplace_back(glm::vec3(-30.0f, 10.0f, 0.0f), glm::vec3(0.99f, 0.05f, 0.08f), 0.2f, 0.4f, Light::Type::SPOT);
+    //lights->emplace_back(glm::vec3(0.0f, 34.0f, 36.0f), glm::vec3(0.09f, 0.05f, 0.78f), 0.2f, 0.4f, Light::Type::SPOT);
 
     auto lit_shader = Shader::Library::CreateShader("shaders/lit/lit.vert", "shaders/lit/lit.frag");
     auto unlit_shader = Shader::Library::CreateShader("shaders/unlit/unlit.vert", "shaders/unlit/unlit.frag");
@@ -117,6 +117,8 @@ void Renderer::Init() {
 }
 
 void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
+    const auto current_time = (float)glfwGetTime();
+
     // processes input
     InputCallback(_window, _deltaTime);
 
@@ -153,11 +155,11 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
 
         //todo: Draw shadow-caster elements HERE (i.e. the cubes below)
 
-        test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), first_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
+        test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), first_world_transform_matrix, current_time, GL_TRIANGLES, shadow_mapper_material.get());
 
         //test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), second_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
 
-        test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), third_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
+        test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), third_world_transform_matrix, current_time, GL_TRIANGLES, shadow_mapper_material.get());
     }
 
     // COLOR PASS
@@ -186,11 +188,11 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         main_y_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
         main_z_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
 
-        test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), first_world_transform_matrix);
+        test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), first_world_transform_matrix, current_time);
 
-        test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), second_world_transform_matrix);
+        test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), second_world_transform_matrix, current_time);
 
-        test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), third_world_transform_matrix);
+        test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), third_world_transform_matrix, current_time);
     }
 
     // unbinds the main screen, so that it can be used as a texture

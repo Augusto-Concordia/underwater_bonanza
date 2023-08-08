@@ -79,17 +79,17 @@ VisualCube::VisualCube(glm::vec3 _position, glm::vec3 _rotation, glm::vec3 _scal
     VisualObject::SetupGlBuffersVerticesNormalsUvs();
 }
 
-void VisualCube::Draw(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, int _renderMode, const Shader::Material *material)
+void VisualCube::Draw(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition,  float _time, int _renderMode, const Shader::Material *material)
 {
     glm::mat4 model_matrix = glm::mat4(1.0f);
     model_matrix = glm::translate(model_matrix, position);
     model_matrix = Transform::RotateDegrees(model_matrix, rotation);
     model_matrix = glm::scale(model_matrix, scale);
 
-    DrawFromMatrix(_viewProjection, _cameraPosition, model_matrix, _renderMode, material);
+    DrawFromMatrix(_viewProjection, _cameraPosition, model_matrix, _time, _renderMode, material);
 }
 
-void VisualCube::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, const glm::mat4 &_transformMatrix, int _renderMode, const Shader::Material *_material)
+void VisualCube::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, const glm::mat4 &_transformMatrix,  float _time, int _renderMode, const Shader::Material *_material)
 {
     // bind the vertex array to draw
     glBindVertexArray(vertex_array_o);
@@ -108,7 +108,7 @@ void VisualCube::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::vec
     current_material->shader->SetVec3("u_cam_pos", _cameraPosition);
 
     // lights
-    current_material->shader->ApplyLightsToShader(current_material->lights);
+    current_material->shader->ApplyLightsToShader(current_material->lights, _time);
 
     // material properties
     current_material->shader->SetVec3("u_color", current_material->color);
