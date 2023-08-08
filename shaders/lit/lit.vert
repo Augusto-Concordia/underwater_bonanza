@@ -4,16 +4,16 @@
 
 struct Light {
     vec3 position;
+    vec3 target;
     vec3 color;
 
-    float point_spot_influence;
+    int type;
     float shadows_influence;
     vec3 attenuation;
 
     float ambient_strength;
     float specular_strength;
 
-    vec3 spot_dir;
     float spot_cutoff;
 
     mat4 light_view_projection;

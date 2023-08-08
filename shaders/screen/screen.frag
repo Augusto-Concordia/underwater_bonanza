@@ -4,16 +4,16 @@
 
 struct Light {
     vec3 position;
+    vec3 target;
     vec3 color;
 
-    float point_spot_influence;
+    int type;
     float shadows_influence;
     vec3 attenuation;
 
     float ambient_strength;
     float specular_strength;
 
-    vec3 spot_dir;
     float spot_cutoff;
 
     mat4 light_view_projection;
@@ -121,13 +121,17 @@ void main() {
             // calculate the light direction
             float lightDistance = length(light.position - currentVolumetricPos);
             vec3 lightDir = normalize(light.position - currentVolumetricPos);
+            vec3 lightTargetDir = normalize(light.position - light.target);
 
-            //spotlight calculation
-            float theta = dot(lightDir, light.spot_dir);
+            float lightTypeScalar = 1.0f;
+
+            if (light.type == 2) {
+                lightTypeScalar = dot(lightDir, lightTargetDir);
+            }
 
             if (shadowScalar > 0.5f) {
                 lightsContribution += ComputeScattering(dot(volumetricNormRay, lightDir)) * light.color * //shadows
-                max(theta - light.spot_cutoff, 0.0) *  //spotlight
+                lightTypeScalar *  //light type (i.e. if it's a spotlight)
                 2.0f / (light.attenuation.x + light.attenuation.y * lightDistance + light.attenuation.z * lightDistance * lightDistance) / float(u_lights.length()); //attenuation
             }
         }
