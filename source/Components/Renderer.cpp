@@ -2,6 +2,7 @@
 #include "Utility/Input.hpp"
 #include "Utility/Graphics.hpp"
 #include "Texture.h"
+#include "Utility/Transform.hpp"
 
 Renderer::Renderer(int _initialWidth, int _initialHeight) {
     viewport_width = _initialWidth;
@@ -71,6 +72,33 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
             .line_thickness = 3.0f,
             .color = glm::vec3(0.0f, 0.0f, 1.0f)
     };
+
+    //leaf
+    Shader::Material Leaf_material =  {
+            .shader = lit_shader,
+            .line_thickness = 3.0f,
+            .lights = lights,
+            //.color = glm::vec3(0.0f, 0.0f, 1.0f),
+            .texture = Texture::Library::CreateTexture("assets/fuzz.jpg"),
+            .texture_tiling = glm::vec2(1.0f)
+    };
+
+    leaf_cube = std::make_unique<Leaf>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), Leaf_material);
+
+    //make a stem
+    Shader::Material Stem_material =  {
+            .shader = lit_shader,
+            .line_thickness = 3.0f,
+            .lights = lights,
+            //.color = glm::vec3(0.0f, 0.0f, 1.0f),
+            .texture = Texture::Library::CreateTexture("assets/clay_texture.jpg"),
+            .texture_tiling = glm::vec2(2.0f)
+    };
+
+    stem_cube = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), Stem_material);
+
+
+
 
     //this is a quick way to make the axis lines avoid having depth fighting issues
     main_x_line = std::make_unique<VisualLine>(glm::vec3(0.01f), glm::vec3(5.01f, 0.01f, 0.01f), x_line_material);
@@ -151,9 +179,13 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
 
         //todo: Draw shadow-caster elements HERE (i.e. the cubes below)
 
-        test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), first_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
+        //test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), first_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
 
         test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), second_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
+
+        DrawOneJackRacket(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(0.0f), glm::vec3(10.0f), light.GetViewProjection(), light.GetPosition(), shadow_mapper_material.get());
+
+        //DrawOneLeaf(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(100.0f), light.GetViewProjection(), light.GetPosition(), shadow_mapper_material.get());
     }
 
     // COLOR PASS
@@ -182,9 +214,13 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         main_y_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
         main_z_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
 
-        test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), first_world_transform_matrix);
+        //test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), first_world_transform_matrix);
 
         test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), second_world_transform_matrix);
+
+        //DrawOneLeaf(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(10.0f), light.GetViewProjection(), light.GetPosition(), shadow_mapper_material.get());
+
+        DrawOneJackRacket(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr);
     }
 
     // unbinds the main screen, so that it can be used as a texture
@@ -216,6 +252,67 @@ void Renderer::ResizeCallback(GLFWwindow* _window, int _displayWidth, int _displ
 
     main_camera->SetViewportSize((float)_displayWidth, (float)_displayHeight);
     main_screen->ResizeCallback(_displayWidth, _displayHeight);
+}
+
+void Renderer::DrawOneJackRacket(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride)
+{
+    glm::mat4 world_transform_matrix = glm::mat4(1.0f);
+
+    world_transform_matrix = glm::translate(world_transform_matrix, _position);
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, _rotation);
+    world_transform_matrix = glm::scale(world_transform_matrix, _scale);
+
+
+    glm::mat4 secondary_transform_matrix = world_transform_matrix;
+    // DrawOneS(secondary_transform_matrix, _viewProjection, _eyePosition, _materialOverride);
+    // DrawOneP(secondary_transform_matrix, _viewProjection, _eyePosition, _materialOverride);
+
+    DrawOneLeaf(secondary_transform_matrix, _viewProjection, _eyePosition, _materialOverride);
+
+
+    // forearm (skin)
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(45.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 5.0f, 1.0f));
+    stem_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 0.2f, 1.0f));
+
+    // arm (skin)
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, 5.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(-45.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 4.0f, 1.0f));
+    stem_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 0.25f, 1.0f));
+
+
+    // racket handle
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, 4.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.5f, 5.0f, 0.5f));
+    stem_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(2.0f, 0.20f, 2.0f));
+
+    // base
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, 5.0f, -2.5f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(-90.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.5f, 5.0f, 0.5f));
+    stem_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(2.0f, 0.20f, 2.0f));
+
+
+}
+
+
+
+void Renderer::DrawOneLeaf(glm::mat4 world_transform_matrix, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride){
+    auto scale_factor = glm::vec3(1.0f, 1.0f, 1.0f);         // scale for one cube
+    // global transforms
+    //world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec(0.0f));
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, scale_factor);
+    leaf_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor);
+
+
 }
 
 void Renderer::InputCallback(GLFWwindow* _window, const double _deltaTime) {

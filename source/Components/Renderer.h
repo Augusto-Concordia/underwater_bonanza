@@ -7,6 +7,7 @@
 #include "GLFW/glfw3.h"
 #include "Components/Visual/VisualLine.h"
 #include "Components/Visual/VisualCube.h"
+#include "Components/Visual/Leaf.h"
 #include "Screen.h"
 
 class Renderer {
@@ -26,6 +27,10 @@ private:
 
     std::unique_ptr<VisualCube> test_cube;
 
+    std::unique_ptr<Leaf> leaf_cube;
+
+    std::unique_ptr<VisualCube>  stem_cube;
+
     int viewport_width, viewport_height;
 
     GLuint shadow_map_fbo = 0;
@@ -39,5 +44,10 @@ public:
 
     void ResizeCallback(GLFWwindow* _window, int _displayWidth, int _displayHeight);
     void InputCallback(GLFWwindow* _window, double _deltaTime);
+
+    void DrawOneJackRacket(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride);
+
+
+    void DrawOneLeaf(glm::mat4 world_transform_matrix, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride);
 };
 
