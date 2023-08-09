@@ -18,8 +18,8 @@ private:
     GLuint screen_base_texture_unit = 0;
 
     GLuint scene_color_texture = 0;
-    GLuint scene_true_depth_texture = 0;
-    GLuint scene_true_pos_texture = 0;
+    GLuint scene_camera_pos_texture = 0;
+    GLuint scene_world_pos_texture = 0;
     GLuint scene_depth_texture = 0;
 
 public:

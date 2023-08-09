@@ -36,15 +36,6 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     };
     main_light_cube = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), main_light_cube_material);
 
-    //test cube
-    Shader::Material test_material = {
-            .shader = lit_shader,
-            .color = glm::vec3(0.2f, 0.7f, 0.85f),
-            .lights = lights
-    };
-
-    test_cube = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), test_material);
-
     //grid
     Shader::Material grid_material = {
             .shader = unlit_shader,
@@ -75,6 +66,16 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     main_x_line = std::make_unique<VisualLine>(glm::vec3(0.01f), glm::vec3(5.01f, 0.01f, 0.01f), x_line_material);
     main_y_line = std::make_unique<VisualLine>(glm::vec3(0.01f), glm::vec3(0.01f, 5.01f, 0.01f), y_line_material);
     main_z_line = std::make_unique<VisualLine>(glm::vec3(0.01f), glm::vec3(0.01f, 0.01f, 5.01f), z_line_material);
+
+    //test cube
+    Shader::Material test_material = {
+            .shader = lit_shader,
+            .color = glm::vec3(0.2f, 0.7f, 0.85f),
+            .lights = lights
+    };
+
+    test_cube = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), test_material);
+    test_plane = std::make_unique<VisualPlane>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(100.0f), test_material);
 }
 
 void Renderer::Init() {
@@ -98,8 +99,8 @@ void Renderer::Init() {
 
     // the following 2 blocks mitigate shadow map artifacts, coming from: https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
     // when sampling outside, we don't want a repeating pattern
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
     glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_DEPTH_COMPONENT32, Light::LIGHTMAP_SIZE, Light::LIGHTMAP_SIZE, (GLint)lights->size());
 
@@ -160,6 +161,8 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         //test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), second_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
 
         test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), third_world_transform_matrix, current_time, GL_TRIANGLES, shadow_mapper_material.get());
+
+        test_plane->Draw(light.GetViewProjection(), light.GetPosition(), current_time, GL_TRIANGLES, shadow_mapper_material.get());
     }
 
     // COLOR PASS
@@ -193,6 +196,8 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), second_world_transform_matrix, current_time);
 
         test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), third_world_transform_matrix, current_time);
+
+        test_plane->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), current_time);
     }
 
     // unbinds the main screen, so that it can be used as a texture

@@ -54,8 +54,11 @@ struct Light {
 
 uniform float u_time; //time
 uniform vec3 u_cam_pos; //camera position
+uniform vec3 u_cam_target; //camera target
 
 uniform Light u_lights[4]; //lights array
+
+uniform float u_caustics_strength = 2.0f; //caustics strength
 
 uniform vec3 u_fog_color = vec3(0.0, 0.36, 0.73); //fog color
 uniform float u_fog_density = 0.66; //fog density
@@ -128,6 +131,8 @@ void main() {
     float fogFactor = Map(posInCameraSpace.z, 0.0f, 50.0f, 0.0f, 1.0f);
     fogFactor = 1.0f / pow(exp(fogFactor * 0.66f), 2.0f); // exponential fog
 
+    // VOLUMETRIC LIGHTING
+
     int volumetricSteps = 50; // number of steps to take when raymarching
     float volumetricDensity = 0.2f; // density of the fog
 
@@ -156,7 +161,8 @@ void main() {
             // calculate the light direction
             float lightDistance = length(light.position - currentVolumetricPos);
             vec3 lightDir = normalize(light.position - currentVolumetricPos);
-            vec3 lightTargetDir = normalize(light.position - light.target);
+            vec3 lightTargetVec = light.position - light.target;
+            vec3 lightTargetDir = normalize(lightTargetVec);
 
             float lightTypeScalar = 1.0f;
 
@@ -165,6 +171,8 @@ void main() {
             if (light.type == 0) {
                 caustics = voronoi2d(vec2(fragPosLightSpace.x + u_time * 0.03f, fragPosLightSpace.y * 5.0f + u_time * 0.03f) * 10.0f);// * 0.05f + 0.95f;
                 caustics = (1.0 - smoothstep(caustics, 0.65, 0.68));
+                lightDistance = max(dot(lightTargetVec, light.position - currentVolumetricPos), 0.0) / u_caustics_strength;
+                //lightTypeScalar = dot(lightTargetDir, normalize(u_cam_pos - u_cam_target));
             } else if (light.type == 2) {
                 lightTypeScalar = dot(lightDir, lightTargetDir);
             }
@@ -172,7 +180,7 @@ void main() {
             if (shadowScalar > 0.5f) {
                 lightsContribution += (ComputeScattering(dot(volumetricNormRay, lightDir)) + caustics) * light.color * //shadows
                 lightTypeScalar *  //light type (i.e. if it's a spotlight)
-                2.0f / (light.attenuation.x + light.attenuation.y * lightDistance + light.attenuation.z * lightDistance * lightDistance) / float(u_lights.length()); //attenuation
+                2.0f / (light.attenuation.x + light.attenuation.y * lightDistance + light.attenuation.z * lightDistance * lightDistance); //attenuation
             }
         }
 
@@ -185,7 +193,7 @@ void main() {
             break;
         }
 
-        accumulatedColor += lightsContribution;
+        accumulatedColor += lightsContribution / float(u_lights.length());
     }
 
     accumulatedColor /= float(volumetricSteps);

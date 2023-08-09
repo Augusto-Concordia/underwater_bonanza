@@ -117,7 +117,6 @@ vec3 CalculateDirectionalLight(Light light, vec4 fragPosLightSpace, int index) {
 
     float caustics = voronoi2d(vec2(fragPosLightSpace.x + u_time * 0.03f, fragPosLightSpace.y * 5.0f + u_time * 0.03f) * 10.0f);// * 0.05f + 0.95f;
     caustics = (1.0 - smoothstep(caustics, 0.65, 0.68));
-    caustics *= max(dot(viewDir, lightDir), 0.0);
 
     vec3 colorResult = (caustics + diffuse + specular) * //lighting
     shadowScalar * //shadows

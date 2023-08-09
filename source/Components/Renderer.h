@@ -8,6 +8,7 @@
 #include "Components/Visual/VisualLine.h"
 #include "Components/Visual/VisualCube.h"
 #include "Screen.h"
+#include "Components/Visual/VisualPlane.h"
 
 class Renderer {
 private:
@@ -24,6 +25,7 @@ private:
     std::shared_ptr<std::vector<Light>> lights;
     std::unique_ptr<VisualCube> main_light_cube;
 
+    std::unique_ptr<VisualPlane> test_plane;
     std::unique_ptr<VisualCube> test_cube;
 
     int viewport_width, viewport_height;
