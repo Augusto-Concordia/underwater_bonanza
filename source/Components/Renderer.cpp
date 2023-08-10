@@ -149,6 +149,9 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
     // processes input
     InputCallback(_window, _deltaTime);
 
+    //animation
+    moving_angle = glfwGetTime() * 20.0f;
+
     // moves the main light
     auto light_turning_radius = 4.0f;
     for (int i = 1; i < lights->size(); ++i) {
@@ -183,7 +186,7 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
 
         test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), second_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
 
-        DrawOneJackRacket(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(0.0f), glm::vec3(10.0f), light.GetViewProjection(), light.GetPosition(), shadow_mapper_material.get());
+        DrawOneWeed(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), light.GetViewProjection(), light.GetPosition(), shadow_mapper_material.get(), moving_angle);
 
         //DrawOneLeaf(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(100.0f), light.GetViewProjection(), light.GetPosition(), shadow_mapper_material.get());
     }
@@ -220,7 +223,7 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
 
         //DrawOneLeaf(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(10.0f), light.GetViewProjection(), light.GetPosition(), shadow_mapper_material.get());
 
-        DrawOneJackRacket(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr);
+        DrawOneWeed(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
     }
 
     // unbinds the main screen, so that it can be used as a texture
@@ -254,7 +257,7 @@ void Renderer::ResizeCallback(GLFWwindow* _window, int _displayWidth, int _displ
     main_screen->ResizeCallback(_displayWidth, _displayHeight);
 }
 
-void Renderer::DrawOneJackRacket(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride)
+void Renderer::DrawOneWeed(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time)
 {
     glm::mat4 world_transform_matrix = glm::mat4(1.0f);
 
@@ -262,41 +265,64 @@ void Renderer::DrawOneJackRacket(const glm::vec3 &_position, const glm::vec3 &_r
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, _rotation);
     world_transform_matrix = glm::scale(world_transform_matrix, _scale);
 
+    auto scale_factor = glm::vec3(0.3f, 0.3f, 0.3f);         // scale for one cube
+
 
     glm::mat4 secondary_transform_matrix = world_transform_matrix;
     // DrawOneS(secondary_transform_matrix, _viewProjection, _eyePosition, _materialOverride);
     // DrawOneP(secondary_transform_matrix, _viewProjection, _eyePosition, _materialOverride);
 
-    DrawOneLeaf(secondary_transform_matrix, _viewProjection, _eyePosition, _materialOverride);
+    //DrawOneLeaf(secondary_transform_matrix, _viewProjection, _eyePosition, _materialOverride);
+
+    //animation values
+    //float moving_angle = glm::cos(glfwGetTime() * 2.0f);
 
 
-    // forearm (skin)
-    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(45.0f, 0.0f, 0.0f));
-    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 5.0f, 1.0f));
+    //base stem
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, 0.0f, 0.0f));
+    //world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, scale_factor);
     stem_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
-    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 0.2f, 1.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor);
 
-    // arm (skin)
-    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, 5.0f, 0.0f));
-    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(-45.0f, 0.0f, 0.0f));
-    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 4.0f, 1.0f));
-    stem_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
-    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 0.25f, 1.0f));
+    float x_offset = 0.05f;
+    float y_offset = 0.3f;
+    float rot_bounce = 90.0f;
+    float bounce = 1.0f;
+    float bounce_sin = 1.0f;
+
+    float sin_offset = cos(time/20)/20;
 
 
-    // racket handle
-    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, 4.0f, 0.0f));
-    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f, 0.0f, 0.0f));
-    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.5f, 5.0f, 0.5f));
-    stem_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
-    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(2.0f, 0.20f, 2.0f));
+    for(int x = 0; x < 10; x++){
 
-    // base
-    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, 5.0f, -2.5f));
-    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(-90.0f, 0.0f, 0.0f));
-    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.5f, 5.0f, 0.5f));
-    stem_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
-    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(2.0f, 0.20f, 2.0f));
+        if(bounce_sin / 3.0f == 1.0f){
+            bounce_sin = 1.0f;
+            x_offset = -x_offset;
+        }
+        
+        //draw stem block 
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(x_offset+sin_offset, y_offset, 0.0f));
+        //world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f, bounce * rot_bounce, 0.0f));
+        world_transform_matrix = glm::scale(world_transform_matrix, scale_factor);
+        stem_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+        world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor);
+        //world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f, -bounce * rot_bounce, 0.0f));
+
+        //draw leaf block 
+
+        // world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f, bounce * rot_bounce, 0.0f));
+        // DrawOneLeaf(secondary_transform_matrix, _viewProjection, _eyePosition, _materialOverride);
+        // secondary_transform_matrix = world_transform_matrix;
+        // world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f, -bounce * rot_bounce, 0.0f));
+
+        //bounce
+        bounce += 1.0f;
+        bounce_sin += 1.0f;
+
+
+
+    }
 
 
 }
@@ -307,7 +333,8 @@ void Renderer::DrawOneLeaf(glm::mat4 world_transform_matrix, const glm::mat4& _v
     auto scale_factor = glm::vec3(1.0f, 1.0f, 1.0f);         // scale for one cube
     // global transforms
     //world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec(0.0f));
-    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-1.0f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(90.0f, 0.0f, 90.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, scale_factor);
     leaf_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor);
