@@ -174,7 +174,7 @@ void main() {
             float caustics = 0.0f;
 
             if (light.type == 0) { // Directional
-                caustics = voronoi2d(vec2(fragPosLightSpace.x + u_time * 0.03f, fragPosLightSpace.y * 5.0f + u_time * 0.03f) * 10.0f);
+                caustics = voronoi2d(vec2(fragPosLightSpace.x + u_time * 0.03f, fragPosLightSpace.y * 5.0f + u_time * 0.1f) * 10.0f);
                 lightDistance = max(dot(light.position - currentVolumetricPos, lightTargetDir), 0.0) / u_caustics_strength;
             } else if (light.type == 1) { // Point
                 lightTypeScalar = dot(lightDir, lightTargetDir);
