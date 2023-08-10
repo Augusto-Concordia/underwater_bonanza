@@ -1,11 +1,12 @@
 #include "Light.h"
 #include "Utility/Transform.hpp"
 
-Light::Light(glm::vec3 _position, glm::vec3 _color, float _ambientStrength, float _specularStrength, Type _type) {
+Light::Light(glm::vec3 _position, glm::vec3 _color, float _ambientStrength, float _diffuseStrength, float _specularStrength, Type _type) {
     position = _position;
     target = glm::vec3(0.0f);
     color = _color;
     ambient_strength = _ambientStrength;
+    diffuse_strength = _diffuseStrength;
     specular_strength = _specularStrength;
     type = _type;
 

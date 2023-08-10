@@ -36,6 +36,9 @@ void VisualPlane::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::ve
     // bind the vertex array to draw
     glBindVertexArray(vertex_array_o);
 
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+
     const Shader::Material *current_material = &material;
 
     // set the material to use on this frame
@@ -72,4 +75,6 @@ void VisualPlane::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::ve
 
     // clear the current texture
     current_material->texture->Clear();
+
+    glDisable(GL_CULL_FACE);
 }

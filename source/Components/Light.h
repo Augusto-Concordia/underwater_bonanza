@@ -21,9 +21,10 @@ public:
     float cutoff = 50.0f;
 
     float ambient_strength = 0.1f;
+    float diffuse_strength = 0.1f;
     float specular_strength = 0.5f;
 
-    inline static int LIGHTMAP_SIZE = 2048;
+    inline static int LIGHTMAP_SIZE = 1024;
     inline constexpr static float FOV = 80.0f;
     inline constexpr static float NEAR_PLANE = 0.1f;
     inline constexpr static float FAR_PLANE = 400.0f;
@@ -42,7 +43,7 @@ private:
 
 public:
     Light() = default;
-    Light(glm::vec3 _position, glm::vec3 _color, float _ambientStrength, float _specularStrength, Type _type = Type::SPOT);
+    Light(glm::vec3 _position, glm::vec3 _color, float _ambientStrength, float _diffuseStrength, float _specularStrength, Type _type = Type::SPOT);
 
     void SetPosition(const glm::vec3& _position);
     void SetTarget(const glm::vec3& _target);

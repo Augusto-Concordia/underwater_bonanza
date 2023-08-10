@@ -10,10 +10,10 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     main_camera = std::make_unique<Camera>(glm::vec3(8.0f, 8.0f, 8.0f), glm::vec3(0.0f), _initialWidth, _initialHeight);
 
     lights = std::make_shared<std::vector<Light>>();
-    lights->emplace_back(glm::vec3(2.0f, 10.0f, 2.0f), glm::vec3(0.99f, 0.95f, 0.78f), 0.1f, 0.4f, Light::Type::DIRECTIONAL);
-    lights->emplace_back(glm::vec3(30.0f, 10.0f, 0.0f), glm::vec3(0.09f, 0.95f, 0.08f), 0.2f, 0.4f, Light::Type::SPOT);
-    lights->emplace_back(glm::vec3(-30.0f, 10.0f, 0.0f), glm::vec3(0.99f, 0.05f, 0.08f), 0.2f, 0.4f, Light::Type::SPOT);
-    lights->emplace_back(glm::vec3(0.0f, 34.0f, 36.0f), glm::vec3(0.09f, 0.05f, 0.78f), 0.2f, 0.4f, Light::Type::SPOT);
+    lights->emplace_back(glm::vec3(2.0f, 10.0f, 2.0f), glm::vec3(0.99f, 0.95f, 0.78f), 0.1f, 0.2f, 0.4f, Light::Type::DIRECTIONAL);
+    lights->emplace_back(glm::vec3(30.0f, 10.0f, 0.0f), glm::vec3(0.09f, 0.95f, 0.08f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
+    lights->emplace_back(glm::vec3(-30.0f, 10.0f, 0.0f), glm::vec3(0.99f, 0.05f, 0.08f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
+    lights->emplace_back(glm::vec3(0.0f, 34.0f, 36.0f), glm::vec3(0.09f, 0.05f, 0.78f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
 
     auto lit_shader = Shader::Library::CreateShader("shaders/lit/lit.vert", "shaders/lit/lit.frag");
     auto unlit_shader = Shader::Library::CreateShader("shaders/unlit/unlit.vert", "shaders/unlit/unlit.frag");
@@ -75,7 +75,7 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     };
 
     test_cube = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), test_material);
-    test_plane = std::make_unique<VisualPlane>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(100.0f), test_material);
+    test_plane = std::make_unique<VisualPlane>(glm::vec3(0.0f, -0.5f, 0.0f), glm::vec3(0.0f), glm::vec3(100.0f), test_material);
 }
 
 void Renderer::Init() {
@@ -102,7 +102,8 @@ void Renderer::Init() {
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
-    glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_DEPTH_COMPONENT32, Light::LIGHTMAP_SIZE, Light::LIGHTMAP_SIZE, (GLint)lights->size());
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT32, Light::LIGHTMAP_SIZE, Light::LIGHTMAP_SIZE, (GLint)lights->size(), 0, GL_DEPTH_COMPONENT, GL_FLOAT,
+                 nullptr);
 
     // binds the shadow map depth texture to the framebuffer
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadow_map_texture, 0);
@@ -123,7 +124,10 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
     // processes input
     InputCallback(_window, _deltaTime);
 
-    // moves the main light
+    // moves the lights
+    /*lights->at(0).SetPosition(glm::vec3(main_camera->GetPosition().x, 20.0f, main_camera->GetPosition().z));
+    lights->at(0).SetTarget(glm::vec3(main_camera->GetPosition().x + 2.0f, -10.0f, main_camera->GetPosition().z + 2.0f));*/
+
     auto light_turning_radius = 5.0f;
     for (int i = 1; i < lights->size(); ++i) {
         auto& light = lights->at(i);
@@ -141,7 +145,7 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
     first_world_transform_matrix = glm::scale(first_world_transform_matrix, glm::vec3(2.0f));
 
     glm::mat4 second_world_transform_matrix = glm::translate(glm::mat4(1.0f), main_camera->GetPosition());
-    second_world_transform_matrix =  glm::scale(second_world_transform_matrix, glm::vec3(200.0f));
+    second_world_transform_matrix =  glm::scale(second_world_transform_matrix, glm::vec3(500.0f));
 
     glm::mat4 third_world_transform_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 3.0f, 0.0f));
     third_world_transform_matrix =  glm::scale(third_world_transform_matrix, glm::vec3(1.5f));
@@ -184,7 +188,7 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         }
 
         // draws the main grid
-        main_grid->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
+        //main_grid->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
 
         // draws the coordinate axis
         main_x_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());

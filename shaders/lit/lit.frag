@@ -46,7 +46,9 @@ struct Light {
     float shadows_influence;
     vec3 attenuation;
 
+    // a light generally does not have information on how it's going to affect the objects, but this is a shortcut
     float ambient_strength;
+    float diffuse_strength;
     float specular_strength;
 
     float spot_cutoff;
@@ -92,35 +94,34 @@ float CalculateShadowScalar(int index, vec4 fragPosLightSpace, float influence, 
     // get current linear depth as stored in the depth buffer
     float currentDepth = projectedCoords.z;
 
-    return (currentDepth - max(0.000100 * (1.0 - dot(norm, lightDir)), 0.000025)) < closestDepth ? 1.0 : influence; //bias calculation comes from: https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
+    return (currentDepth - max(0.000175 * (1.0 - dot(norm, lightDir)), 0.000025)) < closestDepth ? 1.0 : influence; //bias calculation comes from: https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
 }
 
 vec3 CalculateDirectionalLight(Light light, vec4 fragPosLightSpace, int index) {
     //diffuse lighting calculation
     vec3 norm = normalize(Normal);
     vec3 lightTargetVec = light.position - light.target;
-    vec3 lightDir = normalize(light.position - WorldPos);
-    float lightDistance = dot(lightTargetVec, light.position - WorldPos);
+    vec3 lightTargetDir = normalize(lightTargetVec); // this is used for lighting calculations, because it's a directional light, so the position of the light does not matter
+    float lightDistance = dot(light.position - WorldPos, lightTargetDir);
 
-    float diffFactor = max(dot(lightDir, norm), 0.0);
-    vec3 diffuse = diffFactor * light.color;
+    float diffFactor = max(dot(norm, lightTargetDir), 0.0);
+    vec3 diffuse = diffFactor * light.diffuse_strength * light.color;
 
     //specular lighting calculation
     vec3 viewDir = normalize(u_cam_pos - WorldPos);
-    vec3 reflectDir = normalize(reflect(-lightDir, norm));
+    vec3 reflectDir = normalize(reflect(-lightTargetDir, norm));
 
     float specularFactor = pow(max(dot(viewDir, reflectDir), 0.0), u_shininess);
     vec3 specular = specularFactor * light.specular_strength * light.color;
 
     //shadow calculation
-    float shadowScalar = CalculateShadowScalar(index, fragPosLightSpace, light.shadows_influence, norm, lightDir);
+    float shadowScalar = CalculateShadowScalar(index, fragPosLightSpace, light.shadows_influence, norm, lightTargetDir);
 
-    float caustics = voronoi2d(vec2(fragPosLightSpace.x + u_time * 0.03f, fragPosLightSpace.y * 5.0f + u_time * 0.03f) * 10.0f);// * 0.05f + 0.95f;
-    caustics = (1.0 - smoothstep(caustics, 0.65, 0.68));
+    float causticFactor = voronoi2d(vec2(fragPosLightSpace.x + u_time * 0.03f, fragPosLightSpace.y * 5.0f + u_time * 0.03f) * 10.0f);// * 0.05f + 0.95f;
+    vec3 caustics = (1.0 - smoothstep(causticFactor, 0.65, 0.68)) * light.color;
 
     vec3 colorResult = (caustics + diffuse + specular) * //lighting
     shadowScalar * //shadows
-    //caustics * //caustics
     2.0 / (light.attenuation.x + light.attenuation.y * lightDistance + light.attenuation.z * lightDistance * lightDistance); //attenuation
 
     return colorResult;

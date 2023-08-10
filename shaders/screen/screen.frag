@@ -44,7 +44,9 @@ struct Light {
     float shadows_influence;
     vec3 attenuation;
 
+    // a light generally does not have information on how it's going to affect the objects, but this is a shortcut
     float ambient_strength;
+    float diffuse_strength;
     float specular_strength;
 
     float spot_cutoff;
@@ -61,8 +63,8 @@ uniform Light u_lights[4]; //lights array
 uniform float u_caustics_strength = 2.0f; //caustics strength
 
 uniform vec3 u_fog_color = vec3(0.0, 0.36, 0.73); //fog color
-uniform float u_fog_density = 0.66; //fog density
-uniform float u_fog_max_distance = 50.0; //fog max distance
+uniform float u_fog_density = 0.81; //fog density
+uniform float u_fog_max_distance = 40.0; //fog max distance
 uniform float u_fog_min_distance = 2.0; //fog min distance
 
 uniform vec3 u_chromatic_aberration = vec3(-0.009, -0.006, 0.006); //chromatic aberration
@@ -78,7 +80,7 @@ float Map(float value, float min1, float max1, float min2, float max2) {
     return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
 }
 
-float CalculateShadowScalar(int index, vec4 fragPosLightSpace) {
+bool IsInLight(int index, vec4 fragPosLightSpace) {
     //shadow calculation
     vec3 projectedCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projectedCoords = projectedCoords * 0.5f + 0.5f;
@@ -89,7 +91,7 @@ float CalculateShadowScalar(int index, vec4 fragPosLightSpace) {
     // get current linear depth as stored in the depth buffer
     float currentDepth = projectedCoords.z;
 
-    return (currentDepth - 0.00100) < shadowMapDepth ? 1.0f : 0.0f; //bias calculation comes from: https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
+    return (currentDepth - 0.00100) < shadowMapDepth; //bias calculation comes from: https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
 }
 
 // Mie scaterring approximated with Henyey-Greenstein phase function.
@@ -156,32 +158,35 @@ void main() {
             vec4 fragPosLightSpace = light.light_view_projection * vec4(currentVolumetricPos, 1.0f);
 
             // calculate the shadow scalar for the current light
-            float shadowScalar = CalculateShadowScalar(j, fragPosLightSpace);
+            bool isInLight = IsInLight(j, fragPosLightSpace);
+
+            // if the fragment is in shadow, skip the following calculations for this light
+            if (!isInLight)
+                continue;
 
             // calculate the light direction
-            float lightDistance = length(light.position - currentVolumetricPos);
+            float lightDistance;
             vec3 lightDir = normalize(light.position - currentVolumetricPos);
             vec3 lightTargetVec = light.position - light.target;
             vec3 lightTargetDir = normalize(lightTargetVec);
 
             float lightTypeScalar = 1.0f;
-
             float caustics = 0.0f;
 
-            if (light.type == 0) {
-                caustics = voronoi2d(vec2(fragPosLightSpace.x + u_time * 0.03f, fragPosLightSpace.y * 5.0f + u_time * 0.03f) * 10.0f);// * 0.05f + 0.95f;
-                caustics = (1.0 - smoothstep(caustics, 0.65, 0.68));
-                lightDistance = max(dot(lightTargetVec, light.position - currentVolumetricPos), 0.0) / u_caustics_strength;
-                //lightTypeScalar = dot(lightTargetDir, normalize(u_cam_pos - u_cam_target));
-            } else if (light.type == 2) {
+            if (light.type == 0) { // Directional
+                caustics = voronoi2d(vec2(fragPosLightSpace.x + u_time * 0.03f, fragPosLightSpace.y * 5.0f + u_time * 0.03f) * 10.0f);
+                lightDistance = max(dot(light.position - currentVolumetricPos, lightTargetDir), 0.0) / u_caustics_strength;
+            } else if (light.type == 1) { // Point
                 lightTypeScalar = dot(lightDir, lightTargetDir);
+                lightDistance = length(light.position - currentVolumetricPos);
+            } else if (light.type == 2) { // Spot
+                lightTypeScalar = dot(lightDir, lightTargetDir);
+                lightDistance = length(light.position - currentVolumetricPos);
             }
 
-            if (shadowScalar > 0.5f) {
-                lightsContribution += (ComputeScattering(dot(volumetricNormRay, lightDir)) + caustics) * light.color * //shadows
-                lightTypeScalar *  //light type (i.e. if it's a spotlight)
-                2.0f / (light.attenuation.x + light.attenuation.y * lightDistance + light.attenuation.z * lightDistance * lightDistance); //attenuation
-            }
+            lightsContribution += (ComputeScattering(dot(volumetricNormRay, lightDir)) + ComputeScattering(caustics)) * light.color * //shadows
+            lightTypeScalar *  //light type (i.e. if it's a spotlight)
+            2.0f / (light.attenuation.x + light.attenuation.y * lightDistance + light.attenuation.z * lightDistance * lightDistance); //attenuation
         }
 
         // calculate the next step

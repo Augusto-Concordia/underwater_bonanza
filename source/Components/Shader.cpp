@@ -78,6 +78,7 @@ void Shader::ApplyLightsToShader(const std::shared_ptr<std::vector<Light>> _ligh
         SetVec3(("u_lights[" + i_string + "].attenuation").c_str(), light.attenuation);
 
         SetFloatFast(("u_lights[" + i_string + "].ambient_strength").c_str(), light.ambient_strength);
+        SetFloatFast(("u_lights[" + i_string + "].diffuse_strength").c_str(), light.diffuse_strength);
         SetFloatFast(("u_lights[" + i_string + "].specular_strength").c_str(), light.specular_strength);
 
         SetFloatFast(("u_lights[" + i_string + "].spot_cutoff").c_str(), light.GetSpotlightCutoff());

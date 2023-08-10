@@ -11,7 +11,9 @@ struct Light {
     float shadows_influence;
     vec3 attenuation;
 
+    // a light generally does not have information on how it's going to affect the objects, but this is a shortcut
     float ambient_strength;
+    float diffuse_strength;
     float specular_strength;
 
     float spot_cutoff;
