@@ -30,6 +30,9 @@ private:
     std::unique_ptr<Leaf> leaf_cube;
 
     std::unique_ptr<VisualCube>  stem_cube;
+    std::unique_ptr<VisualCube>  clam_cube;
+    std::unique_ptr<VisualCube>  pearl_cube;
+    std::unique_ptr<VisualCube>  lip_cube;
 
     int viewport_width, viewport_height;
 
@@ -48,8 +51,8 @@ public:
     void InputCallback(GLFWwindow* _window, double _deltaTime);
 
     void DrawOneWeed(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time);
-
-
+    void DrawOneWeed2(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time);
+    void DrawOneClam(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time);
     void DrawOneLeaf(glm::mat4 world_transform_matrix, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride);
 };
 
