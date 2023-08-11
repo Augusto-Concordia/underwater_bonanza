@@ -2,39 +2,6 @@
 
 #version 330 core
 
-//	Voronoi 2D Noise
-//	https://github.com/MaxBittker/glsl-voronoi-noise/blob/master/2d.glsl
-
-const mat2 myt = mat2(.12121212, .13131313, -.13131313, .12121212);
-const vec2 mys = vec2(1e4, 1e6);
-
-vec2 rhash(vec2 uv) {
-    uv *= myt;
-    uv *= mys;
-    return fract(fract(uv / mys) * uv);
-}
-
-vec3 hash(vec3 p) {
-    return fract(sin(vec3(dot(p, vec3(1.0, 57.0, 113.0)),
-    dot(p, vec3(57.0, 113.0, 1.0)),
-    dot(p, vec3(113.0, 1.0, 57.0)))) *
-    43758.5453);
-}
-
-float voronoi2d(const in vec2 point) {
-    vec2 p = floor(point);
-    vec2 f = fract(point);
-    float res = 0.0;
-    for (int j = -1; j <= 1; j++) {
-        for (int i = -1; i <= 1; i++) {
-            vec2 b = vec2(i, j);
-            vec2 r = vec2(b) - f + rhash(p + b);
-            res += 1. / pow(dot(r, r), 8.);
-        }
-    }
-    return pow(1. / res, 0.0625);
-}
-
 struct Light {
     vec3 position;
     vec3 target;
@@ -76,17 +43,17 @@ uniform sampler2DArray u_light_depth_textures; //light depth textures (from ligh
 
 out vec4 OutColor; //rgba color output
 
-float Map(float value, float min1, float max1, float min2, float max2) {
-    return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
+float Map(float _value, float _min1, float _max1, float _min2, float _max2) {
+    return _min2 + (_value - _min1) * (_max2 - _min2) / (_max1 - _min1);
 }
 
-bool IsInLight(int index, vec4 fragPosLightSpace) {
+bool IsInLight(int _index, vec4 _fragPosLightSpace) {
     //shadow calculation
-    vec3 projectedCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    vec3 projectedCoords = _fragPosLightSpace.xyz / _fragPosLightSpace.w;
     projectedCoords = projectedCoords * 0.5f + 0.5f;
 
     // get closest depth value from light's perspective (using [0,1] range LightSpaceFragPos as coords)
-    float shadowMapDepth = texture(u_light_depth_textures, vec3(projectedCoords.xy, index)).r;
+    float shadowMapDepth = texture(u_light_depth_textures, vec3(projectedCoords.xy, _index)).r;
 
     // get current linear depth as stored in the depth buffer
     float currentDepth = projectedCoords.z;
@@ -95,14 +62,40 @@ bool IsInLight(int index, vec4 fragPosLightSpace) {
 }
 
 // Mie scaterring approximated with Henyey-Greenstein phase function.
-float ComputeScattering(float lightDotView)
+float ComputeScattering(float _lightDotView)
 {
     const float G_SCATTERING = 0.55f;
     const float PI = 3.1415f;
 
     float result = 1.0f - G_SCATTERING * G_SCATTERING;
-    result /= (4.0f * PI * pow(1.0f + G_SCATTERING * G_SCATTERING - (2.0f * G_SCATTERING) * lightDotView, 1.5f));
+    result /= (4.0f * PI * pow(1.0f + G_SCATTERING * G_SCATTERING - (2.0f * G_SCATTERING) * _lightDotView, 1.5f));
     return result;
+}
+
+//	Voronoi 2D Noise
+//	https://github.com/MaxBittker/glsl-voronoi-noise/blob/master/2d.glsl
+
+const mat2 myt = mat2(.12121212, .13131313, -.13131313, .12121212);
+const vec2 mys = vec2(1e4, 1e6);
+
+vec2 RHash(vec2 _uv) {
+    _uv *= myt;
+    _uv *= mys;
+    return fract(fract(_uv / mys) * _uv);
+}
+
+float Voronoi2D(const in vec2 _point) {
+    vec2 p = floor(_point);
+    vec2 f = fract(_point);
+    float res = 0.0;
+    for (int j = -1; j <= 1; j++) {
+        for (int i = -1; i <= 1; i++) {
+            vec2 b = vec2(i, j);
+            vec2 r = vec2(b) - f + RHash(p + b);
+            res += 1. / pow(dot(r, r), 8.);
+        }
+    }
+    return pow(1. / res, 0.0625);
 }
 
 //entrypoint
@@ -171,10 +164,10 @@ void main() {
             vec3 lightTargetDir = normalize(lightTargetVec);
 
             float lightTypeScalar = 1.0f;
-            float caustics = 0.0f;
+            float lightRays = 0.0f;
 
             if (light.type == 0) { // Directional
-                caustics = voronoi2d(vec2(fragPosLightSpace.x + u_time * 0.03f, fragPosLightSpace.y * 5.0f + u_time * 0.1f) * 10.0f);
+                lightRays = Voronoi2D(vec2(fragPosLightSpace.x + u_time * 0.03f, fragPosLightSpace.y * 5.0f + u_time * 0.1f) * 10.0f);
                 lightDistance = max(dot(light.position - currentVolumetricPos, lightTargetDir), 0.0) / u_caustics_strength;
             } else if (light.type == 1) { // Point
                 lightTypeScalar = dot(lightDir, lightTargetDir);
@@ -184,7 +177,7 @@ void main() {
                 lightDistance = length(light.position - currentVolumetricPos);
             }
 
-            lightsContribution += (ComputeScattering(dot(volumetricNormRay, lightDir)) + ComputeScattering(caustics)) * light.color * //shadows
+            lightsContribution += (ComputeScattering(dot(volumetricNormRay, lightDir)) + ComputeScattering(lightRays)) * light.color * //shadows
             lightTypeScalar *  //light type (i.e. if it's a spotlight)
             2.0f / (light.attenuation.x + light.attenuation.y * lightDistance + light.attenuation.z * lightDistance * lightDistance); //attenuation
         }

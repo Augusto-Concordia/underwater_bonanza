@@ -10,6 +10,8 @@ Screen::Screen(GLsizei _width, GLsizei _height, GLuint _textureUnit, Shader::Mat
     screen_height = _height;
     screen_base_texture_unit = _textureUnit;
 
+    caustics_texture = Texture::Library::CreateSequenceTexture("assets/caustics");
+
     // quad vertices with their uvs
     vertices = {
         -1.0f, -1.0f, 0.0f,     0.0f, 0.0f,
@@ -117,11 +119,16 @@ void Screen::Bind() const {
 
     // clears the color & depth canvas to black
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // binds the caustics texture to be used
+    caustics_texture->UseSequence(GL_TEXTURE0 + screen_base_texture_unit + 3);
 }
 
 void Screen::Unbind() const {
     // unbinds the screen framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    caustics_texture->Clear();
 }
 
 void Screen::ResizeCallback(GLsizei _width, GLsizei _height) {
@@ -187,6 +194,10 @@ void Screen::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::vec3 &_
     glBindTexture(GL_TEXTURE_2D, scene_world_pos_texture);
     current_material->shader->SetTexture("u_scene_world_pos_texture", (GLint)screen_base_texture_unit + 2);
 
+    caustics_texture->UseSequence(GL_TEXTURE0 + screen_base_texture_unit + 3);
+
     // draw vertices according to their indices
     glDrawElements(_renderMode, indices.size(), GL_UNSIGNED_INT, nullptr);
+
+    caustics_texture->Clear();
 }

@@ -115,11 +115,15 @@ void VisualCube::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::vec
     current_material->shader->SetFloat("u_alpha", current_material->alpha);
     current_material->shader->SetInt("u_shininess", current_material->shininess);
 
-    // texture mapping & consumption
-    current_material->texture->Use(GL_TEXTURE1);
+    // object texture mapping & consumption
+    current_material->texture->UseSingle(GL_TEXTURE1);
     current_material->shader->SetFloatFast("u_texture_influence", current_material->texture_influence);
     current_material->shader->SetTexture("u_texture", 1);
     current_material->shader->SetVec2("u_texture_tiling", current_material->texture_tiling);
+
+    // caustics texture mapping & consumption
+    // texture should be enabled by the screen object at the GL_TEXTURE0 + 18 texture unit
+    current_material->shader->SetTexture("u_caustics_texture", 18);
 
     // line & point properties
     glLineWidth(current_material->line_thickness);

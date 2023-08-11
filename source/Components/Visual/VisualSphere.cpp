@@ -231,7 +231,7 @@ void VisualSphere::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::v
     current_material->shader->SetInt("u_shininess", current_material->shininess);
 
     // texture mapping & consumption
-    current_material->texture->Use(GL_TEXTURE1);
+    current_material->texture->UseSingle(GL_TEXTURE1);
     current_material->shader->SetFloatFast("u_texture_influence", current_material->texture_influence);
     current_material->shader->SetTexture("u_texture", 1);
     current_material->shader->SetVec2("u_texture_tiling", current_material->texture_tiling);

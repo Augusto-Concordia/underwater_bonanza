@@ -22,6 +22,8 @@ private:
     GLuint scene_world_pos_texture = 0;
     GLuint scene_depth_texture = 0;
 
+    std::shared_ptr<Texture> caustics_texture;
+
 public:
     explicit Screen(GLsizei _width, GLsizei _height, GLuint _textureUnit = 15, Shader::Material _material = Shader::Material());
 

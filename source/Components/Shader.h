@@ -49,7 +49,7 @@ public:
 
         std::shared_ptr<std::vector<Light>> lights = std::make_shared<std::vector<Light>>();
 
-        std::shared_ptr<Texture> texture = std::make_shared<Texture>(0, "", 0, 0, 0, 0);
+        std::shared_ptr<Texture> texture = std::make_shared<Texture>(0, 0, "", 0, 0, 0, 0);
         float texture_influence = 0.0f;
         glm::vec2 texture_tiling = glm::vec2(1.0f);
 

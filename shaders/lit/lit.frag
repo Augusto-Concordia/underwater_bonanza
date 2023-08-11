@@ -2,55 +2,6 @@
 
 #version 330 core
 
-//	Voronoi 3D Noise
-//	https://github.com/MaxBittker/glsl-voronoi-noise/blob/master/3d.glsl
-
-const mat2 myt = mat2(.92121212, .13131313, -.13131313, .82121212);
-const vec2 mys = vec2(1e4, 1e6);
-
-vec2 rhash(vec2 uv) {
-    uv *= myt;
-    uv *= mys;
-    return fract(fract(mys / uv) * uv);
-}
-
-vec3 hash(vec3 p) {
-    return fract(
-    sin(vec3(dot(p, vec3(1.0, 57.0, 113.0)), dot(p, vec3(57.0, 113.0, 1.0)),
-    dot(p, vec3(113.0, 1.0, 57.0)))) *
-    43758.5453);
-}
-
-vec3 voronoi3d(const in vec3 x) {
-    vec3 p = floor(x);
-    vec3 f = fract(x);
-
-    float id = 0.0;
-    vec2 res = vec2(100.0);
-    for (int k = -1; k <= 1; k++) {
-        for (int j = -1; j <= 1; j++) {
-            for (int i = -1; i <= 1; i++) {
-                vec3 b = vec3(float(i), float(j), float(k));
-                vec3 r = vec3(b) - f + hash(p + b);
-                float d = dot(r, r);
-
-                float cond = max(sign(res.x - d), 0.0);
-                float nCond = 1.0 - cond;
-
-                float cond2 = nCond * max(sign(res.y - d), 0.0);
-                float nCond2 = 1.0 - cond2;
-
-                id = (dot(p + b, vec3(1.0, 57.0, 113.0)) * cond) + (id * nCond);
-                res = vec2(d, res.x) * cond + res * nCond;
-
-                res.y = cond2 * d + nCond2 * res.y;
-            }
-        }
-    }
-
-    return vec3(sqrt(res), abs(id));
-}
-
 struct Light {
     vec3 position;
     vec3 target;
@@ -84,6 +35,9 @@ uniform float u_texture_influence = 0.5; //are textures enabled?
 
 uniform sampler2D u_texture; //object texture
 
+uniform int u_caustics_texture_count = 32; //number of caustics textures
+uniform sampler2DArray u_caustics_texture; //caustics texture
+
 in vec3 Normal; //normal of the fragment
 in vec3 WorldPos; //position of the fragment in world space
 in vec4 FragPosLightSpace[4]; //light space position of the fragment
@@ -93,107 +47,128 @@ layout(location = 0) out vec4 out_color; //rgba color output
 layout(location = 1) out vec4 camera_pos; //camera-space position output
 layout(location = 2) out vec4 world_pos; //world-space position output
 
-float Map(float value, float min1, float max1, float min2, float max2) {
-    return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
+float Map(float _value, float _min1, float _max1, float _min2, float _max2) {
+    return _min2 + (_value - _min1) * (_max2 - _min2) / (_max1 - _min1);
 }
 
-float CalculateShadowScalar(int index, vec4 fragPosLightSpace, float influence, vec3 norm, vec3 lightDir) {
+float CalculateShadowScalar(int _index, vec4 _fragPosLightSpace, float _influence, vec3 _norm, vec3 _lightDir) {
     //shadow calculation
-    vec3 projectedCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    vec3 projectedCoords = _fragPosLightSpace.xyz / _fragPosLightSpace.w;
     projectedCoords = projectedCoords * 0.5 + 0.5;
 
     // get closest depth value from light's perspective (using [0,1] range LightSpaceFragPos as coords)
-    float closestDepth = texture(u_light_depth_textures, vec3(projectedCoords.xy, index)).r;
+    float closestDepth = texture(u_light_depth_textures, vec3(projectedCoords.xy, _index)).r;
 
     // get current linear depth as stored in the depth buffer
     float currentDepth = projectedCoords.z;
 
-    return (currentDepth - max(0.000175 * (1.0 - dot(norm, lightDir)), 0.000025)) < closestDepth ? 1.0 : influence; //bias calculation comes from: https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
+    return (currentDepth - max(0.000175 * (1.0 - dot(_norm, _lightDir)), 0.000025)) < closestDepth ? 1.0 : _influence; //bias calculation comes from: https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
 }
 
-vec3 CalculateDirectionalLight(Light light, vec4 fragPosLightSpace, int index) {
+vec4 CalculateCaustics(sampler2DArray _causticsTexture, vec4 _frapPosLightSpace, int _textureCount, float _time) {
+    //caustics calculation
+    int discreteTime = int(_time);
+
+    //loops through all the layers in the caustics texture array, in a periodic fashion, according to the time
+
+    //if the time is even, the index goes up, otherwise it goes down
+    int nextCausticsIndexDirection = (int(discreteTime / _textureCount) % 2) == 0 ? 1 : -1;
+
+    //if the index goes up, it's the remainder of the time divided by the number of textures, otherwise it's the number of textures minus the remainder of the time divided by the number of textures
+    int currentCausticsIndex = nextCausticsIndexDirection == 1 ? (discreteTime % _textureCount) : (_textureCount - (discreteTime % _textureCount));
+    int nextCausticsIndex = currentCausticsIndex + nextCausticsIndexDirection;
+
+    vec4 currentCausticsFactor = texture(_causticsTexture, vec3(_frapPosLightSpace.x, _frapPosLightSpace.y, currentCausticsIndex));
+    vec4 nextCausticsFactor = texture(_causticsTexture, vec3(_frapPosLightSpace.x, _frapPosLightSpace.y, nextCausticsIndex));
+
+    //the mix ratio is the fractional part of the time, to make the transition between caustics textures smooth
+    float causticsMixRatio = fract(u_time);
+
+    return mix(currentCausticsFactor, nextCausticsFactor, causticsMixRatio);
+}
+
+vec3 CalculateDirectionalLight(Light _light, vec4 _fragPosLightSpace, int _index) {
     //diffuse lighting calculation
     vec3 norm = normalize(Normal);
-    vec3 lightTargetVec = light.position - light.target;
+    vec3 lightTargetVec = _light.position - _light.target;
     vec3 lightTargetDir = normalize(lightTargetVec); // this is used for lighting calculations, because it's a directional light, so the position of the light does not matter
-    float lightDistance = dot(light.position - WorldPos, lightTargetDir);
+    float lightDistance = dot(_light.position - WorldPos, lightTargetDir);
 
     float diffFactor = max(dot(norm, lightTargetDir), 0.0);
-    vec3 diffuse = diffFactor * light.diffuse_strength * light.color;
+    vec3 diffuse = diffFactor * _light.diffuse_strength * _light.color;
 
     //specular lighting calculation
     vec3 viewDir = normalize(u_cam_pos - WorldPos);
     vec3 reflectDir = normalize(reflect(-lightTargetDir, norm));
 
     float specularFactor = pow(max(dot(viewDir, reflectDir), 0.0), u_shininess);
-    vec3 specular = specularFactor * light.specular_strength * light.color;
+    vec3 specular = specularFactor * _light.specular_strength * _light.color;
 
     //shadow calculation
-    float shadowScalar = CalculateShadowScalar(index, fragPosLightSpace, light.shadows_influence, norm, lightTargetDir);
+    float shadowScalar = CalculateShadowScalar(_index, _fragPosLightSpace, _light.shadows_influence, norm, lightTargetDir);
 
     //caustics calculation
-    vec3 causticsFactor = voronoi3d(vec3(fragPosLightSpace.x, fragPosLightSpace.y, u_time * 0.04f) * 10.0f);
-    vec3 caustics = causticsFactor.z * (max(step((causticsFactor.x) * (causticsFactor.y), 0.4) - step((causticsFactor.x) * (causticsFactor.y), 0.38), 0.0)) * light.color;
+    vec3 caustics = CalculateCaustics(u_caustics_texture, _fragPosLightSpace * 0.5, u_caustics_texture_count, u_time).rgb * _light.color;
 
     vec3 colorResult = (caustics + diffuse + specular) * //lighting
     shadowScalar * //shadows
-    2.0 / (light.attenuation.x + light.attenuation.y * lightDistance + light.attenuation.z * lightDistance * lightDistance); //attenuation
+    2.0 / (_light.attenuation.x + _light.attenuation.y * lightDistance + _light.attenuation.z * lightDistance * lightDistance); //attenuation
 
     return colorResult;
 }
 
-vec3 CalculateSpotLight(Light light, vec4 fragPosLightSpace, int index) {
+vec3 CalculateSpotLight(Light _light, vec4 _fragPosLightSpace, int _index) {
     //diffuse lighting calculation
     vec3 norm = normalize(Normal);
-    vec3 lightTargetDir = normalize(light.position - light.target);
-    vec3 lightDir = normalize(light.position - WorldPos);
-    float lightDistance = length(light.position - WorldPos);
+    vec3 lightTargetDir = normalize(_light.position - _light.target);
+    vec3 lightDir = normalize(_light.position - WorldPos);
+    float lightDistance = length(_light.position - WorldPos);
 
     //spotlight calculation
     float theta = dot(lightDir, lightTargetDir);
 
     float diffFactor = max(dot(lightDir, norm), 0.0);
-    vec3 diffuse = diffFactor * light.color;
+    vec3 diffuse = diffFactor * _light.color;
 
     //specular lighting calculation
     vec3 viewDir = normalize(u_cam_pos - WorldPos);
     vec3 reflectDir = normalize(reflect(-lightDir, norm));
 
     float specularFactor = pow(max(dot(viewDir, reflectDir), 0.0), u_shininess);
-    vec3 specular = specularFactor * light.specular_strength * light.color;
+    vec3 specular = specularFactor * _light.specular_strength * _light.color;
 
     //shadow calculation
-    float shadowScalar = CalculateShadowScalar(index, fragPosLightSpace, light.shadows_influence, norm, lightDir);
+    float shadowScalar = CalculateShadowScalar(_index, _fragPosLightSpace, _light.shadows_influence, norm, lightDir);
 
-    vec3 colorResult = (diffuse + specular) * max(theta - light.spot_cutoff, 0.0) * //spotlight
+    vec3 colorResult = (diffuse + specular) * max(theta - _light.spot_cutoff, 0.0) * //spotlight
                             shadowScalar * //shadows
-                            2.0 / (light.attenuation.x + light.attenuation.y * lightDistance + light.attenuation.z * lightDistance * lightDistance); //attenuation
+                            2.0 / (_light.attenuation.x + _light.attenuation.y * lightDistance + _light.attenuation.z * lightDistance * lightDistance); //attenuation
 
     return colorResult;
 }
 
-vec3 CalculatePointLight(Light light, vec4 fragPosLightSpace, int index) {
+vec3 CalculatePointLight(Light _light, vec4 _fragPosLightSpace, int _index) {
     //diffuse lighting calculation
     vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(light.position - WorldPos);
-    float lightDistance = length(light.position - WorldPos);
+    vec3 lightDir = normalize(_light.position - WorldPos);
+    float lightDistance = length(_light.position - WorldPos);
 
     float diffFactor = max(dot(lightDir, norm), 0.0);
-    vec3 diffuse = diffFactor * light.color;
+    vec3 diffuse = diffFactor * _light.color;
 
     //specular lighting calculation
     vec3 viewDir = normalize(u_cam_pos - WorldPos);
     vec3 reflectDir = normalize(reflect(-lightDir, norm));
 
     float specularFactor = pow(max(dot(viewDir, reflectDir), 0.0), u_shininess);
-    vec3 specular = specularFactor * light.specular_strength * light.color;
+    vec3 specular = specularFactor * _light.specular_strength * _light.color;
 
     //shadow calculation
-    float shadowScalar = CalculateShadowScalar(index, fragPosLightSpace, light.shadows_influence, norm, lightDir);
+    float shadowScalar = CalculateShadowScalar(_index, _fragPosLightSpace, _light.shadows_influence, norm, lightDir);
 
     vec3 colorResult = (diffuse + specular) * //spotlight
     shadowScalar * //shadows
-    2.0 / (light.attenuation.x + light.attenuation.y * lightDistance + light.attenuation.z * lightDistance * lightDistance); //attenuation
+    2.0 / (_light.attenuation.x + _light.attenuation.y * lightDistance + _light.attenuation.z * lightDistance * lightDistance); //attenuation
 
     return colorResult;
 }
