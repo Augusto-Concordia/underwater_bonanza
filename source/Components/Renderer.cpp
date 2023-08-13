@@ -54,6 +54,17 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     };
 
     test_cube = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), test_material);
+//rock cube
+    Shader::Material rock_material = {
+            .shader = lit_shader,
+            .line_thickness = 3.0f,
+            .lights = lights,
+            .color = glm::vec3(0.0f, 0.0f, 1.0f),
+            //.texture = Texture::Library::CreateTexture("assets/clay_texture.jpg"),
+            //.texture_tiling = glm::vec2(2.0f)
+    };
+
+    rock_cube = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), rock_material);
 
     //grid
     Shader::Material grid_material = {
@@ -699,7 +710,14 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
 
         //todo: Draw shadow-caster elements HERE (i.e. the cubes below)
 
-        test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), first_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
+       // test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), first_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
+
+      //  test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), second_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
+
+       // DrawRock(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(0.0f), glm::vec3(10.0f), light.GetViewProjection(), light.GetPosition(), shadow_mapper_material.get());
+       // DrawRock2(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(0.0f), glm::vec3(10.0f), light.GetViewProjection(), light.GetPosition(), shadow_mapper_material.get());
+       // DrawRock3(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(0.0f), glm::vec3(10.0f), light.GetViewProjection(), light.GetPosition(), shadow_mapper_material.get());
+      DrawPebble(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(0.0f), glm::vec3(10.0f), light.GetViewProjection(), light.GetPosition(), shadow_mapper_material.get());
 
         test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), second_world_transform_matrix, current_time, GL_TRIANGLES, shadow_mapper_material.get());
 
@@ -733,7 +751,14 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         main_y_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
         main_z_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
 
-        test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), first_world_transform_matrix);
+       // test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), first_world_transform_matrix);
+
+       // test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), second_world_transform_matrix);
+
+       // DrawRock(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr);
+       // DrawRock2(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr);
+       // DrawRock3(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr);
+        DrawPebble(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr);
 
         test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), second_world_transform_matrix, current_time);
 
@@ -775,6 +800,385 @@ void Renderer::ResizeCallback(GLFWwindow* _window, int _displayWidth, int _displ
 
     main_camera->SetViewportSize((float)_displayWidth, (float)_displayHeight);
     main_screen->ResizeCallback(_displayWidth, _displayHeight);
+}
+void Renderer::DrawRock(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride)
+{
+    glm::mat4 world_transform_matrix = glm::mat4(1.0f);
+
+    world_transform_matrix = glm::translate(world_transform_matrix, _position);
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, _rotation);
+    world_transform_matrix = glm::scale(world_transform_matrix, _scale);
+
+    glm::mat4 secondary_transform_matrix = world_transform_matrix;
+
+    // rocks
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(5.0f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 0.50f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.20f, 0.25f, 1.0f));
+
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
+     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(5.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(-2.0f, 5.0f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 0.25f, 1.0f));
+
+     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(2.50f, 0.0f, 0.70f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(-5.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.0f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.20f, 1.0f, 1.0f));
+
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-4.50f, 0.70f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(6.0f, 4.0f, 0.5f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.20f, 0.25f, 1.0f));
+
+     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-3.50f, -1.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(10.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(6.0f, 2.0f, 3.5f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(6.0f, 2.0f, 3.5f));
+
+     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(3.50f, 2.0f, -0.80f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(-45.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(5.0f, 3.0f, 1.50f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.20f, 0.25f, 1.0f));
+
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(2.0f, 0.0f, 1.80f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(-75.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(5.0f, 1.0f, 1.50f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.20f, 0.25f, 1.0f));
+}
+
+void Renderer::DrawRock2(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride)
+{
+    glm::mat4 world_transform_matrix = glm::mat4(1.0f);
+
+    world_transform_matrix = glm::translate(world_transform_matrix, _position);
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, _rotation);
+    world_transform_matrix = glm::scale(world_transform_matrix, _scale);
+
+
+    glm::mat4 secondary_transform_matrix = world_transform_matrix;
+
+    // rocks (skin)
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.10f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 3.0f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 3.0f, 1.0f));
+
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 3.0f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 3.0f, 1.0f));
+
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 3.0f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 3.0f, 1.0f));
+
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.20f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 4.0f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 4.0f, 1.0f));
+
+     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.30f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 4.0f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 4.0f, 1.0f));
+
+    //second rock 
+
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.0f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.0f, 1.0f));
+
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.80f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 1.80f, 1.0f));
+
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.20f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.1f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.1f, 1.0f));
+
+     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.30f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.70f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 1.70f, 1.0f));
+
+
+    ////third rock 
+
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-3.0f, 0.0f, -2.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 1.0f, 1.0f));
+
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 1.0f, 1.0f));
+
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.20f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 1.0f, 1.0f));
+
+     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.30f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 1.0f, 1.0f));
+
+     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.50f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 1.0f, 1.0f));
+
+    ////
+    //fourth rock 
+
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(3.0f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 4.30f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 4.30f, 1.0f));
+
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 4.30f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 4.30f, 1.0f));
+
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.20f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 4.30f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 4.30f, 1.0f));
+
+     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.30f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 4.30f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 4.30f, 1.0f));
+
+    //fifth rock
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.30f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.30f, 1.0f));
+
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.30f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.30f, 1.0f));
+
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.20f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.30f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.30f, 1.0f));
+
+     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.30f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.30f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.30f, 1.0f));
+
+    //sixth rock 
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-2.0f, 0.0f, -1.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.30f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.30f, 1.0f));
+
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.30f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.30f, 1.0f));
+
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.20f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.30f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.30f, 1.0f));
+
+     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.30f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.30f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.30f, 1.0f));
+    
+}
+
+void Renderer::DrawRock3(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride)
+{
+    glm::mat4 world_transform_matrix = glm::mat4(1.0f);
+
+    world_transform_matrix = glm::translate(world_transform_matrix, _position);
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, _rotation);
+    world_transform_matrix = glm::scale(world_transform_matrix, _scale);
+
+
+    glm::mat4 secondary_transform_matrix = world_transform_matrix;
+
+    // rock base
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(5.0f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.5f, 1.50f, 1.50f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.5f, 1.50f, 1.50f));
+
+//second
+     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 20.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.5f, 1.50f, 6.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.5f, 1.50f, 6.0f));
+
+     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(1.50f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, -30.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.0f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.0f, 1.0f));
+
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.50f, 1.50f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, -30.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(3.0f, 2.0f, 6.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.0f, 1.0f));
+
+     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, -40.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.0f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.0f, 1.0f));
+
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 10.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.0f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.0f, 1.0f));
+
+ world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 20.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.0f, 1.0f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.0f, 1.0f));
+
+    // world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-1.50f, 0.0f, 0.0f));
+    // world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, -30.0f));
+    // world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.0f, 0.50f));
+    // rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    // world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.0f, 1.0f));
+
+   
+}
+void Renderer::DrawPebble(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride)
+{
+    glm::mat4 world_transform_matrix = glm::mat4(1.0f);
+
+    world_transform_matrix = glm::translate(world_transform_matrix, _position);
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, _rotation);
+    world_transform_matrix = glm::scale(world_transform_matrix, _scale);
+
+
+    glm::mat4 secondary_transform_matrix = world_transform_matrix;
+
+    // rock base
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(5.0f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.70f, 0.20f, 0.80f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
+
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, 0.50f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.60f, 0.90f, 0.70f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
+
+     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, 0.50f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.50f, 0.90f, 0.50f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
+
+     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(3.0f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.50f, 0.50f, 0.50f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
+
+     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-13.0f, 0.0f, 0.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.50f, 0.50f, 0.50f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
+
+ world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-3.0f, 0.0f, -2.0f));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.70f, 0.70f, 0.70f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f)); 
+
+    for (int i=0;i<6;i++){
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-3.0f+i, 0.0f, -2.0f+i));
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.70f, 0.70f, 0.70f));
+    rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f)); 
+
+    }
+
+//    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(1.70f, 0.0f, 0.0f));
+//     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
+//     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.70f, 1.0f, 0.80f));
+//     rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+//     world_transform_matrix = glm::scale(world_transform_matrix,glm::vec3(1.0f, 1.0f, 1.0f));
+
+//      world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-1.70f, 0.0f, 0.0f));
+//     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
+//     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.50f, 1.0f, 0.50f));
+//     rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+//     world_transform_matrix = glm::scale(world_transform_matrix,glm::vec3(1.0f, 1.0f, 1.0f));
+
+//      world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(4.0f, 0.0f, 0.0f));
+//     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
+//     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.70f, 0.40f, 0.80f));
+//     rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+//     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
+
+//     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-4.0f, 0.0f, 0.0f));
+//     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
+//     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.70f, 0.40f, 0.80f));
+//     rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+//     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
+
+    //world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(1.0f, 0.0f, 0.0f));
+    // world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 40.0f));
+    // world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.70f, 1.0f, 0.80f));
+    // rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    // world_transform_matrix = glm::scale(world_transform_matrix,glm::vec3(0.5f, 0.50f, 0.50f));
+
+    // world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 90.0f));
+    // world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.70f, 1.0f, 0.80f));
+    // rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+    // world_transform_matrix = glm::scale(world_transform_matrix,glm::vec3(0.5f, 0.50f, 0.50f));
+
 }
 
 void Renderer::SwitchScenes() {
