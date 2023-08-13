@@ -286,18 +286,18 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
 
         //DrawOneLeaf(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(10.0f), light.GetViewProjection(), light.GetPosition(), shadow_mapper_material.get());
 
-        DrawOneWeed(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
-        DrawOneWeed(glm::vec3(2.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
-        DrawOneWeed(glm::vec3(3.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
-        DrawOneWeed(glm::vec3(4.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
+        DrawOneWeed(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.2f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
+        DrawOneWeed(glm::vec3(2.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.2f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
+        DrawOneWeed(glm::vec3(3.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.2f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
+        DrawOneWeed(glm::vec3(4.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.2f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
 
         DrawOneWeed2(glm::vec3(1.0f,1.0f,4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
 
         DrawOneClam(glm::vec3(3.0f,1.0f,4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
 
-        DrawOneCoral(glm::vec3(6.0f,1.0f,4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
+        DrawOneCoral(glm::vec3(6.0f,1.0f,4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.2f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
     
-        DrawOneCoral2(glm::vec3(8.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
+        DrawOneCoral2(glm::vec3(8.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.2f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
 
     }
 
@@ -386,13 +386,6 @@ void Renderer::DrawOneWeed(const glm::vec3 &_position, const glm::vec3 &_rotatio
         stem_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
         world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor);
         //world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f, -bounce * rot_bounce, 0.0f));
-
-        //draw leaf block 
-
-        // world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f, bounce * rot_bounce, 0.0f));
-        // DrawOneLeaf(secondary_transform_matrix, _viewProjection, _eyePosition, _materialOverride);
-        // secondary_transform_matrix = world_transform_matrix;
-        // world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f, -bounce * rot_bounce, 0.0f));
 
         //bounce
         bounce += 1.0f;
