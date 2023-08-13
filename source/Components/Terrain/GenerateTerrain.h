@@ -32,13 +32,15 @@ private:
         static glm::vec3 CalculateNormal(glm::vec3 e1, glm::vec3 e2, glm::vec3 e3);
         static bool NormalPerpendicular(glm::vec3 n);
 
-        float DensityFunc(glm::vec3 point);
         [[nodiscard]] float GenerateRandomNumber(float minValue, float maxValue) const;
+        float DensityFunc(glm::vec3 point);
+
+        glm::vec3 barycentricCoordinates(glm::vec2 point, glm::vec3 A, glm::vec3 B, glm::vec3 C);
 
 public:
         GenerateTerrain(int grid_size, float iso_surface_level, glm::vec3 chunk_position, int seed, Shader::Material _material = Shader::Material()); // default constructor
 
-        std::vector<YAndNormal> FindMatchingYValues(float x, float y);
+        std::vector<YAndNormal> findMatchingYValues(float x, float y);
         void GenerateChunkTerrain();
         void SetupBuffers();
         void DrawChunk(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, const glm::mat4 &_transformMatrix, float _time = 0.0f, int _renderMode = GL_TRIANGLES, const Shader::Material *_material = nullptr);

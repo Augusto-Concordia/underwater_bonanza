@@ -366,16 +366,54 @@ float GenerateTerrain::DensityFunc(glm::vec3 point) {
     return density;
 }
 
-std::vector<YAndNormal> GenerateTerrain::FindMatchingYValues(float x, float z) {
-    std::vector<YAndNormal> matchingYValues;
-    for (auto & vertice : vertices) {
-        glm::vec3 pos = vertice.position;
-        float normal = vertice.normal.y;
+glm::vec3 GenerateTerrain::barycentricCoordinates(glm::vec2 point, glm::vec3 A, glm::vec3 B, glm::vec3 C) {
+    // using barycentric to get u,v,w
+    // if the values are negative means that point it not in triangle
+    /*    A
+        /   \
+       /   .P\
+      B ----- C
+    */
+    // subtriangles
+    glm::vec3 AB = B - A;
+    glm::vec3 AC = C - A;
+    glm::vec3 AP = (glm::vec3(point.x, 0, point.y) - A);
 
-        if (pos.x == x && pos.z == z) {
-            YAndNormal yAndNormal{};
-            yAndNormal.y = pos.y;
-            yAndNormal.normal = normal;
+    float dotABAB = glm::dot(AB, AB);
+    float dotABAC = glm::dot(AB, AC);
+    float dotACAC = glm::dot(AC, AC);
+    float dotAPAB = glm::dot(AP, AB);
+    float dotAPAC = glm::dot(AP, AC);
+    
+    float denominator = dotABAB * dotACAC - dotABAC * dotABAC; // should be area pf triangle
+
+    // coordinates
+    float u = (dotACAC * dotAPAB - dotABAC * dotAPAC) / denominator;
+    float v = (dotABAB * dotAPAC - dotABAC * dotAPAB) / denominator;
+    float w = 1.0f - u - v;
+
+    return glm::vec3(u, v, w);
+}
+
+std::vector<YAndNormal> GenerateTerrain::findMatchingYValues(float x, float z) {
+    std::vector<YAndNormal> matchingYValues;
+
+    for (int vertex = 0; vertex < vertices.size()/3 ; vertex += 3) {
+        glm::vec3 index1 = vertices[vertex].position;
+        glm::vec3 index2 = vertices[vertex+1].position;
+        glm::vec3 index3 = vertices[vertex+3].position;
+
+        glm::vec3 triangle_normal = glm::normalize(glm::cross(index2 - index1, index3 - index1));
+        glm::vec2 point = glm::vec2(x, z);
+        // https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/barycentric-coordinates.html
+        glm::vec3 barycentricCoords = barycentricCoordinates(point, index1, index2, index3);
+        // barycentric coordinates valid range [0, 1], outside of this range it is not in triangle
+        if (barycentricCoords.x >= 0.0f && barycentricCoords.x <= 1.0f && barycentricCoords.y >= 0.0f && barycentricCoords.y <= 1.0f && barycentricCoords.z >= 0.0f && barycentricCoords.z <= 1.0f) {
+            // get y
+            float y = barycentricCoords.x * index1.y + barycentricCoords.y * index2.y + barycentricCoords.z * index3.y;
+            YAndNormal yAndNormal;
+            yAndNormal.y = y;
+            yAndNormal.normal = triangle_normal.y;
             matchingYValues.push_back(yAndNormal);
         }
     }
