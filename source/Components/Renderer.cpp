@@ -131,6 +131,31 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
 
 
 
+    //coral stem
+    Shader::Material coral_material =  {
+            .shader = unlit_shader,
+            .line_thickness = 3.0f,
+            .lights = lights,
+            .color = glm::vec3(1.0f, 1.0f, 1.0f),
+    };
+    //for internal variation of color
+    coral_cube = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), coral_material);
+
+        Shader::Material coral_material_2 =  {
+            .shader = unlit_shader,
+            .line_thickness = 3.0f,
+            .lights = lights,
+            .color = glm::vec3(1.0f, 1.0f, 1.0f),
+    };
+
+    coral_cube_2 = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), coral_material_2);
+
+
+    coral_cube_3 = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), coral_material_2);
+
+
+
+
 
     //this is a quick way to make the axis lines avoid having depth fighting issues
     main_x_line = std::make_unique<VisualLine>(glm::vec3(0.01f), glm::vec3(5.01f, 0.01f, 0.01f), x_line_material);
@@ -269,6 +294,11 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         DrawOneWeed2(glm::vec3(1.0f,1.0f,4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
 
         DrawOneClam(glm::vec3(3.0f,1.0f,4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
+
+        DrawOneCoral(glm::vec3(6.0f,1.0f,4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
+    
+        DrawOneCoral2(glm::vec3(8.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
+
     }
 
     // unbinds the main screen, so that it can be used as a texture
@@ -711,6 +741,225 @@ void Renderer::DrawOneClam(const glm::vec3 &_position, const glm::vec3 &_rotatio
 
 
 }
+
+
+
+void Renderer::DrawOneCoral(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time){
+
+
+    glm::mat4 world_transform_matrix = glm::mat4(1.0f);
+
+    world_transform_matrix = glm::translate(world_transform_matrix, _position);
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, _rotation);
+    world_transform_matrix = glm::scale(world_transform_matrix, _scale);
+
+
+    float sin_offset = cos(time/60) * 2;
+
+    glm::mat4 secondary_transform_matrix = world_transform_matrix;
+
+    coral_cube_3->material.color = glm::vec3(1.0f, 0.7f, 0.0f); // colour --should be the darker one
+
+    coral_cube->material.color = glm::vec3(1.0f, 0.8f, 0.0f); // colour --should be the darker one
+    coral_cube_2->material.color = glm::vec3(1.0f, 1.0f, 0.0f); // colour for later gradient -- should be the lighter one
+    //lip_cube->material.color = glm::vec3(255.0f/255.0f, 255.0f/255.0f, 255.0f/255.0f); // colour
+
+
+   //special values 
+
+    float height = 3.0f;
+    float angle_side = 45.0f;
+    float angle_upward = 30.0f;
+    float bounce = 1.0f;
+    float nb_branches = 20.0f;
+
+    auto scale_factor = glm::vec3(0.1f, height/1.75, 0.1f);         // scale for pilar cube
+    auto scale_factor_tier2 = glm::vec3(0.1f, height/2, 0.1f);     // scale for one cube it the second hierachy
+    auto scale_factor_tier3 = glm::vec3(0.05f, height/2.25, 0.05f);     // scale for one cube it the second hierachy
+
+    float increment = height / nb_branches;
+    float circle = 360.0f / nb_branches;
+    float radius = 2.0f;
+    //reset position
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, -height/2, 0.0f));
+
+
+    for(int i =0; nb_branches*1.5 > i; i++ ){
+        //every branch will have 1+ tier 3 branches
+        
+        
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,360.0f/(nb_branches*1.5), 0.0f));
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(radius/1.25, height/4, 0.0f));
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,sin_offset, 35.0f));
+        world_transform_matrix = glm::scale(world_transform_matrix, scale_factor_tier3 );
+        coral_cube_2->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+        world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor_tier3);
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,-sin_offset, -35.0f));
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-radius/1.25, -height/4, 0.0f));
+
+    }
+
+    for(int i =0; nb_branches > i; i++ ){
+        //every branch will have 1+ tier 3 branches
+        
+        
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,circle, 0.0f));
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(radius/1.5, height/4, 0.0f));
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,0.0f, 35.0f));
+        world_transform_matrix = glm::scale(world_transform_matrix, scale_factor_tier2 );
+        coral_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+        world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor_tier2);
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,0.0f, -35.0f));
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-radius/1.5, -height/4, 0.0f));
+
+    }
+
+    for(int i =0; nb_branches > i; i++ ){
+        //every branch will have 1+ tier 3 branches
+        
+        
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,circle, 0.0f));
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(radius/2, height/4, 0.0f));
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,0.0f, 25.0f));
+        world_transform_matrix = glm::scale(world_transform_matrix, scale_factor_tier2 );
+        coral_cube_2->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+        world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor_tier2);
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,0.0f, -25.0f));
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-radius/2, -height/4, 0.0f));
+
+    }
+
+    
+
+    for(int i =0; nb_branches > i; i++ ){
+        //every branch will have 1+ tier 3 branches
+        
+        
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,circle, 0.0f));
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(radius/3, height/3, 0.0f));
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(sin_offset,0.0f, 15.0f));
+        world_transform_matrix = glm::scale(world_transform_matrix, scale_factor );
+        coral_cube_3->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+        world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor);
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(-sin_offset,0.0f, -15.0f));
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-radius/3, -height/3, 0.0f));
+
+    }
+
+
+}
+
+
+void Renderer::DrawOneCoral2(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time){
+
+
+    glm::mat4 world_transform_matrix = glm::mat4(1.0f);
+
+    world_transform_matrix = glm::translate(world_transform_matrix, _position);
+    world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, _rotation);
+    world_transform_matrix = glm::scale(world_transform_matrix, _scale);
+
+
+    float sin_offset = cos(time/30) * 2;
+
+    glm::mat4 secondary_transform_matrix = world_transform_matrix;
+
+    coral_cube_3->material.color = glm::vec3(1.0f, 0.7f, 0.0f); // colour --should be the darker one
+
+    coral_cube->material.color = glm::vec3(1.0f, 0.8f, 0.0f); // colour --should be the darker one
+    coral_cube_2->material.color = glm::vec3(1.0f, 1.0f, 0.0f); // colour for later gradient -- should be the lighter one
+    //lip_cube->material.color = glm::vec3(255.0f/255.0f, 255.0f/255.0f, 255.0f/255.0f); // colour
+
+
+   //special values 
+    float nb_branches = 5.0f;
+    float height = 3.0f;
+    float angle_side = 360.0f/nb_branches;
+    float angle_upward = 30.0f;
+    float bounce = 1.0f;
+    float angle_upward2 ;
+    
+
+    auto scale_factor = glm::vec3(0.1f, height, 0.1f);         // scale for pilar cube
+    auto scale_factor_tier2 = glm::vec3(0.1f, height/2, 0.1f);     // scale for one cube it the second hierachy
+    auto scale_factor_tier3 = glm::vec3(0.05f, height/4, 0.05f);     // scale for one cube it the second hierachy
+
+    float increment = height / nb_branches;
+    // float circle = 360.0f / nb_branches;
+    // float radius = 2.0f;
+    //reset position
+    //world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, -height/2, 0.0f));
+
+    //main pilar 
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, height/2, 0.0f));
+        world_transform_matrix = glm::scale(world_transform_matrix, scale_factor );
+        coral_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+        world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor);
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, -height/2, 0.0f));
+
+
+
+    for(int i =0; nb_branches-1 > i; i++ ){
+        //every branch will have 1+ tier 3 branches
+        
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, increment, 0.0f));
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,sin_offset/2, angle_upward));
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, height/4, 0.0f));
+        world_transform_matrix = glm::scale(world_transform_matrix, scale_factor_tier2 );
+        coral_cube_2->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+        world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor_tier2);
+
+        //make a tier 3 branch 
+
+        angle_upward2 = angle_upward + i*3;
+
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,sin_offset, angle_upward2));
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, height/8, 0.0f));
+        world_transform_matrix = glm::scale(world_transform_matrix, scale_factor_tier3 );
+        coral_cube_3->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+        world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor_tier3);
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, -height/8, 0.0f));
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,-sin_offset, -angle_upward2));
+
+        //return to pillar
+
+
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, -height/4, 0.0f));
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,-sin_offset/2, -angle_upward));
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,angle_side, 0.0f));
+
+    }
+
+    //last one is 1 down 
+    world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, -increment, 0.0f));
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,0.0f, angle_upward));
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, height/4, 0.0f));
+        world_transform_matrix = glm::scale(world_transform_matrix, scale_factor_tier2 );
+        coral_cube_2->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+        world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor_tier2);
+        //tier 3
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,0.0f, angle_upward2));
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, height/8, 0.0f));
+        world_transform_matrix = glm::scale(world_transform_matrix, scale_factor_tier3 );
+        coral_cube_3->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, GL_TRIANGLES, _materialOverride);
+        world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor_tier3);
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, -height/8, 0.0f));
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,0.0f, -angle_upward2));
+        //clear 
+        world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, -height/4, 0.0f));
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,0.0f, -angle_upward));
+        world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,angle_side, 0.0f));
+
+
+
+    
+
+
+}
+
+
+
+
 
 
 
