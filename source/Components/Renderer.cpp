@@ -20,6 +20,7 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     auto lit_shader = Shader::Library::CreateShader("shaders/lit/lit.vert", "shaders/lit/lit.frag");
     auto terrain_lit_shader = Shader::Library::CreateShader("shaders/terrain/lit.vert", "shaders/terrain/lit.frag");
     auto unlit_shader = Shader::Library::CreateShader("shaders/unlit/unlit.vert", "shaders/unlit/unlit.frag");
+    auto ocean_shader = Shader::Library::CreateShader("shaders/ocean/ocean.vert", "shaders/ocean/ocean.frag");
 
     auto screen_shader = Shader::Library::CreateShader("shaders/screen/screen.vert", "shaders/screen/screen.frag");
     auto shadow_mapper_shader = Shader::Library::CreateShader("shaders/shadows/shadow_mapper.vert", "shaders/shadows/shadow_mapper.frag");
@@ -80,7 +81,7 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     test_cube = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), test_material);
 
     // Define terrain parameters
-    int grid_size = 100;
+    int grid_size = 8;
     float iso_surface_level = 0.0f;
 
     std::random_device rd;
@@ -174,9 +175,21 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     };
 
     coral_cube_2 = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), coral_material_2);
-
-
     coral_cube_3 = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), coral_material_2);
+
+    //ocean
+    ocean_material =  std::make_unique<Shader::Material>();
+    ocean_material->shader = ocean_shader;
+    ocean_material->lights = lights;
+    ocean_material->line_thickness = 3.0f;
+    ocean_material->color = glm::vec3(0.0f, 0.0f, 1.0f);
+
+    //ocean flow map
+    ocean_flow_map = Texture::Library::CreateTexture("assets/textures/flowMap.png");
+    main_ocean = std::make_unique<VisualModel>("assets/models/ocean.obj", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), *ocean_material);
+
+    //skybox
+    main_skybox = Texture::Library::CreateCubemapTexture("assets/textures/skybox");
 }
 
 void Renderer::Init() {
@@ -224,6 +237,24 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
 
     // processes input
     InputCallback(_window, _deltaTime);
+
+    // resets the viewport to the window size
+    glViewport(0, 0, viewport_width, viewport_height);
+
+    // clears the color & depth canvas to black
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    main_skybox->UseCubemap(GL_TEXTURE1);
+    ocean_flow_map->UseSingle(GL_TEXTURE2);
+
+    ocean_material->shader->SetTexture("skybox", 1);
+    ocean_material->shader->SetTexture("oceanFlowMap", 2);
+
+    main_ocean->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), current_time, GL_TRIANGLES, ocean_material.get());
+
+    Texture::Clear();
+
+    return;
 
     //animation
     moving_angle = glfwGetTime() * 20.0f;

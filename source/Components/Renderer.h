@@ -8,8 +8,9 @@
 #include "Components/Visual/VisualLine.h"
 #include "Components/Visual/VisualCube.h"
 #include "Components/Visual/Leaf.h"
-#include "Screen.h"
 #include "Components/Terrain/GenerateTerrain.h"
+#include "Components/Visual/VisualModel.h"
+#include "Screen.h"
 
 class Renderer {
 private:
@@ -25,6 +26,11 @@ private:
 
     std::shared_ptr<std::vector<Light>> lights;
     std::unique_ptr<VisualCube> main_light_cube;
+
+    std::unique_ptr<VisualModel> main_ocean;
+    std::unique_ptr<Shader::Material> ocean_material;
+    std::shared_ptr<Texture> main_skybox;
+    std::shared_ptr<Texture> ocean_flow_map;
 
     std::unique_ptr<GenerateTerrain> main_terrain;
 
