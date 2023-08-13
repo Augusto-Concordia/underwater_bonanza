@@ -108,7 +108,7 @@ vec3 CalculateDirectionalLight(Light _light, vec4 _fragPosLightSpace, int _index
     float shadowScalar = CalculateShadowScalar(_index, _fragPosLightSpace, _light.shadows_influence, norm, lightTargetDir);
 
     //caustics calculation
-    vec3 caustics = CalculateCaustics(u_caustics_texture, _fragPosLightSpace * 0.5, u_caustics_texture_count, u_time).rgb * _light.color;
+    vec3 caustics = CalculateCaustics(u_caustics_texture, _fragPosLightSpace * 0.5, u_caustics_texture_count, u_time).rgb * _light.color * max(norm.y, 0.0);
 
     vec3 colorResult = (caustics + diffuse + specular) * //lighting
     shadowScalar * //shadows

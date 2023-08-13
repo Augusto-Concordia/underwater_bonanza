@@ -288,8 +288,8 @@ GenerateTerrain::GenerateTerrain(int grid_size, float iso_surface_level, glm::ve
 
 glm::vec3 GenerateTerrain::CalculateNormal(glm::vec3 e1, glm::vec3 e2, glm::vec3 e3) {
     // calculate edge vectors
-    glm::vec3 v1 = e2 - e1;
-    glm::vec3 v2 = e3 - e1;
+    glm::vec3 v1 = e3 - e1;
+    glm::vec3 v2 = e2 - e1;
     // calculate cross product (normal)
     glm::vec3 n =  glm::normalize(glm::cross(v1, v2));
     return n;
@@ -508,7 +508,7 @@ void GenerateTerrain::SetupBuffers() {
     glBindVertexArray(0); // Unbind to not modify the VAO
 }
 
-void GenerateTerrain::DrawChunk(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, const glm::mat4 &_transformMatrix, int _renderMode, const Shader::Material *_material) {
+void GenerateTerrain::DrawChunk(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, const glm::mat4 &_transformMatrix, float _time, int _renderMode, const Shader::Material *_material) {
     // bind the vertex array to draw
     glBindVertexArray(vertex_array_o);
 
@@ -526,7 +526,7 @@ void GenerateTerrain::DrawChunk(const glm::mat4 &_viewProjection, const glm::vec
     current_material->shader->SetVec3("u_cam_pos", _cameraPosition);
 
     // lights
-    current_material->shader->ApplyLightsToShader(current_material->lights);
+    current_material->shader->ApplyLightsToShader(current_material->lights, _time);
 
     // material properties
     current_material->shader->SetVec3("u_color", current_material->color);
@@ -534,7 +534,7 @@ void GenerateTerrain::DrawChunk(const glm::mat4 &_viewProjection, const glm::vec
     current_material->shader->SetInt("u_shininess", current_material->shininess);
 
     // texture mapping & consumption
-    current_material->texture->Use(GL_TEXTURE1);
+    current_material->texture->UseSingle(GL_TEXTURE1);
     current_material->shader->SetFloatFast("u_texture_influence", current_material->texture_influence);
     current_material->shader->SetTexture("u_texture", 1);
     current_material->shader->SetVec2("u_texture_tiling", current_material->texture_tiling);

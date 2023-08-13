@@ -41,7 +41,7 @@ public:
         std::vector<YAndNormal> FindMatchingYValues(float x, float y);
         void GenerateChunkTerrain();
         void SetupBuffers();
-        void DrawChunk(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, const glm::mat4 &_transformMatrix, int _renderMode = GL_TRIANGLES, const Shader::Material *_material = nullptr);
+        void DrawChunk(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, const glm::mat4 &_transformMatrix, float _time = 0.0f, int _renderMode = GL_TRIANGLES, const Shader::Material *_material = nullptr);
 
         std::vector<Vertex> GetVertices();
         [[nodiscard]] int GetGridSize() const;
