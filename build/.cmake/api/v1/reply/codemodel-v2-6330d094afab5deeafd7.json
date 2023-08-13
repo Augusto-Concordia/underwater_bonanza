@@ -1,0 +1,211 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						2
+					]
+				},
+				{
+					"build" : "vendor",
+					"childIndexes" : 
+					[
+						2,
+						4
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-vendor-Debug-650fd368ad88650ee272.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "vendor",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"build" : "vendor/glm",
+					"childIndexes" : 
+					[
+						3
+					],
+					"jsonFile" : "directory-vendor.glm-Debug-706d9b07bfa77b120e5d.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.2"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 1,
+					"source" : "vendor/glm",
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"build" : "vendor/glm/glm",
+					"jsonFile" : "directory-vendor.glm.glm-Debug-eda9303c7ab069be96a8.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.2"
+					},
+					"parentIndex" : 2,
+					"projectIndex" : 1,
+					"source" : "vendor/glm/glm"
+				},
+				{
+					"build" : "vendor/glfw",
+					"childIndexes" : 
+					[
+						5
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-vendor.glfw-Debug-6af6113b048677c6a5ed.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.4"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 2,
+					"source" : "vendor/glfw"
+				},
+				{
+					"build" : "vendor/glfw/src",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-vendor.glfw.src-Debug-076f5213d25e07c99fb0.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.4"
+					},
+					"parentIndex" : 4,
+					"projectIndex" : 2,
+					"source" : "vendor/glfw/src",
+					"targetIndexes" : 
+					[
+						1,
+						4
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"directoryIndexes" : 
+					[
+						0,
+						1
+					],
+					"name" : "underwater_bonanza",
+					"targetIndexes" : 
+					[
+						0,
+						2
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2,
+						3
+					],
+					"name" : "glm",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						4,
+						5
+					],
+					"name" : "GLFW",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1,
+						4
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 1,
+					"id" : "glad::@af9395fb4c239a7adf53",
+					"jsonFile" : "target-glad-Debug-6077d11b4086b409ebea.json",
+					"name" : "glad",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "glfw::@31bd9730e6b8c71cc656",
+					"jsonFile" : "target-glfw-Debug-8ad056d1c1be9e82073f.json",
+					"name" : "glfw",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "underwater_bonanza::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-underwater_bonanza-Debug-6cd0cdcdcb7c144a9fbb.json",
+					"name" : "underwater_bonanza",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "uninstall::@1771e774e4950c903856",
+					"jsonFile" : "target-uninstall-Debug-f65a88ef08d5472804df.json",
+					"name" : "uninstall",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "update_mappings::@31bd9730e6b8c71cc656",
+					"jsonFile" : "target-update_mappings-Debug-080138f546c5fcd858b6.json",
+					"name" : "update_mappings",
+					"projectIndex" : 2
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/Users/noorhammodi/underwater_bonanza/build",
+		"source" : "/Users/noorhammodi/underwater_bonanza"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 5
+	}
+}
