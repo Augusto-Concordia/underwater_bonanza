@@ -25,7 +25,7 @@ uniform float u_time; //time
 uniform vec3 u_cam_pos; //camera position
 uniform vec3 u_cam_target; //camera target
 
-uniform Light u_lights[4]; //lights array
+uniform Light u_lights[1]; //lights array
 
 uniform float u_caustics_strength = 2.0f; //caustics strength
 
