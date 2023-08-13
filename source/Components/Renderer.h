@@ -8,6 +8,7 @@
 #include "Components/Visual/VisualLine.h"
 #include "Components/Visual/VisualCube.h"
 #include "Screen.h"
+#include "Components/Terrain/GenerateTerrain.h"
 
 class Renderer {
 private:
@@ -23,6 +24,8 @@ private:
 
     std::shared_ptr<std::vector<Light>> lights;
     std::unique_ptr<VisualCube> main_light_cube;
+
+    std::unique_ptr<GenerateTerrain> main_terrain;
 
     std::unique_ptr<VisualCube> test_cube;
 

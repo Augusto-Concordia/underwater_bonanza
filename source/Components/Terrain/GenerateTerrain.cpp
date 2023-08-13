@@ -261,7 +261,7 @@ int triangulationTable[256][16] =
     {0, 3, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1} };
 
-int edgeIndexTable[12][2] = 
+int edgeIndexTable[12][2] =
 { {0, 1}, // vertex index for edge 0
     {1, 2},
     {2, 3},
@@ -276,17 +276,17 @@ int edgeIndexTable[12][2] =
     {7, 3} };
 
 
-GenerateTerrain::GenerateTerrain(int grid_size, float iso_surface_level, glm::vec3 chunk_position, int seed, int shaderProgram) {
-    GenerateTerrain::grid_size = grid_size;
-    GenerateTerrain::iso_surface_level = iso_surface_level; 
-    GenerateTerrain::chunk_position = chunk_position; 
+GenerateTerrain::GenerateTerrain(int grid_size, float iso_surface_level, glm::vec3 chunk_position, int seed, Shader::Material _material) {
+    this->grid_size = grid_size;
+    this->iso_surface_level = iso_surface_level;
+    this->chunk_position = chunk_position;
 
-    GenerateTerrain::shaderProgram = shaderProgram;
+    this->material = _material;
 
-    GenerateTerrain::seed = seed;
+    this->seed = seed;
 } 
 
-glm::vec3 GenerateTerrain::calculateNormal(glm::vec3 e1, glm::vec3 e2, glm::vec3 e3) {
+glm::vec3 GenerateTerrain::CalculateNormal(glm::vec3 e1, glm::vec3 e2, glm::vec3 e3) {
     // calculate edge vectors
     glm::vec3 v1 = e2 - e1;
     glm::vec3 v2 = e3 - e1;
@@ -295,7 +295,7 @@ glm::vec3 GenerateTerrain::calculateNormal(glm::vec3 e1, glm::vec3 e2, glm::vec3
     return n;
 }
 
-bool GenerateTerrain::normalPerpendicular(glm::vec3 n) {
+bool GenerateTerrain::NormalPerpendicular(glm::vec3 n) {
     // assume n is already normalizex
     // calculate the dot product between the normal and x-axis unit vector
     float dot_product = glm::dot(n, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -306,13 +306,13 @@ bool GenerateTerrain::normalPerpendicular(glm::vec3 n) {
     else { return false; }
 }
 
-float GenerateTerrain::generateRandomNumber(float minValue, float maxValue) {
+float GenerateTerrain::GenerateRandomNumber(float minValue, float maxValue) const {
     srand(seed);
     float randomValue = static_cast<float>(rand()) / RAND_MAX;
     return minValue + randomValue * (maxValue - minValue);
 }
 
-float GenerateTerrain::densityFunc(glm::vec3 point) {
+float GenerateTerrain::DensityFunc(glm::vec3 point) {
     point = point * 0.20f; // make it less condensed 
     glm::vec3 adjustedPoint = point + glm::vec3(seed, 0.0f, seed);
 
@@ -332,11 +332,11 @@ float GenerateTerrain::densityFunc(glm::vec3 point) {
     float flatAreaEnd = 5.0f;
 
     float perturbFactor = 0.5f; // Adjust the amount of perturbation
-    frequency += perturbFactor * generateRandomNumber(0.0f, 0.5f); // lowest is 0 because we dont want ngeative frequency
-    hillHeight += perturbFactor  * generateRandomNumber(-4.0f, 5.0f);
-    caveStrength += perturbFactor * generateRandomNumber(-1.0f, 2.0f);
-    shelfHeight += perturbFactor * generateRandomNumber(-1.5f, 2.5f);
-    overhangStrength += perturbFactor * generateRandomNumber(-4.0f, 5.0f);
+    frequency += perturbFactor * GenerateRandomNumber(0.0f, 0.5f); // lowest is 0 because we dont want ngeative frequency
+    hillHeight += perturbFactor * GenerateRandomNumber(-4.0f, 5.0f);
+    caveStrength += perturbFactor * GenerateRandomNumber(-1.0f, 2.0f);
+    shelfHeight += perturbFactor * GenerateRandomNumber(-1.5f, 2.5f);
+    overhangStrength += perturbFactor * GenerateRandomNumber(-4.0f, 5.0f);
 
     // flat floor
     float flatFloor = adjustedPoint.y - flatFloorLevel;
@@ -366,14 +366,14 @@ float GenerateTerrain::densityFunc(glm::vec3 point) {
     return density;
 }
 
-std::vector<YAndNormal> GenerateTerrain::findMatchingYValues(float x, float z) {
+std::vector<YAndNormal> GenerateTerrain::FindMatchingYValues(float x, float z) {
     std::vector<YAndNormal> matchingYValues;
-    for (int vertex = 0; vertex < vertices.size(); ++vertex) {
-        glm::vec3 pos = vertices[vertex].position;
-        float normal = vertices[vertex].normal.y;
+    for (auto & vertice : vertices) {
+        glm::vec3 pos = vertice.position;
+        float normal = vertice.normal.y;
 
         if (pos.x == x && pos.z == z) {
-            YAndNormal yAndNormal;
+            YAndNormal yAndNormal{};
             yAndNormal.y = pos.y;
             yAndNormal.normal = normal;
             matchingYValues.push_back(yAndNormal);
@@ -382,7 +382,7 @@ std::vector<YAndNormal> GenerateTerrain::findMatchingYValues(float x, float z) {
     return matchingYValues;
 }
 
-void GenerateTerrain::generateChunkTerrain() {
+void GenerateTerrain::GenerateChunkTerrain() {
     // grid_size x grid_size x grid_size even cube assumption
     for (int x = 0; x < grid_size; x++) {
         for (int y = 0; y < grid_size; y++) {
@@ -410,7 +410,7 @@ void GenerateTerrain::generateChunkTerrain() {
                 int cube_config = 0;
                 for (int i = 0; i < 8; i++) {
                     // it is inside the surface
-                    if (densityFunc(voxel_corners[i]) < iso_surface_level)
+                    if (DensityFunc(voxel_corners[i]) < iso_surface_level)
                         cube_config |= (1 << i); // bit at position 0 represents voxel corner 0
                 }
 
@@ -452,25 +452,22 @@ void GenerateTerrain::generateChunkTerrain() {
                     glm::vec3 mid_ver_3 = glm::vec3((voxel_corners[edge3_point_a].x + voxel_corners[edge3_point_b].x)/2.0f, (voxel_corners[edge3_point_a].y + voxel_corners[edge3_point_b].y)/2.0f, (voxel_corners[edge3_point_a].z + voxel_corners[edge3_point_b].z)/2.0f);
 
                     // normals
-                    glm::vec3 n = calculateNormal(mid_ver_1, mid_ver_2, mid_ver_3);
+                    glm::vec3 n = CalculateNormal(mid_ver_1, mid_ver_2, mid_ver_3);
 
                     // add to postion,normal,texture of vertex info
-                    Vertex vertex_info1;
+                    Vertex vertex_info1{};
                     vertex_info1.position = mid_ver_1;
                     vertex_info1.normal = n;
-                    vertex_info1.textureCoord = glm::vec2(1.0f, 1.0f);
                     vertices.push_back(vertex_info1);
 
-                    Vertex vertex_info2;
+                    Vertex vertex_info2{};
                     vertex_info2.position = mid_ver_2;
                     vertex_info2.normal = n;
-                    vertex_info2.textureCoord = glm::vec2(0.0f, 1.0f);
                     vertices.push_back(vertex_info2);
 
-                    Vertex vertex_info3;
+                    Vertex vertex_info3{};
                     vertex_info3.position = mid_ver_3;
                     vertex_info3.normal = n;
-                    vertex_info3.textureCoord = glm::vec2(0.0f, 0.0f);
                     vertices.push_back(vertex_info3);
                 }
             }
@@ -478,13 +475,13 @@ void GenerateTerrain::generateChunkTerrain() {
     }
 }
 
-void GenerateTerrain::setupBuffers() {
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
+void GenerateTerrain::SetupBuffers() {
+    glGenVertexArrays(1, &vertex_array_o);
+    glBindVertexArray(vertex_array_o);
     
     // vertex buffer object
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glGenBuffers(1, &vertex_buffer_o);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_o);
     glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
     // vertices (positions)
@@ -507,47 +504,68 @@ void GenerateTerrain::setupBuffers() {
                         );
     glEnableVertexAttribArray(1);
 
-    // textures
-    glVertexAttribPointer(2,                            // attribute 2 matches aTex in vertex shader
-                        2,                              // size
-                        GL_FLOAT,                       // type
-                        GL_FALSE,                       // normalized?
-                        sizeof(Vertex),          // stride - each vertex contains 2 vec3 (normal and position)
-                        (void*)offsetof(Vertex, textureCoord)   // array buffer offset
-                        );
-    glEnableVertexAttribArray(2);
-
     glBindBuffer(GL_ARRAY_BUFFER, 0); // VAO already stored the state we just defined, safe to unbind buffer
     glBindVertexArray(0); // Unbind to not modify the VAO
 }
 
-void GenerateTerrain::drawChunk() {
-    //model
-    glm::mat4 model = glm::mat4(1.0f);
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
-    // marching cubes
-    glBindVertexArray(VAO);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-    glBindVertexArray(0);
+void GenerateTerrain::DrawChunk(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, const glm::mat4 &_transformMatrix, int _renderMode, const Shader::Material *_material) {
+    // bind the vertex array to draw
+    glBindVertexArray(vertex_array_o);
+
+    const Shader::Material *current_material = &material;
+
+    // set the material to use on this frame
+    if (_material != nullptr)
+        current_material = _material;
+
+    current_material->shader->Use();
+    current_material->shader->SetModelMatrix(_transformMatrix);
+    current_material->shader->SetViewProjectionMatrix(_viewProjection);
+
+    // camera properties
+    current_material->shader->SetVec3("u_cam_pos", _cameraPosition);
+
+    // lights
+    current_material->shader->ApplyLightsToShader(current_material->lights);
+
+    // material properties
+    current_material->shader->SetVec3("u_color", current_material->color);
+    current_material->shader->SetFloat("u_alpha", current_material->alpha);
+    current_material->shader->SetInt("u_shininess", current_material->shininess);
+
+    // texture mapping & consumption
+    current_material->texture->Use(GL_TEXTURE1);
+    current_material->shader->SetFloatFast("u_texture_influence", current_material->texture_influence);
+    current_material->shader->SetTexture("u_texture", 1);
+    current_material->shader->SetVec2("u_texture_tiling", current_material->texture_tiling);
+
+    // line & point properties
+    glLineWidth(current_material->line_thickness);
+    glPointSize(current_material->point_size);
+
+    // draw vertices according to their indices
+    glDrawArrays(_renderMode, 0, vertices.size());
+
+    // clear the current texture
+    current_material->texture->Clear();
 }
 
-std::vector<Vertex> GenerateTerrain::getVertices() {
+std::vector<Vertex> GenerateTerrain::GetVertices() {
     return GenerateTerrain::vertices;
 }
 
-int GenerateTerrain::getGridSize() {
-    return GenerateTerrain::grid_size;
+int GenerateTerrain::GetGridSize() const {
+    return this->grid_size;
 }
 
-void GenerateTerrain::setGridSize(int grid_size) {
-    GenerateTerrain::grid_size = grid_size;
+void GenerateTerrain::SetGridSize(int grid_size) {
+    this->grid_size = grid_size;
 }
 
-float GenerateTerrain::getIsoSL() {
-    return GenerateTerrain::iso_surface_level;
+float GenerateTerrain::GetIsoSL() const {
+    return this->iso_surface_level;
 }
 
-void GenerateTerrain::setIsoSL(float surface_level) {
-    GenerateTerrain::iso_surface_level = surface_level;
+void GenerateTerrain::SetIsoSl(float surface_level) {
+    this->iso_surface_level = surface_level;
 }

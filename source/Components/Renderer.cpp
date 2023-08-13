@@ -1,3 +1,4 @@
+#include <random>
 #include "Renderer.h"
 #include "Utility/Input.hpp"
 #include "Utility/Graphics.hpp"
@@ -76,6 +77,28 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     main_x_line = std::make_unique<VisualLine>(glm::vec3(0.01f), glm::vec3(5.01f, 0.01f, 0.01f), x_line_material);
     main_y_line = std::make_unique<VisualLine>(glm::vec3(0.01f), glm::vec3(0.01f, 5.01f, 0.01f), y_line_material);
     main_z_line = std::make_unique<VisualLine>(glm::vec3(0.01f), glm::vec3(0.01f, 0.01f, 5.01f), z_line_material);
+
+    // Define terrain parameters
+    int grid_size = 32;
+    float iso_surface_level = 0.0f;
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> distribution(1, 1000);
+    int seed = distribution(gen);
+
+    // FOR GETTING XZ RELATED Y WE CAN JUST HAVE SMALL CHUNKS , CHECK WHAT CHUNK WERE IN AND LOOP THROUGH VERTICES OF THAT CHUNK
+
+    Shader::Material terrain_material = {
+            .shader = lit_shader,
+            .color = glm::vec3(1.0f),
+            .lights = lights
+    };
+
+    // Create the terrain generator
+    main_terrain = std::make_unique<GenerateTerrain>(grid_size, iso_surface_level, glm::vec3(0.0f,0.0f,0.0f), seed, terrain_material);
+    main_terrain->GenerateChunkTerrain();
+    main_terrain->SetupBuffers();
 }
 
 void Renderer::Init() {
@@ -151,9 +174,11 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
 
         //todo: Draw shadow-caster elements HERE (i.e. the cubes below)
 
-        test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), first_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
+        //test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), first_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
 
-        test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), second_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
+        //test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), second_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
+
+        main_terrain->DrawChunk(light.GetViewProjection(), light.GetPosition(), glm::mat4(1.0f), GL_TRIANGLES, shadow_mapper_material.get());
     }
 
     // COLOR PASS
@@ -182,9 +207,11 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         main_y_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
         main_z_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
 
-        test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), first_world_transform_matrix);
+        //test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), first_world_transform_matrix);
 
-        test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), second_world_transform_matrix);
+        //test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), second_world_transform_matrix);
+
+        main_terrain->DrawChunk(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::mat4(1.0f));
     }
 
     // unbinds the main screen, so that it can be used as a texture
