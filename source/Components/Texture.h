@@ -2,6 +2,7 @@
 
 #include <unordered_map>
 #include <memory>
+#include <vector>
 #include "glad/glad.h"
 
 class Texture {
@@ -14,20 +15,26 @@ public:
         Library();
 
         static std::shared_ptr<Texture> CreateTexture(const std::string& _fileLocation);
+        static std::shared_ptr<Texture> CreateSequenceTexture(const std::string &_fileLocation);
 
     private:
         static Texture LoadTexture(const std::string &_fileLocation);
+        static Texture LoadSequenceTexture(const std::string &_folderLocation);
     };
 
 private:
     GLuint texture_id = 0;
-    std::string file_location = "";
+    GLsizei texture_count = 0;
+
+    std::string file_location;
 
     int width = 0, height = 0, bit_depth = 0, channels = 0;
 
 public:
-    explicit Texture(GLuint _textureId, const std::string& _fileLocation, int _width, int _height, int _bitDepth, int _channels);
+    explicit Texture(const GLuint _textureId, GLsizei _textureCount, const std::string& _folderLocation, int _width, int _height, int _bitDepth, int _channels);
 
-    void Use(unsigned int _textureUnit) const;
+    void UseSingle(GLuint _textureUnit) const;
+    void UseSequence(GLuint _textureUnit) const;
+
     static void Clear();
 };

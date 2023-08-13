@@ -22,6 +22,6 @@ public:
     glm::vec3 computeFaceNormals(glm::vec3 v);
     glm::vec2 computeVertexTexture(glm::vec3 v);
 
-    void Draw(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, int _renderMode = GL_TRIANGLES, const Shader::Material *_material = nullptr) override;
-    void DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, const glm::mat4 &_transformMatrix, int _renderMode = GL_TRIANGLES, const Shader::Material *_material = nullptr) override;
+    void Draw(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, float _time = 0.0f, int _renderMode = GL_TRIANGLES, const Shader::Material *_material = nullptr) override;
+    void DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, const glm::mat4 &_transformMatrix, float _time = 0.0f, int _renderMode = GL_TRIANGLES, const Shader::Material *_material = nullptr) override;
 };

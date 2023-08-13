@@ -18,8 +18,11 @@ private:
     GLuint screen_base_texture_unit = 0;
 
     GLuint scene_color_texture = 0;
-    GLuint scene_true_depth_texture = 0;
+    GLuint scene_camera_pos_texture = 0;
+    GLuint scene_world_pos_texture = 0;
     GLuint scene_depth_texture = 0;
+
+    std::shared_ptr<Texture> caustics_texture;
 
 public:
     explicit Screen(GLsizei _width, GLsizei _height, GLuint _textureUnit = 15, Shader::Material _material = Shader::Material());
@@ -30,6 +33,6 @@ public:
 
     void ResizeCallback(GLsizei _width, GLsizei _height);
 
-    void Draw(const glm::mat4 &_viewProjection = glm::mat4(1.0f), const glm::vec3 &_cameraPosition = glm::vec3(0.0f), int _renderMode = GL_TRIANGLES, const Shader::Material *_material = nullptr) override;
-    void DrawFromMatrix(const glm::mat4 &_viewProjection = glm::mat4(1.0f), const glm::vec3 &_cameraPosition = glm::vec3(0.0f), const glm::mat4 &_transformMatrix = glm::mat4(1.0f), int _renderMode = GL_TRIANGLES, const Shader::Material *_material = nullptr) override;
+    void Draw(const glm::mat4 &_viewProjection = glm::mat4(1.0f), const glm::vec3 &_cameraPosition = glm::vec3(0.0f),  float _time = 0.0f, int _renderMode = GL_TRIANGLES, const Shader::Material *_material = nullptr) override;
+    void DrawFromMatrix(const glm::mat4 &_viewProjection = glm::mat4(1.0f), const glm::vec3 &_cameraPosition = glm::vec3(0.0f), const glm::mat4 &_transformMatrix = glm::mat4(1.0f),  float _time = 0.0f, int _renderMode = GL_TRIANGLES, const Shader::Material *_material = nullptr) override;
 };

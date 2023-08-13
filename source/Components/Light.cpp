@@ -1,15 +1,14 @@
 #include "Light.h"
 #include "Utility/Transform.hpp"
 
-Light::Light(glm::vec3 _position, glm::vec3 _color, float _ambientStrength, float _specularStrength, float _range, float _cutoff, Type _type) {
+Light::Light(glm::vec3 _position, glm::vec3 _color, float _ambientStrength, float _diffuseStrength, float _specularStrength, Type _type) {
     position = _position;
     target = glm::vec3(0.0f);
     color = _color;
     ambient_strength = _ambientStrength;
+    diffuse_strength = _diffuseStrength;
     specular_strength = _specularStrength;
     type = _type;
-    range = _range;
-    cutoff = _cutoff;
 
     UpdateView();
     UpdateProjection();
@@ -46,7 +45,7 @@ glm::vec3 Light::GetColor() const {
     return color;
 }
 
-glm::vec3 Light::GetSpotlightDirection() const {
+glm::vec3 Light::GetLightDirection() const {
     return light_forward;
 }
 
@@ -67,7 +66,14 @@ void Light::UpdateView() {
 }
 
 void Light::UpdateProjection() {
-    projection_matrix = glm::perspective(glm::radians(Light::FOV), (float)Light::LIGHTMAP_SIZE / (float)Light::LIGHTMAP_SIZE, Light::NEAR_PLANE, Light::FAR_PLANE);
+    switch (type) {
+        case Light::Type::POINT:
+        case Light::Type::SPOT:
+            projection_matrix = glm::perspective(glm::radians(Light::FOV), (float)Light::LIGHTMAP_SIZE / (float)Light::LIGHTMAP_SIZE, Light::NEAR_PLANE, Light::FAR_PLANE);
+            break;
+        case Light::Type::DIRECTIONAL:
+            projection_matrix = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, Light::NEAR_PLANE, Light::FAR_PLANE);
+    }
 }
 
 void Light::UpdateAttenuation() {

@@ -47,7 +47,7 @@ public:
 
     inline constexpr static float FOV = 75.0f;
     inline constexpr static float NEAR_PLANE = 0.1f;
-    inline constexpr static float FAR_PLANE = 400.0f;
+    inline constexpr static float FAR_PLANE = 500.0f;
 
 public:
     Camera();

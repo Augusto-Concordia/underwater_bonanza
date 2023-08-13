@@ -10,15 +10,13 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     main_camera = std::make_unique<Camera>(glm::vec3(8.0f, 8.0f, 8.0f), glm::vec3(0.0f), _initialWidth, _initialHeight);
 
     lights = std::make_shared<std::vector<Light>>();
-    lights->emplace_back(glm::vec3(2.0f, 14.0f, 2.0f), glm::vec3(0.99f, 0.95f, 0.78f), 0.1f, 0.4f, 50.0f, 50.0f, Light::Type::POINT);
-    lights->emplace_back(glm::vec3(30.0f, 10.0f, 0.0f), glm::vec3(0.09f, 0.95f, 0.08f), 0.2f, 0.4f, 300.0f, 50.0f, Light::Type::SPOT);
-    lights->emplace_back(glm::vec3(-30.0f, 10.0f, 0.0f), glm::vec3(0.99f, 0.05f, 0.08f), 0.2f, 0.4f, 300.0f, 50.0f, Light::Type::SPOT);
-    lights->emplace_back(glm::vec3(0.0f, 34.0f, 36.0f), glm::vec3(0.09f, 0.05f, 0.78f), 0.2f, 0.4f, 400.0f, 40.0f, Light::Type::SPOT);
+    lights->emplace_back(glm::vec3(2.0f, 10.0f, 2.0f), glm::vec3(0.99f, 0.95f, 0.78f), 0.1f, 0.2f, 0.4f, Light::Type::DIRECTIONAL);
+    lights->emplace_back(glm::vec3(30.0f, 10.0f, 0.0f), glm::vec3(0.09f, 0.95f, 0.08f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
+    lights->emplace_back(glm::vec3(-30.0f, 10.0f, 0.0f), glm::vec3(0.99f, 0.05f, 0.08f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
+    lights->emplace_back(glm::vec3(0.0f, 34.0f, 36.0f), glm::vec3(0.09f, 0.05f, 0.78f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
 
-    auto grid_shader = Shader::Library::CreateShader("shaders/grid/grid.vert", "shaders/grid/grid.frag");
     auto lit_shader = Shader::Library::CreateShader("shaders/lit/lit.vert", "shaders/lit/lit.frag");
     auto unlit_shader = Shader::Library::CreateShader("shaders/unlit/unlit.vert", "shaders/unlit/unlit.frag");
-    auto line_shader = Shader::Library::CreateShader("shaders/line/line.vert", "shaders/line/line.frag");
 
     auto screen_shader = Shader::Library::CreateShader("shaders/screen/screen.vert", "shaders/screen/screen.frag");
     auto shadow_mapper_shader = Shader::Library::CreateShader("shaders/shadows/shadow_mapper.vert", "shaders/shadows/shadow_mapper.frag");
@@ -28,6 +26,7 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
 
     Shader::Material screen_material = {
             .shader = screen_shader,
+            .lights = lights
     };
     main_screen = std::make_unique<Screen>(viewport_width, viewport_height, 15, screen_material);
 
@@ -37,37 +36,28 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     };
     main_light_cube = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), main_light_cube_material);
 
-    //test cube
-    Shader::Material test_material = {
-            .shader = lit_shader,
-            .color = glm::vec3(0.2f, 0.7f, 0.85f),
-            .lights = lights
-    };
-
-    test_cube = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), test_material);
-
     //grid
     Shader::Material grid_material = {
-            .shader = grid_shader,
+            .shader = unlit_shader,
             .alpha = 0.4f
     };
     main_grid = std::make_unique<VisualGrid>(100, 100, 1.0f, glm::vec3(0.0f), glm::vec3(90.0f, 0.0f, 0.0f), grid_material);
 
     //axis lines
     Shader::Material x_line_material = {
-            .shader = line_shader,
+            .shader = unlit_shader,
             .line_thickness = 3.0f,
             .color = glm::vec3(1.0f, 0.0f, 0.0f)
     };
 
     Shader::Material y_line_material =  {
-            .shader = line_shader,
+            .shader = unlit_shader,
             .line_thickness = 3.0f,
             .color = glm::vec3(0.0f, 1.0f, 0.0f)
     };
 
     Shader::Material z_line_material =  {
-            .shader = line_shader,
+            .shader = unlit_shader,
             .line_thickness = 3.0f,
             .color = glm::vec3(0.0f, 0.0f, 1.0f)
     };
@@ -76,6 +66,16 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     main_x_line = std::make_unique<VisualLine>(glm::vec3(0.01f), glm::vec3(5.01f, 0.01f, 0.01f), x_line_material);
     main_y_line = std::make_unique<VisualLine>(glm::vec3(0.01f), glm::vec3(0.01f, 5.01f, 0.01f), y_line_material);
     main_z_line = std::make_unique<VisualLine>(glm::vec3(0.01f), glm::vec3(0.01f, 0.01f, 5.01f), z_line_material);
+
+    //test cube
+    Shader::Material test_material = {
+            .shader = lit_shader,
+            .color = glm::vec3(0.2f, 0.7f, 0.85f),
+            .lights = lights
+    };
+
+    test_cube = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), test_material);
+    test_plane = std::make_unique<VisualPlane>(glm::vec3(0.0f, -0.5f, 0.0f), glm::vec3(0.0f), glm::vec3(100.0f), test_material);
 }
 
 void Renderer::Init() {
@@ -102,7 +102,8 @@ void Renderer::Init() {
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
-    glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_DEPTH_COMPONENT32, Light::LIGHTMAP_SIZE, Light::LIGHTMAP_SIZE, (GLint)lights->size());
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT32, Light::LIGHTMAP_SIZE, Light::LIGHTMAP_SIZE, (GLint)lights->size(), 0, GL_DEPTH_COMPONENT, GL_FLOAT,
+                 nullptr);
 
     // binds the shadow map depth texture to the framebuffer
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadow_map_texture, 0);
@@ -118,11 +119,16 @@ void Renderer::Init() {
 }
 
 void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
+    const auto current_time = (float)glfwGetTime();
+
     // processes input
     InputCallback(_window, _deltaTime);
 
-    // moves the main light
-    auto light_turning_radius = 4.0f;
+    // moves the lights
+    /*lights->at(0).SetPosition(glm::vec3(main_camera->GetPosition().x, 20.0f, main_camera->GetPosition().z));
+    lights->at(0).SetTarget(glm::vec3(main_camera->GetPosition().x + 2.0f, -10.0f, main_camera->GetPosition().z + 2.0f));*/
+
+    auto light_turning_radius = 5.0f;
     for (int i = 1; i < lights->size(); ++i) {
         auto& light = lights->at(i);
 
@@ -138,8 +144,11 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
     glm::mat4 first_world_transform_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, 0.0f));
     first_world_transform_matrix = glm::scale(first_world_transform_matrix, glm::vec3(2.0f));
 
-    glm::mat4 second_world_transform_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
-    second_world_transform_matrix = glm::translate(second_world_transform_matrix, glm::vec3(0.0f, 2.0f, 0.0f));
+    glm::mat4 second_world_transform_matrix = glm::translate(glm::mat4(1.0f), main_camera->GetPosition());
+    second_world_transform_matrix =  glm::scale(second_world_transform_matrix, glm::vec3(500.0f));
+
+    glm::mat4 third_world_transform_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 3.0f, 0.0f));
+    third_world_transform_matrix =  glm::scale(third_world_transform_matrix, glm::vec3(1.5f));
 
     for (int i = 0; i < lights->size(); ++i) {
         const auto& light = lights->at(i);
@@ -151,9 +160,13 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
 
         //todo: Draw shadow-caster elements HERE (i.e. the cubes below)
 
-        test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), first_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
+        test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), first_world_transform_matrix, current_time, GL_TRIANGLES, shadow_mapper_material.get());
 
-        test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), second_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
+        //test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), second_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
+
+        test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), third_world_transform_matrix, current_time, GL_TRIANGLES, shadow_mapper_material.get());
+
+        test_plane->Draw(light.GetViewProjection(), light.GetPosition(), current_time, GL_TRIANGLES, shadow_mapper_material.get());
     }
 
     // COLOR PASS
@@ -175,16 +188,20 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         }
 
         // draws the main grid
-        main_grid->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
+        //main_grid->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
 
         // draws the coordinate axis
         main_x_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
         main_y_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
         main_z_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
 
-        test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), first_world_transform_matrix);
+        test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), first_world_transform_matrix, current_time);
 
-        test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), second_world_transform_matrix);
+        test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), second_world_transform_matrix, current_time);
+
+        test_cube->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), third_world_transform_matrix, current_time);
+
+        test_plane->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), current_time);
     }
 
     // unbinds the main screen, so that it can be used as a texture
@@ -202,7 +219,7 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         glDisable(GL_DEPTH_TEST);
 
         // used for post-processing effects
-        main_screen->Draw();
+        main_screen->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), current_time);
 
         // enables depth testing again
         glEnable(GL_DEPTH_TEST);

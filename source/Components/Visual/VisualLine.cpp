@@ -19,15 +19,15 @@ VisualLine::VisualLine(glm::vec3 _start, glm::vec3 _end, Shader::Material _mater
     VisualObject::SetupGlBuffersVerticesWithIndices();
 }
 
-void VisualLine::Draw(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, int _renderMode, const Shader::Material *_material)
+void VisualLine::Draw(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition,  float _time, int _renderMode, const Shader::Material *_material)
 {
     glm::mat4 model_matrix = glm::mat4(1.0f);
 
-    DrawFromMatrix(_viewProjection, _cameraPosition, model_matrix, _renderMode, _material);
+    DrawFromMatrix(_viewProjection, _cameraPosition, model_matrix, _time, _renderMode, _material);
 }
 
 void VisualLine::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition,
-                                const glm::mat4 &_transformMatrix, int _renderMode, const Shader::Material *_material)
+                                const glm::mat4 &_transformMatrix,  float _time, int _renderMode, const Shader::Material *_material)
 {
     // bind the vertex array to draw
     glBindVertexArray(vertex_array_o);

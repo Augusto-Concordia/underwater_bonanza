@@ -58,25 +58,29 @@ void Shader::SetViewProjectionMatrix(const glm::mat4 &_transform) const {
     glProgramUniformMatrix4fv(program_id, glGetUniformLocation(program_id, "u_view_projection"), 1, GL_FALSE, glm::value_ptr(_transform));
 }
 
-void Shader::ApplyLightsToShader(const std::shared_ptr<std::vector<Light>> _lights) const {
+void Shader::ApplyLightsToShader(const std::shared_ptr<std::vector<Light>> _lights, const float _time) const {
+    // global data
+    SetFloatFast("u_time", _time);
+
     // shadow map consumption
-    SetTexture("u_depth_texture", 0);
+    SetTexture("u_light_depth_textures", 0);
 
     for (int i = 0; i < _lights->size(); ++i) {
         const auto& light = _lights->at(i);
         const auto i_string = std::to_string(i);
 
         SetVec3(("u_lights[" + i_string + "].position").c_str(), light.GetPosition());
+        SetVec3(("u_lights[" + i_string + "].target").c_str(), light.GetTarget());
         SetVec3(("u_lights[" + i_string + "].color").c_str(), light.GetColor());
 
-        SetFloatFast(("u_lights[" + i_string + "].point_spot_influence").c_str(), light.type == Light::Type::POINT ? 0.0f : 1.0f);
+        SetInt(("u_lights[" + i_string + "].type").c_str(), (int)light.type);
         SetFloatFast(("u_lights[" + i_string + "].shadows_influence").c_str(), 1.0f - (float)light.project_shadows);
         SetVec3(("u_lights[" + i_string + "].attenuation").c_str(), light.attenuation);
 
         SetFloatFast(("u_lights[" + i_string + "].ambient_strength").c_str(), light.ambient_strength);
+        SetFloatFast(("u_lights[" + i_string + "].diffuse_strength").c_str(), light.diffuse_strength);
         SetFloatFast(("u_lights[" + i_string + "].specular_strength").c_str(), light.specular_strength);
 
-        SetVec3(("u_lights[" + i_string + "].spot_dir").c_str(), light.GetSpotlightDirection());
         SetFloatFast(("u_lights[" + i_string + "].spot_cutoff").c_str(), light.GetSpotlightCutoff());
 
         SetMat4(("u_lights[" + i_string + "].light_view_projection").c_str(), light.GetViewProjection());
