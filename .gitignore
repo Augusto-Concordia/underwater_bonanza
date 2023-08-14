@@ -57,3 +57,5 @@ imgui.ini
 # include assets
 !/assets
 *.json
+underwater_bonanza
+.DS_Store

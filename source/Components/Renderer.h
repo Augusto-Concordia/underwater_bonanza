@@ -1,6 +1,8 @@
 #pragma once
 
 #include <map>
+#include <vector>
+
 #include "Camera.h"
 #include "Shader.h"
 #include "Visual/VisualGrid.h"
@@ -13,6 +15,18 @@
 #include "Components/Visual/VisualPlane.h"
 #include "Screen.h"
 #include "SFML/Audio/Sound.hpp"
+
+struct ObjectProperties {
+    int type;
+    float x_offset;
+    glm::vec3 color1;
+    glm::vec3 color2;
+    glm::vec3 color3;
+    glm::vec3 pos;
+    float scaleF;
+    float height;
+    float branches;
+};
 
 class Renderer {
 private:
@@ -55,6 +69,9 @@ private:
     std::unique_ptr<sf::SoundBuffer> main_theme_buffer, underwater_sfx_buffer;
     std::unique_ptr<sf::Sound> main_theme, underwater_sfx;
 
+    //item storage
+    std::vector<ObjectProperties> spawn_list_Global;
+    
     int viewport_width, viewport_height;
 
     float moving_angle;
@@ -75,11 +92,14 @@ public:
     void SwitchScenes();
     void DrawIntroScene(double _time, double _deltaTime);
 
-    void DrawOneWeed(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time);
-    void DrawOneWeed2(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time);
-    void DrawOneClam(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time);
-    void DrawOneCoral(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time);
-    void DrawOneCoral2(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time);
+    void CreateSpawnMap();
+
+    void DrawOneWeed(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time, float _x_offset, glm::vec3 _weedcolor , glm::vec3 _scale_factor);
+    void DrawOneWeed2(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time, float height, glm::vec3 _weedcolor, glm::vec3 _leafcolor);
+    void DrawOneClam(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time, glm::vec3 _color1, glm::vec3 _color2);
+    void DrawOneCoral(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time, glm::vec3 _color1, glm::vec3 _color2 ,glm::vec3 _color3);
+    void DrawOneCoral2(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time,  glm::vec3 _color1, glm::vec3 _color2 ,glm::vec3 _color3, float branches);
     void DrawOneLeaf(glm::mat4 world_transform_matrix, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride);
+    void SpawnAllObjects();
 };
 

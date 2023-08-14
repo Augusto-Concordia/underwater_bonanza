@@ -106,6 +106,8 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     // Create the terrain generator
     main_terrain = std::make_unique<GenerateTerrain>(grid_size, iso_surface_level, glm::vec3(0.0f,0.0f,0.0f), 0, terrain_material);
 
+     CreateSpawnMap();
+
     //leaf
     Shader::Material Leaf_material =  {
             .shader = lit_shader,
@@ -221,6 +223,380 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     underwater_sfx->setLoop(true);
 }
 
+void Renderer::CreateSpawnMap(){
+
+    //findMatchingYValues(float x, float z)
+
+    //it is a grid of 100x100
+    //we go through a bunch of xz points and find appropraite y 
+    //check normal to make sure we can spawn
+    //loop through smaller grids that way we can populate in famillies 
+
+    //we need to return an array of an array of information to spawn 
+
+    float grid_size = 100;
+    int skip_size = 10;
+
+    srand(time(NULL));
+
+    // object generation variables
+    int type = 0;
+    float y;
+    int spawnd = 0;
+
+    int to_spawn; //75% chance?
+    int to_spawn_2;
+
+    glm::vec3 color_chosen;
+    glm::vec3 color_chosen_2;
+    glm::vec3 color_chosen_3;
+
+
+    glm::vec3 petal_color_choice[4] = {glm::vec3(0.424, 0.949, 0.851), glm::vec3(1, 0.416, 0.753), glm::vec3(0.98, 0.839, 0.322), glm::vec3(0.631, 0.506, 0.929)};
+    glm::vec3 stem_color_choice[3] = {glm::vec3(0.086, 0.42, 0.102), glm::vec3(0.224, 0.51, 0.239), glm::vec3(0.337, 0.58, 0.349) };
+
+    glm::vec3 clam_color_choice[3] = {glm::vec3(106.0f/255.0f, 90.0f/255.0f, 205.0f/255.0f), glm::vec3(1.0f,0.51f,0.612f), glm::vec3(1.0f,0.627f,0.129f)}; //shell
+    glm::vec3 clam_color_choice_2[3] = {glm::vec3(181.0f/255.0f, 165.0f/255.0f, 213.0f/255.0f), glm::vec3(1.0f,0.627f,0.702f), glm::vec3(1.0f,0.757f,0.435f)}; //pearl ... really means secondary 
+
+    glm::vec3 coral_color_choice_1[5] = {glm::vec3(1.0f, 0.7f, 0.0f),glm::vec3(0.0f, 1.0f, 0.816f),glm::vec3(0.878f, 0.322f, 0.424f), glm::vec3(0.565f, 0.871f, 0.282f),glm::vec3(1.0f, 0.475f, 0.396f)}; //darkest
+    glm::vec3 coral_color_choice_2[5] = {glm::vec3(1.0f, 0.8f, 0.0f),glm::vec3(0.435, 1.0f, 0.898f),glm::vec3(1.0f, 0.231f, 0.373f),glm::vec3(0.663f, 1.0f, 0.357f),glm::vec3(1.0f, 0.596f, 0.537f)}; //dark
+    glm::vec3 coral_color_choice_3[5] = {glm::vec3(1.0f, 1.0f, 0.0f),glm::vec3(0.663f, 0.988f, 0.929f),glm::vec3(1.0f, 0.376f, 0.49f),glm::vec3(0.733f, 1.0f, 0.49f),glm::vec3(1.0f, 0.769f, 0.733f)}; //light
+    float scaleF;
+            
+    int max_flower_spawn;
+    float height;
+
+    for (int g_row = 0; g_row < grid_size; g_row += skip_size) {
+        for (int g_col = 0; g_col < grid_size; g_col += skip_size) {
+            to_spawn = rand() % 4; //75%
+            std::cout<<"chance to spawn in chunk : "<<to_spawn<<std::endl;
+            if (to_spawn > 0) {
+                //random type
+                int type = rand() % 5; //gives 1 number representing the object that will spawn
+                std::cout<<"spawns a type : "<<type<<std::endl;
+
+                //rest spawnd number
+                spawnd = 0;
+                
+                //now give criteria based on type
+                switch(type) {
+                    case 0: // generic seaweed
+                    //seaweed 1 , generic one
+                    //make a familly spawn 
+
+                    //we have to spawn similar seaweed in a bunch to make it look real 
+                    //our grid is a 10x10 
+                        for (float x = g_row; x < g_row + skip_size; x+=0.75) {
+                            for (float z = g_col; z < g_col + skip_size; z+=0.75) {
+                                // check y value
+                                std::vector<float> valid_y;
+                                std::vector<YAndNormal> position_values = main_terrain->FindMatchingYValues(x,z);
+                                for (auto & pos : position_values) {
+                                    float y = pos.y;
+                                    float norm_y = pos.normal;
+                                    if (norm_y > 0.1f) {
+                                        valid_y.push_back(y);
+                                    }
+                                } 
+                                if (!valid_y.empty()) {
+                                    // get y value
+                                    int index_y = rand() % (valid_y.size());
+                                    std::cout<<"bitch!"<<valid_y.size()<<std::endl;
+                                    std::cout<<"ellooo!"<<index_y<<std::endl;
+                                    y = valid_y.at(index_y);
+
+                                    //to spawn or not to spawn 
+                                    to_spawn_2 = rand() % 10;
+                                    if (to_spawn_2 == 1) {
+                                        ObjectProperties ObjectProperties{};
+                                        //what to spawn 
+                                        //information in this order :
+                                        // type, x_offset, color, scaleFactor , x,y,z 
+                                        //type we have
+                                        ObjectProperties.type = type;
+                                        //x_offset
+                                        ObjectProperties.x_offset = 0.1f; // 0.03 -> 0.06
+                                        std::cout<<"x_offset "<<ObjectProperties.x_offset<<std::endl;
+                                        //color, pick one fromn the array 
+                                        int color_nb = rand() % 3;
+                                        ObjectProperties.color1 = stem_color_choice[color_nb];
+                                        std::cout<<"x color "<<ObjectProperties.color1.x <<std::endl;
+                                        //scaleFactor
+                                        ObjectProperties.scaleF = 0.3f; //leave default for now
+                                        //pos
+                                        ObjectProperties.pos = glm::vec3(x,y,z);
+                                        std::cout<<"x pos "<<ObjectProperties.pos.x <<std::endl;
+
+                                        // put into big list
+                                        spawn_list_Global.push_back(ObjectProperties);
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case 1: // tall seaweed
+                        for (int x = g_row; x < g_row + skip_size; ++x) {
+                            for (int z = g_col; z < g_col + skip_size; ++z) {
+                                to_spawn_2 = rand() % 2;
+                                if (to_spawn_2 == 1 && spawnd < 6) {
+                                    //pos
+                                    float position_x  = x + static_cast<int>(rand()) / RAND_MAX * (g_row - x);
+                                    std::vector<float> valid_y;
+                                    std::vector<YAndNormal> position_values = main_terrain->FindMatchingYValues(position_x,z);
+                                    for (auto & pos : position_values) {
+                                        float y = pos.y;
+                                        float norm_y = pos.normal;
+                                        if (norm_y > 0.1) {
+                                            valid_y.push_back(y);
+                                        }
+                                    } 
+                                    if (!valid_y.empty()) { 
+                                        // get y value
+                                        int index_y = rand() % (valid_y.size());
+                                        y = valid_y.at(index_y);
+                                        std::cout<<"bitch!"<<valid_y.size()<<std::endl;
+                                        std::cout<<"ellooo!"<<index_y<<std::endl;
+
+                                        ObjectProperties ObjectProperties{};
+                                        //type we have
+                                        ObjectProperties.type = type;
+                                        //x_offset
+                                        ObjectProperties.height  = rand() % 21 + 60 ; // 60 - 80;
+                                        //color, pick one fromn the array 
+                                        int color_nb = rand() % 3;
+                                        ObjectProperties.color1 = stem_color_choice[color_nb];
+
+                                        color_nb = rand() % 4;
+                                        ObjectProperties.color2 = petal_color_choice[color_nb];
+                                        //scaleFactor
+                                        ObjectProperties.scaleF = 0.5f; //leave default for now
+
+                                        //pos
+                                        ObjectProperties.pos = glm::vec3(position_x,y,z);
+
+                                        // put into big list
+                                        spawn_list_Global.push_back(ObjectProperties);
+                                        spawnd += 1;
+                                    }
+                                }
+                            }
+                        }
+
+                        break;
+                    case 2: // clam
+                        for (int x = g_row; x < g_row + skip_size; ++x) {
+                            for (int z = g_col; z < g_col + skip_size; ++z) {
+              
+                                to_spawn_2 = rand() % 2;
+                                if (to_spawn_2 == 1 && spawnd < 1) {
+                                    //pos
+                                    float position_x  = x + static_cast<int>(rand()) / RAND_MAX * (g_row - x);
+                                    std::vector<float> valid_y;
+                                    std::vector<YAndNormal> position_values = main_terrain->FindMatchingYValues(position_x,z);
+                                    for (auto & pos : position_values) {
+                                        float y = pos.y;
+                                        float norm_y = pos.normal;
+                                        if (norm_y > 0.1) {
+                                            valid_y.push_back(y);
+                                        }
+                                    } 
+                                    if (!valid_y.empty()) { 
+                                        // get y value
+                                        int index_y = rand() % (valid_y.size());
+                                        y = valid_y.at(index_y); 
+                                        
+                                        ObjectProperties ObjectProperties{};
+
+                                        //type we have
+                                        ObjectProperties.type = type;
+                                        //scale
+                                        ObjectProperties.scaleF = 0.5f; //0.3-0.7
+                                        //color, pick one fromn the array 
+                                        int color_nb = rand() % 3;
+                                        ObjectProperties.color1 = clam_color_choice[color_nb];
+                                        ObjectProperties.color2 = clam_color_choice_2[color_nb];
+
+                                        //pos
+                                        ObjectProperties.pos = glm::vec3(position_x,y,z);
+                                        
+                                        // put into big list
+                                        spawn_list_Global.push_back(ObjectProperties);
+                                        spawnd += 1;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case 3: // coral 1
+                        for (int x = g_row; x < g_row + skip_size; ++x) {
+                            for (int z = g_col; z < g_col + skip_size; ++z) {
+
+                                to_spawn_2 = rand() % 3;
+                                if (to_spawn_2 == 1 && spawnd < 8) {
+
+                                    //pos
+                                    float position_x  = x + static_cast<int>(rand()) / RAND_MAX * (g_row - x);
+                                    std::vector<float> valid_y;
+                                    std::vector<YAndNormal> position_values = main_terrain->FindMatchingYValues(position_x,z);
+                                    for (auto & pos : position_values) {
+                                        float y = pos.y;
+                                        float norm_y = pos.normal;
+                                        if (norm_y > 0.1) {
+                                            valid_y.push_back(y);
+                                        }
+                                    } 
+                                    if (!valid_y.empty()) { 
+                                        // get y value
+                                        int index_y = rand() % (valid_y.size());
+                                        y = valid_y.at(index_y); 
+
+                                        ObjectProperties ObjectProperties{};
+
+                                        //type we have
+                                        ObjectProperties.type = type;
+                                        //scale
+                                        ObjectProperties.scaleF = 0.5; //0.3-0.7
+                                        //color, pick one fromn the array 
+                                        int color_nb = rand() % 5;
+                                        ObjectProperties.color1 = coral_color_choice_1[color_nb];
+                                        ObjectProperties.color2 = coral_color_choice_2[color_nb];
+                                        ObjectProperties.color3 = coral_color_choice_3[color_nb];
+
+                                        //pos
+                                        ObjectProperties.pos = glm::vec3(position_x,y,z);
+                                        
+                                        // put into big list
+                                        spawn_list_Global.push_back(ObjectProperties);
+                                        spawnd += 1;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case 4: // coral 2
+                        for (int x = g_row; x < g_row + skip_size; ++x) {
+                            for (int z = g_col; z < g_col + skip_size; ++z) {
+              
+
+                                to_spawn_2 = rand() % 3;
+                                if (to_spawn_2 == 1 && spawnd < 10) {
+                                    //pos
+                                    float position_x  = x + static_cast<int>(rand()) / RAND_MAX * (g_row - x);
+                                    std::vector<float> valid_y;
+                                    std::vector<YAndNormal> position_values = main_terrain->FindMatchingYValues(position_x,z);
+                                    for (auto & pos : position_values) {
+                                        float y = pos.y;
+                                        float norm_y = pos.normal;
+                                        if (norm_y > 0.1) {
+                                            valid_y.push_back(y);
+                                        }
+                                    } 
+                                    if (!valid_y.empty()) { 
+                                        // get y value
+                                        int index_y = rand() % (valid_y.size());
+                                        y = valid_y.at(index_y); 
+
+                                        ObjectProperties ObjectProperties{};
+
+                                        //type we have
+                                        ObjectProperties.type = type;
+                                        //scale
+                                        ObjectProperties.scaleF = 0.5f; //0.3-0.7
+                                        //number of branches
+                                        ObjectProperties.branches = rand() % 4 + 4; //4-7
+                                        //color, pick one fromn the array 
+                                        int color_nb = rand() % 5;
+                                        ObjectProperties.color1 = coral_color_choice_1[color_nb];
+                                        ObjectProperties.color2 = coral_color_choice_2[color_nb];
+                                        ObjectProperties.color3 = coral_color_choice_3[color_nb];
+
+                                        //pos
+                                        ObjectProperties.pos = glm::vec3(position_x,y,z);
+                                        
+                                        // put into big list
+                                        spawn_list_Global.push_back(ObjectProperties);
+                                        spawnd += 1;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    // case 5: //rock 1 
+                    //     for (int x = g_row; x < g_row + skip_size; ++x) {
+                    //         for (int z = g_col; z < g_col + skip_size; ++z) {
+                    //         }
+                    //     }
+                    //     break;
+                    // case 6: //rock 2
+                    //     for (int x = g_row; x < g_row + skip_size; ++x) {
+                    //         for (int z = g_col; z < g_col + skip_size; ++z) {
+                    //         }
+                    //     }
+                    //     break;
+                    // case 7: //rock 3
+                    //     for (int x = g_row; x < g_row + skip_size; ++x) {
+                    //         for (int z = g_col; z < g_col + skip_size; ++z) {
+                    //         }
+                    //     }
+                    //     break;
+                    // case 8: //pebble
+                    //     for (int x = g_row; x < g_row + skip_size; ++x) {
+                    //         for (int z = g_col; z < g_col + skip_size; ++z) {
+                    //         }
+                    //     }
+                    //     break;
+                }
+            }
+        }
+    }
+}
+
+void Renderer::SpawnAllObjects(){
+    // confirmed that we are spawning in this chunk 
+    //now the way and where we spawn depends on the object we roll
+    for (auto & object : spawn_list_Global) { 
+        int type = object.type;
+        // std::cout<<"HELOOOOO"<<type<<std::endl;
+        switch(type) {
+            case 0: // basic seaweed
+                DrawOneWeed(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle , object.x_offset , object.color1 ,glm::vec3(0.3f,0.3f,0.3f));
+                // std::cout<<"draw seawwed"<<std::endl;
+                // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
+                break;
+            case 1: // tall seaweed
+                DrawOneWeed2(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle, object.height, object.color1, object.color2);
+                // std::cout<<"draw plant"<<std::endl;
+                // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
+                break;
+            case 2: // clam
+            
+                DrawOneClam(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle, object.color1, object.color2);
+                // std::cout<<"draw clam"<<std::endl;
+                // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
+                break;
+            case 3: // coral 1
+                DrawOneCoral(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle, object.color1, object.color2, object.color3);
+                // std::cout<<"draw coral"<<std::endl;
+                // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
+                break;
+            case 4: // coral 2
+            // std::cout<<"HELOOOOO"<<type<<std::endl;
+                DrawOneCoral2(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle, object.color1, object.color2, object.color3,object.branches);
+                // std::cout<<"draw coral 2"<<std::endl;
+                // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
+                break;
+            // case 5: //rock 1 
+            //     break;
+            // case 6: //rock 2
+            //     break;
+            // case 7: //rock 3
+            //     break;
+            // case 8: //pebble
+            //     break;
+        }
+    } 
+}
+
 void Renderer::Init() {
     // SHADOW MAP FRAMEBUFFER
 
@@ -266,6 +642,8 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
 
     // processes input
     InputCallback(_window, _deltaTime);
+    std::cout<<"delta: "<<_deltaTime<< std::endl;
+    std::cout<<"framerate: " << 1 / _deltaTime   << std::endl;
 
     if (!is_underwater) {
         DrawIntroScene(current_time, _deltaTime);
@@ -313,16 +691,7 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), second_world_transform_matrix, current_time, GL_TRIANGLES, shadow_mapper_material.get());
 
         main_terrain->DrawChunk(light.GetViewProjection(), light.GetPosition(), glm::mat4(1.0f), current_time, GL_TRIANGLES, shadow_mapper_material.get());
-
-        DrawOneWeed(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), light.GetViewProjection(), light.GetPosition(), shadow_mapper_material.get(), moving_angle);
-        DrawOneWeed(glm::vec3(2.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), light.GetViewProjection(), light.GetPosition(), shadow_mapper_material.get(), moving_angle);
-        DrawOneWeed(glm::vec3(3.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), light.GetViewProjection(), light.GetPosition(), shadow_mapper_material.get(), moving_angle);
-        DrawOneWeed(glm::vec3(4.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), light.GetViewProjection(), light.GetPosition(), shadow_mapper_material.get(), moving_angle);
-
-
-        DrawOneWeed2(glm::vec3(1.0f,1.0f,4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), light.GetViewProjection(), light.GetPosition(), shadow_mapper_material.get(), moving_angle);
-        DrawOneClam(glm::vec3(3.0f,1.0f,4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), light.GetViewProjection(), light.GetPosition(), shadow_mapper_material.get(), moving_angle);
-        //DrawOneLeaf(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(100.0f), light.GetViewProjection(), light.GetPosition(), shadow_mapper_material.get());
+        
     }
 
     // COLOR PASS
@@ -344,7 +713,7 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         }
 
         // draws the main grid
-        //main_grid->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
+        // main_grid->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
 
         // draws the coordinate axis
         main_x_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
@@ -357,20 +726,19 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
 
         main_terrain->DrawChunk(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::mat4(1.0f), current_time);
 
-        //DrawOneLeaf(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(10.0f), light.GetViewProjection(), light.GetPosition(), shadow_mapper_material.get());
+        SpawnAllObjects();
 
-        DrawOneWeed(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
-        DrawOneWeed(glm::vec3(2.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
-        DrawOneWeed(glm::vec3(3.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
-        DrawOneWeed(glm::vec3(4.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
 
-        DrawOneWeed2(glm::vec3(1.0f,1.0f,4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
+            //DrawOneWeed(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.2f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle , 0.1f , glm::vec3(1.0f, 1.0f, 1.0f) ,glm::vec3(0.3f));
 
-        DrawOneClam(glm::vec3(3.0f,1.0f,4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
+            // DrawOneWeed2(glm::vec3(2.0f, 1.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle, 70.0f, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f) );
 
-        DrawOneCoral(glm::vec3(6.0f,1.0f,4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
+            // DrawOneClam(glm::vec3(3.0f, 1.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
-        DrawOneCoral2(glm::vec3(8.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
+            // DrawOneCoral(glm::vec3(4.0f, 1.0f, 4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+
+            // DrawOneCoral2(glm::vec3(5.0f, 1.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f),5.0f);
+
     }
 
     
@@ -445,15 +813,16 @@ void Renderer::DrawIntroScene(const double _time, const double _deltaTime) {
     Texture::Clear();
 }
 
-void Renderer::DrawOneWeed(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time)
-{
+void Renderer::DrawOneWeed(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time
+    , float _x_offset, glm::vec3 _weedcolor , glm::vec3 _scale_factor ) {
     glm::mat4 world_transform_matrix = glm::mat4(1.0f);
 
     world_transform_matrix = glm::translate(world_transform_matrix, _position);
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, _rotation);
     world_transform_matrix = glm::scale(world_transform_matrix, _scale);
 
-    auto scale_factor = glm::vec3(0.3f, 0.3f, 0.3f);         // scale for one cube
+    //glm::vec3(0.3f, 0.3f, 0.3f); 
+    auto scale_factor =  _scale_factor ;     // scale for one cube
 
 
     glm::mat4 secondary_transform_matrix = world_transform_matrix;
@@ -468,18 +837,21 @@ void Renderer::DrawOneWeed(const glm::vec3 &_position, const glm::vec3 &_rotatio
     stem_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, time, GL_TRIANGLES, _materialOverride);
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor);
 
-    //weed color
-    glm::vec3 weedcolor = glm::vec3(0.197f, 0.321f, 0.118f);
+    
+    // float x_offset = 0.05f;
+    // float rot_bounce = 90.0f;
 
-    float x_offset = 0.05f;
-    float y_offset = 0.3f;
-    float rot_bounce = 90.0f;
+
+    float x_offset = _x_offset;
+    float y_offset = scale_factor.y;
+
     float bounce = 1.0f;
     float bounce_sin = 1.0f;
 
     float sin_offset = cos(time/20)/20;
 
-    stem_cube->material.color = weedcolor; // colour
+    //glm::vec3 weedcolor = glm::vec3(0.197f, 0.321f, 0.118f);
+    stem_cube->material.color = _weedcolor; // colour
 
 
     for(int x = 0; x < 10; x++){
@@ -491,18 +863,10 @@ void Renderer::DrawOneWeed(const glm::vec3 &_position, const glm::vec3 &_rotatio
 
         //draw stem block
         world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(x_offset+sin_offset, y_offset, 0.0f));
-        //world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f, bounce * rot_bounce, 0.0f));
         world_transform_matrix = glm::scale(world_transform_matrix, scale_factor);
         stem_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, time, GL_TRIANGLES, _materialOverride);
         world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor);
-        //world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f, -bounce * rot_bounce, 0.0f));
 
-        //draw leaf block
-
-        // world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f, bounce * rot_bounce, 0.0f));
-        // DrawOneLeaf(secondary_transform_matrix, _viewProjection, _eyePosition, _materialOverride);
-        // secondary_transform_matrix = world_transform_matrix;
-        // world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f, -bounce * rot_bounce, 0.0f));
 
         //bounce
         bounce += 1.0f;
@@ -516,7 +880,7 @@ void Renderer::DrawOneWeed(const glm::vec3 &_position, const glm::vec3 &_rotatio
 }
 
 
-void Renderer::DrawOneWeed2(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time)
+void Renderer::DrawOneWeed2(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time, float height, glm::vec3 _weedcolor, glm::vec3 _leafcolor)
 {
     glm::mat4 world_transform_matrix = glm::mat4(1.0f);
 
@@ -550,16 +914,16 @@ void Renderer::DrawOneWeed2(const glm::vec3 &_position, const glm::vec3 &_rotati
     float sin_offset = cos(time/20)/20;
 
     //weed color
-    glm::vec3 weedcolor = glm::vec3(0.197f, 0.321f, 0.118f);
+    glm::vec3 weedcolor = _weedcolor;
     stem_cube->material.color = weedcolor; // colour
 
     //leaf color
-    glm::vec3 leafcolor = glm::vec3(1.0f, 0.5f, 0.2f);
-    leaf_cube->material.color = leafcolor; // colour
+    //glm::vec3 leafcolor = glm::vec3(1.0f, 0.5f, 0.2f);
+    leaf_cube->material.color = _leafcolor; // colour
 
 
 
-    for(int x = 0; x < 70; x++){
+    for(int x = 0; x < height; x++){
 
         if(bounce_sin / 2.0f == 1.0f){
             bounce_sin = 1.0f;
@@ -600,7 +964,7 @@ void Renderer::DrawOneWeed2(const glm::vec3 &_position, const glm::vec3 &_rotati
 }
 
 
-void Renderer::DrawOneClam(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time)
+void Renderer::DrawOneClam(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time, glm::vec3 _color1, glm::vec3 _color2 )
 {
     glm::mat4 world_transform_matrix = glm::mat4(1.0f);
 
@@ -608,8 +972,8 @@ void Renderer::DrawOneClam(const glm::vec3 &_position, const glm::vec3 &_rotatio
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, _rotation);
     world_transform_matrix = glm::scale(world_transform_matrix, _scale);
 
-    auto scale_factor = glm::vec3(0.1f, 0.1f, 0.1f);         // scale for one cube
-    auto scale_factor_lip = glm::vec3(0.1f, 0.1f, 0.1f);         // scale for one cube
+    auto scale_factor = glm::vec3(0.1f, 0.1f, 0.1f);        // scale for one cube
+    auto scale_factor_lip = glm::vec3(0.1f, 0.1f, 0.1f);        // scale for one cube
 
     float sin_offset = abs(cos(time/60) * 70);
 
@@ -618,15 +982,14 @@ void Renderer::DrawOneClam(const glm::vec3 &_position, const glm::vec3 &_rotatio
     //new clam model
     //make varying heighted strips
     //and add a small lip
-    clam_cube->material.color = glm::vec3(106.0f/255.0f, 90.0f/255.0f, 205.0f/255.0f); // colour
+    clam_cube->material.color = _color1; // colour
     scale_factor = glm::vec3(0.1f, 0.1f, 1.0f);
     //make lip for that strand
     lip_cube->material.color = glm::vec3(255.0f/255.0f, 255.0f/255.0f, 255.0f/255.0f); // colour
     scale_factor_lip = glm::vec3(0.1f, 0.1f, 0.1f);
 
 
-
-    pearl_cube->material.color = glm::vec3(181.0f/255.0f, 165.0f/255.0f, 213.0f/255.0f); // colour
+    pearl_cube->material.color = _color2; // colours
 
     //first strand is highest
 
@@ -854,7 +1217,7 @@ void Renderer::DrawOneClam(const glm::vec3 &_position, const glm::vec3 &_rotatio
 
 
 
-void Renderer::DrawOneCoral(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time){
+void Renderer::DrawOneCoral(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time , glm::vec3 _color1, glm::vec3 _color2 ,glm::vec3 _color3 ){
 
 
     glm::mat4 world_transform_matrix = glm::mat4(1.0f);
@@ -868,10 +1231,9 @@ void Renderer::DrawOneCoral(const glm::vec3 &_position, const glm::vec3 &_rotati
 
     glm::mat4 secondary_transform_matrix = world_transform_matrix;
 
-    coral_cube_3->material.color = glm::vec3(1.0f, 0.7f, 0.0f); // colour --should be the darker one
-
-    coral_cube->material.color = glm::vec3(1.0f, 0.8f, 0.0f); // colour --should be the darker one
-    coral_cube_2->material.color = glm::vec3(1.0f, 1.0f, 0.0f); // colour for later gradient -- should be the lighter one
+    coral_cube_3->material.color = _color1; // colour --should be the darker one
+    coral_cube->material.color = _color2; // colour --should be the second darker one
+    coral_cube_2->material.color = _color3; // colour for later gradient -- should be the lighter one
     //lip_cube->material.color = glm::vec3(255.0f/255.0f, 255.0f/255.0f, 255.0f/255.0f); // colour
 
 
@@ -960,7 +1322,7 @@ void Renderer::DrawOneCoral(const glm::vec3 &_position, const glm::vec3 &_rotati
 }
 
 
-void Renderer::DrawOneCoral2(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time){
+void Renderer::DrawOneCoral2(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time , glm::vec3 _color1, glm::vec3 _color2 ,glm::vec3 _color3, float branches){
 
 
     glm::mat4 world_transform_matrix = glm::mat4(1.0f);
@@ -974,15 +1336,14 @@ void Renderer::DrawOneCoral2(const glm::vec3 &_position, const glm::vec3 &_rotat
 
     glm::mat4 secondary_transform_matrix = world_transform_matrix;
 
-    coral_cube_3->material.color = glm::vec3(1.0f, 0.7f, 0.0f); // colour --should be the darker one
-
-    coral_cube->material.color = glm::vec3(1.0f, 0.8f, 0.0f); // colour --should be the darker one
-    coral_cube_2->material.color = glm::vec3(1.0f, 1.0f, 0.0f); // colour for later gradient -- should be the lighter one
+    coral_cube_3->material.color = _color1; // colour --should be the darker one
+    coral_cube->material.color = _color2; // colour --should be the darker one
+    coral_cube_2->material.color = _color3; // colour for later gradient -- should be the lighter one
     //lip_cube->material.color = glm::vec3(255.0f/255.0f, 255.0f/255.0f, 255.0f/255.0f); // colour
 
 
     //special values
-    float nb_branches = 5.0f;
+    float nb_branches = branches;
     float height = 3.0f;
     float angle_side = 360.0f/nb_branches;
     float angle_upward = 30.0f;
