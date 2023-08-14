@@ -429,6 +429,10 @@ void GenerateTerrain::GenerateChunkTerrain(bool _newSeed) {
         seed = distribution(gen);
     }
 
+    if (!vertices.empty()) {
+        vertices.clear();
+    }
+
     // grid_size x grid_size x grid_size even cube assumption
     for (int x = 0; x < grid_size; x++) {
         for (int y = 0; y < grid_size; y++) {
