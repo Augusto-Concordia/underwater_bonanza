@@ -39,6 +39,7 @@ private:
     std::unique_ptr<VisualLine> main_x_line;
     std::unique_ptr<VisualLine> main_y_line;
     std::unique_ptr<VisualLine> main_z_line;
+    std::unique_ptr<VisualCube> rock_cube;
 
     std::shared_ptr<std::vector<Light>> lights;
     std::unique_ptr<VisualCube> main_light_cube;
@@ -81,7 +82,7 @@ private:
     GLuint shadow_map_texture = 0;
 
 
-    
+
 
 public:
     Renderer(int _initialWidth, int _initialHeight);
