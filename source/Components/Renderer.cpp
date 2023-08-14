@@ -233,6 +233,8 @@ void Renderer::Init() {
 }
 
 void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     const auto current_time = (float)glfwGetTime();
 
     // processes input
