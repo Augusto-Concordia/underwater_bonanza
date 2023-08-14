@@ -2,6 +2,22 @@ cmake_minimum_required(VERSION 3.20)
 
 set(CMAKE_CXX_STANDARD 20)
 
+#================== SFML =================
+
+# disables all sfml docs, tests and examples from builds
+set(SFML_BUILD_DOC OFF CACHE BOOL "" FORCE)
+set(SFML_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(SFML_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+
+# disables all sfml modules except audio
+set(SFML_BUILD_AUDIO ON CACHE BOOL "" FORCE)
+set(SFML_BUILD_GRAPHICS OFF CACHE BOOL "" FORCE)
+set(SFML_BUILD_NETWORK OFF CACHE BOOL "" FORCE)
+set(SFML_BUILD_SYSTEM OFF CACHE BOOL "" FORCE)
+set(SFML_BUILD_WINDOW OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(sfml)
+
 #================== STB_IMAGE =================
 
 add_library(stb_image INTERFACE)

@@ -52,8 +52,8 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
             .line_thickness = 3.0f,
             .color = glm::vec3(1.0f, 1.0f, 1.0f),
             .alpha = 0.5f,
+            .texture= Texture::Library::CreateTexture("assets/prettyBlue_logo.png"),
             .texture_influence = 1.0f,
-            .texture= Texture::Library::CreateTexture("assets/prettyBlue_logo.png")
     };
     uiPlane = std::make_unique<VisualPlane>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.5f, 0.5f, 0.5f), uiImage_Material);
     

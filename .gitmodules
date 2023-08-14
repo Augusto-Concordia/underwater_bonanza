@@ -8,3 +8,6 @@
 [submodule "vendor/assimp"]
 	path = vendor/assimp
 	url = https://github.com/assimp/assimp
+[submodule "vendor/sfml"]
+	path = vendor/sfml
+	url = https://github.com/SFML/SFML
