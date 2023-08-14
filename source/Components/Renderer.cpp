@@ -4,6 +4,7 @@
 #include "Utility/Graphics.hpp"
 #include "Texture.h"
 #include "Utility/Transform.hpp"
+#include "SFML/Audio/SoundBuffer.hpp"
 
 Renderer::Renderer(int _initialWidth, int _initialHeight) {
     viewport_width = _initialWidth;
@@ -56,7 +57,6 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
             .texture_influence = 1.0f,
     };
     uiPlane = std::make_unique<VisualPlane>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.5f, 0.5f, 0.5f), uiImage_Material);
-    
 
     //axis lines
     Shader::Material x_line_material = {
@@ -194,6 +194,31 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
 
     //skybox
     main_skybox = Texture::Library::CreateCubemapTexture("assets/textures/skybox");
+
+    // SOUNDS
+
+    main_theme_buffer = std::make_unique<sf::SoundBuffer>();
+    underwater_sfx_buffer = std::make_unique<sf::SoundBuffer>();
+
+    if (!main_theme_buffer->loadFromFile("assets/sounds/main_theme.mp3")) {
+        std::cerr << "Failed to load main theme sound!" << std::endl;
+    }
+
+    if (!underwater_sfx_buffer->loadFromFile("assets/sounds/underwater_sfx.mp3")) {
+        std::cerr << "Failed to load underwater sfx sound!" << std::endl;
+    }
+
+    main_theme = std::make_unique<sf::Sound>();
+    underwater_sfx = std::make_unique<sf::Sound>();
+
+    main_theme->setBuffer(*main_theme_buffer);
+    underwater_sfx->setBuffer(*underwater_sfx_buffer);
+
+    main_theme->setVolume(100.0f);
+    underwater_sfx->setVolume(100.0f);
+
+    main_theme->setLoop(true);
+    underwater_sfx->setLoop(true);
 }
 
 void Renderer::Init() {
@@ -389,8 +414,12 @@ void Renderer::SwitchScenes() {
     if (is_underwater) {
         main_terrain->GenerateChunkTerrain(true);
         main_terrain->SetupBuffers();
-    } else {
 
+        main_theme->play();
+        underwater_sfx->play();
+    } else {
+        main_theme->stop();
+        underwater_sfx->stop();
     }
 }
 

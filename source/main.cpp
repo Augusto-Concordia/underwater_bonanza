@@ -64,14 +64,6 @@ int main() {
 
     main_renderer.Init();
 
-    sf::SoundBuffer buffer;
-    if (!buffer.loadFromFile("assets/sounds/test.mp3"))
-        return -1;
-
-    sf::Sound sound;
-    sound.setBuffer(buffer);
-    sound.play();
-
     while (!glfwWindowShouldClose(window)) {
         //get current display window size & update rendering
         glfwGetFramebufferSize(window, &display_w, &display_h);

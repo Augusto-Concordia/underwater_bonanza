@@ -12,6 +12,7 @@
 #include "Components/Visual/VisualModel.h"
 #include "Components/Visual/VisualPlane.h"
 #include "Screen.h"
+#include "SFML/Audio/Sound.hpp"
 
 class Renderer {
 private:
@@ -40,14 +41,19 @@ private:
     //plants and seaweed
     std::unique_ptr<Leaf> leaf_cube;
     std::unique_ptr<VisualCube>  stem_cube;
+
     //clam
     std::unique_ptr<VisualCube>  clam_cube;
     std::unique_ptr<VisualCube>  pearl_cube;
     std::unique_ptr<VisualCube>  lip_cube;
+
     //coral
     std::unique_ptr<VisualCube>  coral_cube;
     std::unique_ptr<VisualCube>  coral_cube_2;
     std::unique_ptr<VisualCube>  coral_cube_3;
+
+    std::unique_ptr<sf::SoundBuffer> main_theme_buffer, underwater_sfx_buffer;
+    std::unique_ptr<sf::Sound> main_theme, underwater_sfx;
 
     int viewport_width, viewport_height;
 
