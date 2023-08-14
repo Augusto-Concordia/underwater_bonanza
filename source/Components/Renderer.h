@@ -28,7 +28,7 @@ struct ObjectProperties {
     float branches;
 };
 
-class Renderer {
+class Renderer { 
 private:
     std::unique_ptr<Screen> main_screen;
     std::shared_ptr<Camera> main_camera;
@@ -79,6 +79,9 @@ private:
 
     GLuint shadow_map_fbo = 0;
     GLuint shadow_map_texture = 0;
+
+
+    
 
 public:
     Renderer(int _initialWidth, int _initialHeight);
