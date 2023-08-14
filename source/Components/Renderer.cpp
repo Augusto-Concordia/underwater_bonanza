@@ -294,7 +294,7 @@ void Renderer::CreateSpawnMap(){
                                 for (auto & pos : position_values) {
                                     float y = pos.y;
                                     float norm_y = pos.normal;
-                                    if (norm_y > 0.1f) {
+                                    if (norm_y > 0.3f) {
                                         valid_y.push_back(y);
                                     }
                                 } 
@@ -346,7 +346,7 @@ void Renderer::CreateSpawnMap(){
                                     for (auto & pos : position_values) {
                                         float y = pos.y;
                                         float norm_y = pos.normal;
-                                        if (norm_y > 0.1) {
+                                        if (norm_y > 0.3) {
                                             valid_y.push_back(y);
                                         }
                                     } 
@@ -354,8 +354,6 @@ void Renderer::CreateSpawnMap(){
                                         // get y value
                                         int index_y = rand() % (valid_y.size());
                                         y = valid_y.at(index_y);
-                                        std::cout<<"bitch!"<<valid_y.size()<<std::endl;
-                                        std::cout<<"ellooo!"<<index_y<<std::endl;
 
                                         ObjectProperties ObjectProperties{};
                                         //type we have
@@ -396,7 +394,7 @@ void Renderer::CreateSpawnMap(){
                                     for (auto & pos : position_values) {
                                         float y = pos.y;
                                         float norm_y = pos.normal;
-                                        if (norm_y > 0.1) {
+                                        if (norm_y > 0.3) {
                                             valid_y.push_back(y);
                                         }
                                     } 
@@ -441,7 +439,7 @@ void Renderer::CreateSpawnMap(){
                                     for (auto & pos : position_values) {
                                         float y = pos.y;
                                         float norm_y = pos.normal;
-                                        if (norm_y > 0.1) {
+                                        if (norm_y > 0.3) {
                                             valid_y.push_back(y);
                                         }
                                     } 
@@ -493,7 +491,7 @@ void Renderer::CreateSpawnMap(){
                                     for (auto & pos : position_values) {
                                         float y = pos.y;
                                         float norm_y = pos.normal;
-                                        if (norm_y > 0.1) {
+                                        if (norm_y > 0.3) {
                                             valid_y.push_back(y);
                                         }
                                     } 

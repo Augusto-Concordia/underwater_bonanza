@@ -396,13 +396,13 @@ glm::vec3 GenerateTerrain::barycentricCoordinates(glm::vec2 point, glm::vec3 A, 
     return glm::vec3(u, v, w);
 }
 
-std::vector<YAndNormal> GenerateTerrain::findMatchingYValues(float x, float z) {
+std::vector<YAndNormal> GenerateTerrain::FindMatchingYValues(float x, float z) {
     std::vector<YAndNormal> matchingYValues;
 
-    for (int vertex = 0; vertex < vertices.size()/3 ; vertex += 3) {
+    for (int vertex = 0; vertex < vertices.size(); vertex += 3) {
         glm::vec3 index1 = vertices[vertex].position;
         glm::vec3 index2 = vertices[vertex+1].position;
-        glm::vec3 index3 = vertices[vertex+3].position;
+        glm::vec3 index3 = vertices[vertex+2].position;  // Change index from vertex+3 to vertex+2
 
         glm::vec3 triangle_normal = glm::normalize(glm::cross(index2 - index1, index3 - index1));
         glm::vec2 point = glm::vec2(x, z);
