@@ -45,7 +45,18 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
             .shader = unlit_shader,
             .alpha = 0.4f
     };
-    main_grid = std::make_unique<VisualGrid>(100, 100, 1.0f, glm::vec3(0.0f), glm::vec3(90.0f, 0.0f, 0.0f), grid_material);
+    //main_grid = std::make_unique<VisualGrid>(100, 100, 1.0f, glm::vec3(0.0f), glm::vec3(90.0f, 0.0f, 0.0f), grid_material);
+
+    Shader::Material uiImage_Material = {
+            .shader = unlit_shader,
+            .line_thickness = 3.0f,
+            .color = glm::vec3(1.0f, 1.0f, 1.0f),
+            .alpha = 0.5f,
+            .texture_influence = 1.0f,
+            .texture= Texture::Library::CreateTexture("assets/prettyBlue_logo.png")
+    };
+    uiPlane = std::make_unique<VisualPlane>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.5f, 0.5f, 0.5f), uiImage_Material);
+    
 
     //axis lines
     Shader::Material x_line_material = {
@@ -78,7 +89,7 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
             .lights = lights
     };
 
-    test_cube = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), test_material);
+    test_cube = std::make_unique<VisualCube>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec3(0.0f), test_material);
 
     // Define terrain parameters
     int grid_size = 100;
@@ -179,7 +190,7 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
 
     //ocean flow map
     ocean_flow_map = Texture::Library::CreateTexture("assets/textures/flowMap.png");
-    main_ocean = std::make_unique<VisualModel>("assets/models/ocean.obj", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), *ocean_material);
+    //main_ocean = std::make_unique<VisualModel>("assets/models/ocean.obj", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), *ocean_material);
 
     //skybox
     main_skybox = Texture::Library::CreateCubemapTexture("assets/textures/skybox");
@@ -337,6 +348,8 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         DrawOneCoral2(glm::vec3(8.0f,1.0f,1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle);
     }
 
+    
+
     // unbinds the main screen, so that it can be used as a texture
     main_screen->Unbind();
 
@@ -396,7 +409,9 @@ void Renderer::DrawIntroScene(const double _time, const double _deltaTime) {
     ocean_material->shader->SetTexture("skybox", 1);
     ocean_material->shader->SetTexture("oceanFlowMap", 2);
 
-    main_ocean->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), (float)_time, GL_TRIANGLES, ocean_material.get());
+    //main_x_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
+    uiPlane->DrawFromMatrix(glm::mat4(1.0f), glm::vec3(1.0f), glm::mat4(1.0f), _time);
+    //main_ocean->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), (float)_time, GL_TRIANGLES, ocean_material.get());
 
     Texture::Clear();
 }

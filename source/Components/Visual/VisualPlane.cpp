@@ -7,10 +7,10 @@ VisualPlane::VisualPlane(glm::vec3 _position, glm::vec3 _rotation, glm::vec3 _sc
 {
     // quad vertices with their uvs
     vertices = {
-        -1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-        1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-        1.0f,  0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-        -1.0f,  0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+        1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        1.0f,  -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+        -1.0f,  -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
     };
 
     indices = {
@@ -36,8 +36,8 @@ void VisualPlane::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::ve
     // bind the vertex array to draw
     glBindVertexArray(vertex_array_o);
 
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_FRONT);
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_FRONT);
 
     const Shader::Material *current_material = &material;
 
@@ -76,5 +76,5 @@ void VisualPlane::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::ve
     // clear the current texture
     current_material->texture->Clear();
 
-    glDisable(GL_CULL_FACE);
+    //glDisable(GL_CULL_FACE);
 }

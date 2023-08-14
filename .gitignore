@@ -56,3 +56,4 @@ imgui.ini
 
 # include assets
 !/assets
+*.json

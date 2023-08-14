@@ -10,6 +10,7 @@
 #include "Components/Visual/Leaf.h"
 #include "Components/Terrain/GenerateTerrain.h"
 #include "Components/Visual/VisualModel.h"
+#include "Components/Visual/VisualPlane.h"
 #include "Screen.h"
 
 class Renderer {
@@ -18,7 +19,7 @@ private:
     std::shared_ptr<Camera> main_camera;
     std::unique_ptr<Shader::Material> shadow_mapper_material;
 
-    std::unique_ptr<VisualGrid> main_grid;
+    std::unique_ptr<VisualPlane> uiPlane;
 
     std::unique_ptr<VisualLine> main_x_line;
     std::unique_ptr<VisualLine> main_y_line;
