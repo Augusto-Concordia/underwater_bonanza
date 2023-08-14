@@ -447,8 +447,14 @@ void Renderer::CreateSpawnMap(){
                                     } 
                                     if (!valid_y.empty()) { 
                                         // get y value
-                                        int index_y = rand() % (valid_y.size());
-                                        y = valid_y.at(index_y); 
+                                        float min_y = 20.0f;
+                                        for (auto & y : valid_y) {
+                                            if (y < min_y) { min_y = y;}
+                                        } 
+                                        y = min_y;
+                                        //int index_y = rand() % (valid_y.size());
+                                        //y = valid_y.at(index_y);
+                                        
 
                                         ObjectProperties ObjectProperties{};
 
