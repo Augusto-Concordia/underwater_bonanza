@@ -503,7 +503,7 @@ int main(int argc, char* argv[])
                 rightVector = glm::normalize(rightVector);
                 vec3 realUp = glm::cross(travel, rightVector);
                 mat4 trap = initialPosition * translate(mat4(1.0f), sharkPos)
-                    * travelRotation * targetRotation * initialRotation * worldRotation * initialScale * scale(mat4(1.0f), vec3(1.0f, 1.0f, 1.0f));
+                    *  targetRotation *travelRotation * initialRotation * initialScale * scale(mat4(1.0f), vec3(1.0f, 1.0f, 1.0f));
                 GLuint worldMatrixLocation = glGetUniformLocation(shader, "worldMatrix");
                 GLuint cc = glGetUniformLocation(shader, "customColor");
                 vec3 customColor = color;
@@ -690,7 +690,7 @@ int main(int argc, char* argv[])
                 rightVector = glm::normalize(rightVector);
                 vec3 realUp = glm::cross(travel, rightVector);
                 mat4 trap = initialPosition * translate(mat4(1.0f), sharkPos)
-                    * travelRotation * targetRotation * initialRotation * worldRotation * initialScale * scale(mat4(1.0f), vec3(1.0f, 1.0f, 1.0f));
+                    * targetRotation * travelRotation * initialRotation * worldRotation * initialScale * scale(mat4(1.0f), vec3(1.0f, 1.0f, 1.0f));
                 GLuint worldMatrixLocation = glGetUniformLocation(shader, "worldMatrix");
                 GLuint cc = glGetUniformLocation(shader, "customColor");
                 vec3 customColor = color;
@@ -777,48 +777,61 @@ int main(int argc, char* argv[])
             
 
             if (glm::abs(cAngleZ - tAngleZ) > 0.1) {
-                if (cAngleZ - tAngleZ < 0) {
-                   cAngleZ = cAngleZ + rotationSpeed * dt;
-                    
+                if (cAngleZ - tAngleZ > 0) {
+                   cAngleZ = cAngleZ - rotationSpeed * dt;
+                  
                 }
                 else {
-                    cAngleZ = cAngleZ - rotationSpeed * dt;
+                    cAngleZ = cAngleZ + rotationSpeed * dt;
                 }
                 
             }
-            
-
 
             if (glm::abs(cAngleY - tAngleY) > 0.1) {
-                if (cAngleY - tAngleY < 0) {
-                    cAngleY += rotationSpeed * dt;
+                if (cAngleY - tAngleY > 0) {
+                    cAngleY -= rotationSpeed * dt;
                 }
                 else {  
-                    cAngleY -= rotationSpeed * dt;
+                    cAngleY += rotationSpeed * dt;
                 }
                 
 
             }
-
+           // cAngleY = 0.0f;
+           cAngleZ = 0.0f;
             travelRotation = rotate(mat4(1.0f), glm::radians(cAngleZ), vec3(0.0f, 0.0f, 1.0f));
             targetRotation = rotate(mat4(1.0f), glm::radians(cAngleY), vec3(0.0f, 1.0f, 0.0f));
 
             if (glm::distance(sharkPos, targetPos) <= 1.0f) {
-                float angle = getRandomFloat(-180.0f, 180.0f);
+                targetPos = vec3(getRandomFloat(-5.0f, 5.0f), getRandomFloat(-5.0f, 5.0f), getRandomFloat(-5.0f, 5.0f));
+                travel = targetPos - sharkPos;
+                travel = glm::normalize(travel);
+                
+                float angle = glm::acos(travel.x);
+                angle = degrees(angle);
+                if (travel.z < 0) {
+                    angle *= -1.0f;
+                }
+                tAngleY = angle;
+                std::cout << "T angle Y: " << tAngleY << " T angle Z: " << tAngleZ << std::endl;
+                /*
+                float angle = getRandomFloat(0.0f, 360.0f); //getRandomFloat(0.0f, 360.0f);
                 travel = vec3(-cos(glm::radians(angle)), 0.0f, sin(glm::radians(angle)));
                 targetPos = (getRandomFloat(10.0f, 30.0f) * travel + sharkPos);
                 float fakeDistance = glm::distance(targetPos, sharkPos);
-                targetPos.y = getRandomFloat(-20.0f, 20.0f);
+                targetPos.y = getRandomFloat(-30.0f,30.0f);
                 //TERRAIN HEIGHT
                 float angle2 = glm::acos(fakeDistance / glm::distance(sharkPos, targetPos));
                 travel = targetPos - sharkPos;
                 travel = glm::normalize(travel);
                 
+                //cAngleY = angle;
+                //cAngleZ = degrees(angle2);
                 tAngleY = angle;
-                tAngleZ = degrees(angle2);
-               
-
-               
+                tAngleZ = degrees(-angle2);
+                std::cout<< "T angle Y: " << tAngleY << "T angle Z: " << tAngleZ << std::endl;
+                //cAngleZ = 0.0f;
+                //cAngleY = tAngleY;*/
             }
 
 
@@ -1233,12 +1246,12 @@ int main(int argc, char* argv[])
 
             }
 
-           
+            cAngleZ = 0.0f;
             travelRotation = rotate(mat4(1.0f), glm::radians(cAngleZ), vec3(0.0f, 0.0f, 1.0f));
             targetRotation = rotate(mat4(1.0f), glm::radians(cAngleY), vec3(0.0f, 1.0f, 0.0f));
 
             if (glm::distance(fishPos, targetPos) <= 1.0f) {
-                float angle = getRandomFloat(-180.0f, 180.0f);
+                /*float angle = getRandomFloat(-180.0f, 180.0f);
                 travel = vec3(-cos(glm::radians(angle)), 0.0f, sin(glm::radians(angle)));
                 targetPos = (getRandomFloat(10.0f, 30.0f) * travel + fishPos);
                 float fakeDistance = glm::distance(targetPos, fishPos);
@@ -1250,7 +1263,18 @@ int main(int argc, char* argv[])
 
                 tAngleY = angle;
                 tAngleZ = degrees(angle2);
-                
+                */
+                targetPos = vec3(getRandomFloat(-5.0f, 5.0f), getRandomFloat(-5.0f, 5.0f), getRandomFloat(-5.0f, 5.0f));
+                travel = targetPos - fishPos;
+                travel = glm::normalize(travel);
+
+                float angle = glm::acos(travel.x);
+                angle = degrees(angle);
+                if (travel.z < 0) {
+                    angle *= -1.0f;
+                }
+                tAngleY = angle;
+                std::cout << "T angle Y: " << tAngleY << " T angle Z: " << tAngleZ << std::endl;
 
 
 
@@ -1296,25 +1320,25 @@ int main(int argc, char* argv[])
     float getRandomFloat(float min, float max);
     int fishCount = 0;
     int sharkCount = 0;
-    for (int i = 1; i <= 20; ++i) {
+   for (int i = 1; i <= 20; ++i) {
         float coin = getRandomFloat(-30.0f, 30.0f);
-        if (coin >= -15.0f) {
-            Fish fish(coin);
+        if (coin < 0.0f) {
+            Fish fish(getRandomFloat(5.0f, 15.0f));
             fishList.push_back(fish);
             fishCount++;
         }
         else {
-            Shark shark(coin);
+            Shark shark(getRandomFloat(5.0f, 15.0f));
             sharkList.push_back(shark);
             sharkCount++;
         }
         
     }
 
-    Fish f1 = Fish(15.0f);
-    Fish f2 = Fish(1.0f);
-    Shark s1 = Shark(8.5f);
-    Shark s2 = Shark(10.5f);
+  //  Fish f1 = Fish(15.0f);
+    //Fish f2 = Fish(1.0f);
+    //Shark s1 = Shark(8.5f);
+    //Shark s2 = Shark(10.5f);
     // Entering Main Loop
     while (!glfwWindowShouldClose(window))
     {
@@ -1414,11 +1438,11 @@ int main(int argc, char* argv[])
 
 
         //FISH
-        f1.drive(window);
+       // f1.drive(window);
        // f2.draw();
         //Shark
-       s1.draw();
-       s2.draw();
+       //s1.draw();
+       //s2.draw();
         for (int i = 0; i < sharkCount; ++i) {
             
             sharkList[i].draw();
