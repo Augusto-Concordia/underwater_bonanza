@@ -41,7 +41,7 @@ public:
         GenerateTerrain(int grid_size, float iso_surface_level, glm::vec3 chunk_position, int seed, Shader::Material _material = Shader::Material()); // default constructor
 
         std::vector<YAndNormal> findMatchingYValues(float x, float y);
-        void GenerateChunkTerrain();
+        void GenerateChunkTerrain(bool _newSeed = false);
         void SetupBuffers();
         void DrawChunk(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, const glm::mat4 &_transformMatrix, float _time = 0.0f, int _renderMode = GL_TRIANGLES, const Shader::Material *_material = nullptr);
 

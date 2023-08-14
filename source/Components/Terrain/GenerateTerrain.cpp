@@ -1,3 +1,4 @@
+#include <random>
 #include "GenerateTerrain.h"
 // https://www.youtube.com/watch?v=M3iI2l0ltbE
 // http://www.paulbourke.net/geometry/polygonise/
@@ -420,7 +421,14 @@ std::vector<YAndNormal> GenerateTerrain::findMatchingYValues(float x, float z) {
     return matchingYValues;
 }
 
-void GenerateTerrain::GenerateChunkTerrain() {
+void GenerateTerrain::GenerateChunkTerrain(bool _newSeed) {
+    if (_newSeed) {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> distribution(1, 1000);
+        seed = distribution(gen);
+    }
+
     // grid_size x grid_size x grid_size even cube assumption
     for (int x = 0; x < grid_size; x++) {
         for (int y = 0; y < grid_size; y++) {
@@ -514,6 +522,11 @@ void GenerateTerrain::GenerateChunkTerrain() {
 }
 
 void GenerateTerrain::SetupBuffers() {
+    if (vertex_array_o != 0) {
+        glDeleteVertexArrays(1, &vertex_array_o);
+        glDeleteBuffers(1, &vertex_buffer_o);
+    }
+
     glGenVertexArrays(1, &vertex_array_o);
     glBindVertexArray(vertex_array_o);
     

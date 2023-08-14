@@ -81,13 +81,8 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     test_cube = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), test_material);
 
     // Define terrain parameters
-    int grid_size = 8;
+    int grid_size = 100;
     float iso_surface_level = 0.0f;
-
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> distribution(1, 1000);
-    int seed = distribution(gen);
 
     // FOR GETTING XZ RELATED Y WE CAN JUST HAVE SMALL CHUNKS , CHECK WHAT CHUNK WERE IN AND LOOP THROUGH VERTICES OF THAT CHUNK
 
@@ -98,9 +93,7 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     };
 
     // Create the terrain generator
-    main_terrain = std::make_unique<GenerateTerrain>(grid_size, iso_surface_level, glm::vec3(0.0f,0.0f,0.0f), seed, terrain_material);
-    main_terrain->GenerateChunkTerrain();
-    main_terrain->SetupBuffers();
+    main_terrain = std::make_unique<GenerateTerrain>(grid_size, iso_surface_level, glm::vec3(0.0f,0.0f,0.0f), 0, terrain_material);
 
     //leaf
     Shader::Material Leaf_material =  {
@@ -233,30 +226,15 @@ void Renderer::Init() {
 }
 
 void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
     const auto current_time = (float)glfwGetTime();
 
     // processes input
     InputCallback(_window, _deltaTime);
 
-    // resets the viewport to the window size
-    glViewport(0, 0, viewport_width, viewport_height);
-
-    // clears the color & depth canvas to black
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    main_skybox->UseCubemap(GL_TEXTURE1);
-    ocean_flow_map->UseSingle(GL_TEXTURE2);
-
-    ocean_material->shader->SetTexture("skybox", 1);
-    ocean_material->shader->SetTexture("oceanFlowMap", 2);
-
-    main_ocean->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), current_time, GL_TRIANGLES, ocean_material.get());
-
-    Texture::Clear();
-
-    return;
+    if (!is_underwater) {
+        DrawIntroScene(current_time, _deltaTime);
+        return;
+    }
 
     //animation
     moving_angle = glfwGetTime() * 20.0f;
@@ -379,6 +357,8 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         // enables depth testing again
         glEnable(GL_DEPTH_TEST);
     }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); //unbinds the shadow map framebuffer
 }
 
 void Renderer::ResizeCallback(GLFWwindow* _window, int _displayWidth, int _displayHeight) {
@@ -388,6 +368,37 @@ void Renderer::ResizeCallback(GLFWwindow* _window, int _displayWidth, int _displ
 
     main_camera->SetViewportSize((float)_displayWidth, (float)_displayHeight);
     main_screen->ResizeCallback(_displayWidth, _displayHeight);
+}
+
+void Renderer::SwitchScenes() {
+    is_underwater = !is_underwater;
+
+    if (is_underwater) {
+        main_terrain->GenerateChunkTerrain(true);
+        main_terrain->SetupBuffers();
+    } else {
+
+    }
+}
+
+void Renderer::DrawIntroScene(const double _time, const double _deltaTime) {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // resets the viewport to the window size
+    glViewport(0, 0, viewport_width, viewport_height);
+
+    // clears the color & depth canvas to black
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    main_skybox->UseCubemap(GL_TEXTURE1);
+    ocean_flow_map->UseSingle(GL_TEXTURE2);
+
+    ocean_material->shader->SetTexture("skybox", 1);
+    ocean_material->shader->SetTexture("oceanFlowMap", 2);
+
+    main_ocean->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), (float)_time, GL_TRIANGLES, ocean_material.get());
+
+    Texture::Clear();
 }
 
 void Renderer::DrawOneWeed(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time)
@@ -1004,20 +1015,7 @@ void Renderer::DrawOneCoral2(const glm::vec3 &_position, const glm::vec3 &_rotat
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, -height/4, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,0.0f, -angle_upward));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,angle_side, 0.0f));
-
-
-
-
-
-
 }
-
-
-
-
-
-
-
 
 void Renderer::DrawOneLeaf(glm::mat4 world_transform_matrix, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride){
     auto scale_factor = glm::vec3(1.0f, 1.0f, 1.0f);         // scale for one cube
@@ -1034,6 +1032,12 @@ void Renderer::DrawOneLeaf(glm::mat4 world_transform_matrix, const glm::mat4& _v
 
 void Renderer::InputCallback(GLFWwindow* _window, const double _deltaTime) {
     //keyboard triggers
+    if (Input::IsKeyReleased(_window, GLFW_KEY_ESCAPE))
+        glfwSetWindowShouldClose(_window, true);
+
+    if (Input::IsKeyReleased(_window, GLFW_KEY_ENTER))
+        SwitchScenes();
+
     //camera translates (side to side and zoom forwards & back)
     if (Input::IsKeyPressed(_window, GLFW_KEY_KP_7) || Input::IsKeyPressed(_window, GLFW_KEY_Q))
         main_camera->OneAxisMove(Camera::Translation::UP, 0.1f);

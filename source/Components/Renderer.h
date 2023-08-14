@@ -51,6 +51,7 @@ private:
     int viewport_width, viewport_height;
 
     float moving_angle;
+    bool is_underwater = false;
 
     GLuint shadow_map_fbo = 0;
     GLuint shadow_map_texture = 0;
@@ -63,6 +64,9 @@ public:
 
     void ResizeCallback(GLFWwindow* _window, int _displayWidth, int _displayHeight);
     void InputCallback(GLFWwindow* _window, double _deltaTime);
+
+    void SwitchScenes();
+    void DrawIntroScene(double _time, double _deltaTime);
 
     void DrawOneWeed(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time);
     void DrawOneWeed2(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time);

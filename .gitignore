@@ -53,3 +53,6 @@ imgui.ini
 # Debugging information
 /s_engine.cap
 /traces/
+
+# include assets
+!/assets
