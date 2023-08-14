@@ -16,10 +16,13 @@ public:
 
         static std::shared_ptr<Texture> CreateTexture(const std::string& _fileLocation);
         static std::shared_ptr<Texture> CreateSequenceTexture(const std::string &_fileLocation);
+        static std::shared_ptr<Texture> CreateCubemapTexture(const std::string &_fileLocation);
 
     private:
         static Texture LoadTexture(const std::string &_fileLocation);
         static Texture LoadSequenceTexture(const std::string &_folderLocation);
+
+        static Texture LoadCubemapTexture(const std::string &_folderLocation);
     };
 
 private:
@@ -35,6 +38,8 @@ public:
 
     void UseSingle(GLuint _textureUnit) const;
     void UseSequence(GLuint _textureUnit) const;
+    void UseCubemap(GLuint _textureUnit) const;
 
     static void Clear();
+
 };
