@@ -1210,9 +1210,6 @@ void Renderer::DrawOneClam(const glm::vec3 &_position, const glm::vec3 &_rotatio
     lip_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix,time, GL_TRIANGLES, _materialOverride);
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor_lip);
 
-
-
-
 }
 
 
