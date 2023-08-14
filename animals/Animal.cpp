@@ -31,7 +31,7 @@ public:
 
     }
 
-    void draw() {
+    void Draw() {
         if (coin < 0.0f) {
             update();
             initialRotation = rotate(mat4(1.0f), glm::radians(90.0f), vec3(0.0f, 0.0f, 1.0f));

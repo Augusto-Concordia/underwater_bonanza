@@ -116,6 +116,30 @@ void VisualObject::SetupGlBuffersVerticesNormalsUvsWithIndices(){
     glDeleteBuffers(1, &element_buffer_o);
 }
 
+void VisualObject::SetupGlBuffersVertices() {
+    //generate and bind the circles' vertex array (VAO)
+    glGenVertexArrays(1, &vertex_array_o);
+    glBindVertexArray(vertex_array_o);
+
+    //generate and bind the grid's VBO
+    glGenBuffers(1, &vertex_buffer_o);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_o);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float),
+                 &vertices.front(), GL_STATIC_DRAW);
+
+    //set vertex attributes pointers (position)
+    //strides are 3 * float-size long, because we are including position data in the VAO (Vertex Attribute Object)
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (GLvoid *) nullptr);
+    glEnableVertexAttribArray(0);
+
+    //the following is in this specific order to avoid a dangling EBO
+    //more info: https://learnopengl.com/code_viewer_gh.php?code=src/1.getting_started/2.2.hello_triangle_indexed/hello_triangle_indexed.cpp
+
+    //cleanup buffers
+    glBindVertexArray(0);
+    glDeleteBuffers(1, &vertex_buffer_o);
+}
+
 void VisualObject::SetupGlBuffersVerticesNormals() {
     //generate and bind the circles' vertex array (VAO)
     glGenVertexArrays(1, &vertex_array_o);

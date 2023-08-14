@@ -11,6 +11,7 @@
 #include "Components/Terrain/GenerateTerrain.h"
 #include "Components/Visual/VisualModel.h"
 #include "Screen.h"
+#include "Components/Animal/Animal.hpp"
 
 class Renderer {
 private:
@@ -47,6 +48,10 @@ private:
     std::unique_ptr<VisualCube>  coral_cube;
     std::unique_ptr<VisualCube>  coral_cube_2;
     std::unique_ptr<VisualCube>  coral_cube_3;
+
+    std::unique_ptr<Shader::Material> shark_material;
+    std::unique_ptr<Shark> shark;
+    std::vector<Fish> fish;
 
     int viewport_width, viewport_height;
 

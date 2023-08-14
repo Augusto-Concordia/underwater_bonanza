@@ -190,6 +190,18 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
 
     //skybox
     main_skybox = Texture::Library::CreateCubemapTexture("assets/textures/skybox");
+
+    //shark
+    shark_material =  std::make_unique<Shader::Material>();
+    shark_material->shader = unlit_shader;
+    shark_material->lights = lights;
+    shark_material->line_thickness = 3.0f;
+
+    shark = std::make_unique<Shark>(100.0f);
+    fish = std::vector<Fish>();
+    for (int i = 0; i < 10; ++i) {
+        fish.emplace_back(50.0f);
+    }
 }
 
 void Renderer::Init() {
@@ -253,6 +265,11 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
     ocean_material->shader->SetTexture("oceanFlowMap", 2);
 
     main_ocean->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), current_time, GL_TRIANGLES, ocean_material.get());
+    shark->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, shark_material.get());
+
+    for (auto& one_fish : fish) {
+        one_fish.DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, shark_material.get());
+    }
 
     Texture::Clear();
 

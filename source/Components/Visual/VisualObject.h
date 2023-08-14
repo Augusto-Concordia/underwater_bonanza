@@ -36,6 +36,7 @@ protected:
     void SetupGlBuffersVerticesNormalsUvsWithIndices();
     void SetupGlBuffersVerticesUvsWithIndices();
 
+    void SetupGlBuffersVertices();
     void SetupGlBuffersVerticesNormals();
     void SetupGlBuffersVerticesNormalsUvs();
 };
