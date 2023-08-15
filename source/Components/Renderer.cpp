@@ -464,7 +464,7 @@ void Renderer::CreateSpawnMap(){
                                     } 
                                     if (!valid_y.empty()) { 
                                         int index_y = rand() % (valid_y.size());
-                                        y = valid_y.at(index_y);
+                                        y = valid_y.at(index_y) + 0.5f;
                                         
 
                                         ObjectProperties ObjectProperties{};
@@ -541,87 +541,8 @@ void Renderer::CreateSpawnMap(){
                     case 5: //rock 1
                         for (int x = g_row; x < g_row + skip_size; x+=2) {
                             for (int z = g_col; z < g_col + skip_size; z+=2) {
-                                to_spawn_2 = rand() % 3;
-                                if (to_spawn_2 == 1 && spawnd < 3) {
-                                    //pos
-                                    float position_x  = x + static_cast<int>(rand()) / RAND_MAX * (g_row - x);
-                                    std::vector<float> valid_y;
-                                    std::vector<YAndNormal> position_values = main_terrain->FindMatchingYValues(position_x,z);
-                                    for (auto & pos : position_values) {
-                                        float y = pos.y;
-                                        float norm_y = pos.normal;
-                                        if (norm_y > 0.3) {
-                                            valid_y.push_back(y);
-                                        }
-                                    }
-                                    if (!valid_y.empty()) {
-                                        // get y value
-                                        int index_y = rand() % (valid_y.size());
-                                        y = valid_y.at(index_y);
-
-                                        ObjectProperties ObjectProperties{};
-
-                                        //type we have
-                                        ObjectProperties.type = type;
-                                        //scale
-                                        ObjectProperties.scaleF = 0.8f; //0.3-0.7
-
-                                        //pos
-                                        ObjectProperties.pos = glm::vec3(position_x,y,z);
-
-                                        // put into big list
-                                        spawn_list_Global.push_back(ObjectProperties);
-                                        spawnd += 1;
-                                    }
-                                }
-
-                            }
-                        }
-                        break;
-                    case 6: //rock 2
-                        for (int x = g_row; x < g_row + skip_size; x+=2) {
-                            for (int z = g_col; z < g_col + skip_size; z+=2) {
                                 to_spawn_2 = rand() % 5;
-                                if (to_spawn_2 == 1 && spawnd < 4) {
-                                    //pos
-                                    float position_x  = x + static_cast<int>(rand()) / RAND_MAX * (g_row - x);
-                                    std::vector<float> valid_y;
-                                    std::vector<YAndNormal> position_values = main_terrain->FindMatchingYValues(position_x,z);
-                                    for (auto & pos : position_values) {
-                                        float y = pos.y;
-                                        float norm_y = pos.normal;
-                                        if (norm_y > 0.3) {
-                                            valid_y.push_back(y);
-                                        }
-                                    }
-                                    if (!valid_y.empty()) {
-                                        // get y value
-                                        int index_y = rand() % (valid_y.size());
-                                        y = valid_y.at(index_y);
-
-                                        ObjectProperties ObjectProperties{};
-
-                                        //type we have
-                                        ObjectProperties.type = type;
-                                        //scale
-                                        ObjectProperties.scaleF = 0.8f;
-
-                                        //pos
-                                        ObjectProperties.pos = glm::vec3(position_x,y,z);
-
-                                        // put into big list
-                                        spawn_list_Global.push_back(ObjectProperties);
-                                        spawnd += 1;
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                    case 7: //rock 3
-                        for (int x = g_row; x < g_row + skip_size; x+=2) {
-                            for (int z = g_col; z < g_col + skip_size; z+=2) {
-                                to_spawn_2 = rand() % 5;
-                                if (to_spawn_2 == 1 && spawnd < 6) {
+                                if (to_spawn_2 == 1 && spawnd < 2) {
                                     //pos
                                     float position_x  = x + static_cast<int>(rand()) / RAND_MAX * (g_row - x);
                                     std::vector<float> valid_y;
@@ -644,6 +565,7 @@ void Renderer::CreateSpawnMap(){
                                         ObjectProperties.type = type;
                                         //scale
                                         ObjectProperties.scaleF = 0.5f; //0.3-0.7
+
                                         //pos
                                         ObjectProperties.pos = glm::vec3(position_x,y,z);
 
@@ -652,14 +574,15 @@ void Renderer::CreateSpawnMap(){
                                         spawnd += 1;
                                     }
                                 }
+
                             }
                         }
                         break;
-                    case 8: //pebble
+                    case 6: //rock 2
                         for (int x = g_row; x < g_row + skip_size; x+=2) {
                             for (int z = g_col; z < g_col + skip_size; z+=2) {
-                                to_spawn_2 = rand() % 5;
-                                if (to_spawn_2 == 1 && spawnd < 10) {
+                                to_spawn_2 = rand() % 7;
+                                if (to_spawn_2 == 1 && spawnd < 3) {
                                     //pos
                                     float position_x  = x + static_cast<int>(rand()) / RAND_MAX * (g_row - x);
                                     std::vector<float> valid_y;
@@ -681,7 +604,84 @@ void Renderer::CreateSpawnMap(){
                                         //type we have
                                         ObjectProperties.type = type;
                                         //scale
-                                        ObjectProperties.scaleF = 0.7f; //0.3-0.7
+                                        ObjectProperties.scaleF = 0.4f;
+
+                                        //pos
+                                        ObjectProperties.pos = glm::vec3(position_x,y,z);
+
+                                        // put into big list
+                                        spawn_list_Global.push_back(ObjectProperties);
+                                        spawnd += 1;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case 7: //rock 3
+                        for (int x = g_row; x < g_row + skip_size; x+=2) {
+                            for (int z = g_col; z < g_col + skip_size; z+=2) {
+                                to_spawn_2 = rand() % 8;
+                                if (to_spawn_2 == 1 && spawnd < 4) {
+                                    //pos
+                                    float position_x  = x + static_cast<int>(rand()) / RAND_MAX * (g_row - x);
+                                    std::vector<float> valid_y;
+                                    std::vector<YAndNormal> position_values = main_terrain->FindMatchingYValues(position_x,z);
+                                    for (auto & pos : position_values) {
+                                        float y = pos.y;
+                                        float norm_y = pos.normal;
+                                        if (norm_y > 0.3) {
+                                            valid_y.push_back(y);
+                                        }
+                                    }
+                                    if (!valid_y.empty()) {
+                                        // get y value
+                                        int index_y = rand() % (valid_y.size());
+                                        y = valid_y.at(index_y);
+
+                                        ObjectProperties ObjectProperties{};
+
+                                        //type we have
+                                        ObjectProperties.type = type;
+                                        //scale
+                                        ObjectProperties.scaleF = 0.4f; //0.3-0.7
+                                        //pos
+                                        ObjectProperties.pos = glm::vec3(position_x,y,z);
+
+                                        // put into big list
+                                        spawn_list_Global.push_back(ObjectProperties);
+                                        spawnd += 1;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case 8: //pebble
+                        for (int x = g_row; x < g_row + skip_size; x+=2) {
+                            for (int z = g_col; z < g_col + skip_size; z+=2) {
+                                to_spawn_2 = rand() % 10;
+                                if (to_spawn_2 == 1 && spawnd < 8) {
+                                    //pos
+                                    float position_x  = x + static_cast<int>(rand()) / RAND_MAX * (g_row - x);
+                                    std::vector<float> valid_y;
+                                    std::vector<YAndNormal> position_values = main_terrain->FindMatchingYValues(position_x,z);
+                                    for (auto & pos : position_values) {
+                                        float y = pos.y;
+                                        float norm_y = pos.normal;
+                                        if (norm_y > 0.3) {
+                                            valid_y.push_back(y);
+                                        }
+                                    }
+                                    if (!valid_y.empty()) {
+                                        // get y value
+                                        int index_y = rand() % (valid_y.size());
+                                        y = valid_y.at(index_y);
+
+                                        ObjectProperties ObjectProperties{};
+
+                                        //type we have
+                                        ObjectProperties.type = type;
+                                        //scale
+                                        ObjectProperties.scaleF = 0.5f; //0.3-0.7
 
                                         //pos
                                         ObjectProperties.pos = glm::vec3(position_x,y,z);
