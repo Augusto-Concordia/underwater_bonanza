@@ -75,6 +75,7 @@ private:
     std::unique_ptr<Shader::Material> shark_material;
     std::unique_ptr<Shark> shark;
     std::vector<Fish> fish;
+    std::vector<Shark> sharks;
 
     int viewport_width, viewport_height;
     float coinFlip;
