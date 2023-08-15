@@ -564,7 +564,7 @@ void Renderer::CreateSpawnMap(){
                                         //type we have
                                         ObjectProperties.type = type;
                                         //scale
-                                        ObjectProperties.scaleF = 0.5f; //0.3-0.7
+                                        ObjectProperties.scaleF = 0.3f; //0.3-0.7
 
                                         //pos
                                         ObjectProperties.pos = glm::vec3(position_x,y,z);
@@ -604,7 +604,7 @@ void Renderer::CreateSpawnMap(){
                                         //type we have
                                         ObjectProperties.type = type;
                                         //scale
-                                        ObjectProperties.scaleF = 0.4f;
+                                        ObjectProperties.scaleF = 0.3f;
 
                                         //pos
                                         ObjectProperties.pos = glm::vec3(position_x,y,z);
@@ -643,7 +643,7 @@ void Renderer::CreateSpawnMap(){
                                         //type we have
                                         ObjectProperties.type = type;
                                         //scale
-                                        ObjectProperties.scaleF = 0.4f; //0.3-0.7
+                                        ObjectProperties.scaleF = 0.3f; //0.3-0.7
                                         //pos
                                         ObjectProperties.pos = glm::vec3(position_x,y,z);
 
@@ -681,7 +681,7 @@ void Renderer::CreateSpawnMap(){
                                         //type we have
                                         ObjectProperties.type = type;
                                         //scale
-                                        ObjectProperties.scaleF = 0.5f; //0.3-0.7
+                                        ObjectProperties.scaleF = 0.3f; //0.3-0.7
 
                                         //pos
                                         ObjectProperties.pos = glm::vec3(position_x,y,z);
