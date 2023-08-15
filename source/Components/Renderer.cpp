@@ -214,9 +214,11 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
 
     shark = std::make_unique<Shark>(100.0f);
     fish = std::vector<Fish>();
-    for (int i = 0; i < 10; ++i) {
-        fish.emplace_back(50.0f);
-    }
+    sharks = std::vector<Shark>();
+    generateAnimals();
+    /*for (int i = 0; i < 10; ++i) {
+    fish.emplace_back(50.0f);
+    }*/
 
     // SOUNDS
 
@@ -846,6 +848,13 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), second_world_transform_matrix, current_time, GL_TRIANGLES, shadow_mapper_material.get());
 
         main_terrain->DrawChunk(light.GetViewProjection(), light.GetPosition(), glm::mat4(1.0f), current_time, GL_TRIANGLES, shadow_mapper_material.get());
+      
+        for (auto& one_fish : fish) {
+        one_fish.DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, shark_material.get());
+        }
+        for (auto& one_sharks : sharks) {
+        one_sharks.DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, shark_material.get());
+        }
 
         VisualCube::DrawInstanced(light.GetViewProjection(), light.GetPosition(), current_time, GL_TRIANGLES, shadow_mapper_material.get());
     }
@@ -878,7 +887,10 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         shark->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, shark_material.get());
 
         for (auto& one_fish : fish) {
-            one_fish.DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, shark_material.get());
+    one_fish.DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, shark_material.get());
+        }
+        for (auto& one_sharks : sharks) {
+    one_sharks.DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, shark_material.get());
         }
 
         VisualCube::DrawInstanced(main_camera->GetViewProjection(), main_camera->GetPosition(), current_time, GL_TRIANGLES, shark_material.get());
@@ -1021,7 +1033,25 @@ void Renderer::DrawOneWeed(const glm::vec3 &_position, const glm::vec3 &_rotatio
 
 
 }
+float Renderer::getRandomFloat(float min, float max) {
+    return min + static_cast<float>(rand()) / RAND_MAX * (max - min);
+}
 
+void Renderer::generateAnimals() {
+    fish.clear();
+    sharks.clear();
+    for (int i = 0; i < 40; ++i) {
+        float coin = getRandomFloat(-30.0f, 30.0f);
+        if (coin < 0.0f) {
+            fish.emplace_back(getRandomFloat(1.0f,4.0f));
+        }
+        else {
+            sharks.emplace_back(getRandomFloat(1.0f, 4.0f));
+        }
+
+    }
+    
+}
 
 void Renderer::DrawOneWeed2(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time, float height, glm::vec3 _weedcolor, glm::vec3 _leafcolor)
 {
