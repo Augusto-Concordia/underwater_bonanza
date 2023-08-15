@@ -13,12 +13,12 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     main_camera = std::make_unique<Camera>(glm::vec3(40.0f, 40.0f, 25.0f), glm::vec3(25.0f , 25.0f, 25.0f), _initialWidth, _initialHeight);
 
     lights = std::make_shared<std::vector<Light>>();
-    lights->emplace_back(glm::vec3(2.0f, 100.0f, 2.0f), glm::vec3(1.0f), 0.1f, 0.2f, 0.4f, Light::Type::DIRECTIONAL);
+    lights->emplace_back(glm::vec3(50.0f, 150.0f, 50.0f), glm::vec3(1.0f), 0.1f, 0.2f, 0.4f, Light::Type::DIRECTIONAL);
     //lights->emplace_back(glm::vec3(30.0f, 10.0f, 0.0f), glm::vec3(0.09f, 0.95f, 0.08f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
     //lights->emplace_back(glm::vec3(-30.0f, 10.0f, 0.0f), glm::vec3(0.99f, 0.05f, 0.08f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
     //lights->emplace_back(glm::vec3(0.0f, 34.0f, 36.0f), glm::vec3(0.09f, 0.05f, 0.78f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
 
-    auto lit_shader = Shader::Library::CreateShader("shaders/lit/lit.vert", "shaders/lit/lit.frag");
+    lit_shader = Shader::Library::CreateShader("shaders/lit/lit.vert", "shaders/lit/lit.frag");
     auto terrain_lit_shader = Shader::Library::CreateShader("shaders/terrain/lit.vert", "shaders/terrain/lit.frag");
     auto unlit_shader = Shader::Library::CreateShader("shaders/unlit/unlit.vert", "shaders/unlit/unlit.frag");
     auto ocean_shader = Shader::Library::CreateShader("shaders/ocean/ocean.vert", "shaders/ocean/ocean.frag");
@@ -209,10 +209,10 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     main_skybox = Texture::Library::CreateCubemapTexture("assets/textures/skybox");
 
     //shark
-    shark_material =  std::make_unique<Shader::Material>();
-    shark_material->shader = lit_shader;
-    shark_material->lights = lights;
-    shark_material->line_thickness = 3.0f;
+    default_material =  std::make_unique<Shader::Material>();
+    default_material->shader = lit_shader;
+    default_material->lights = lights;
+    default_material->line_thickness = 3.0f;
 
     fish = std::vector<Fish>();
     sharks = std::vector<Shark>();
@@ -290,6 +290,8 @@ void Renderer::CreateSpawnMap(){
 
     int max_flower_spawn;
     float height;
+
+    spawn_list_Global.clear();
 
     for (int g_row = 0; g_row < grid_size; g_row += skip_size) {
         for (int g_col = 0; g_col < grid_size; g_col += skip_size) {
@@ -712,29 +714,29 @@ void Renderer::SpawnAllObjects(){
         // std::cout<<"HELOOOOO"<<type<<std::endl;
         switch(type) {
             case 0: // basic seaweed
-                DrawOneWeed(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), shark_material.get(), moving_angle , object.x_offset , object.color1 ,glm::vec3(0.3f,0.3f,0.3f));
+                DrawOneWeed(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), default_material.get(), moving_angle , object.x_offset , object.color1 , glm::vec3(0.3f, 0.3f, 0.3f));
                 // std::cout<<"draw seawwed"<<std::endl;
                 // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
                 break;
             case 1: // tall seaweed
-                DrawOneWeed2(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), shark_material.get(), moving_angle, object.height, object.color1, object.color2);
+                DrawOneWeed2(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), default_material.get(), moving_angle, object.height, object.color1, object.color2);
                 // std::cout<<"draw plant"<<std::endl;
                 // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
                 break;
             case 2: // clam
 
-                DrawOneClam(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), shark_material.get(), moving_angle, object.color1, object.color2);
+                DrawOneClam(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), default_material.get(), moving_angle, object.color1, object.color2);
                 // std::cout<<"draw clam"<<std::endl;
                 // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
                 break;
             case 3: // coral 1
-                DrawOneCoral(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), shark_material.get(), moving_angle, object.color1, object.color2, object.color3);
+                DrawOneCoral(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), default_material.get(), moving_angle, object.color1, object.color2, object.color3);
                 // std::cout<<"draw coral"<<std::endl;
                 // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
                 break;
             case 4: // coral 2
             // std::cout<<"HELOOOOO"<<type<<std::endl;
-                DrawOneCoral2(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), shark_material.get(), moving_angle, object.color1, object.color2, object.color3,object.branches);
+                DrawOneCoral2(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), default_material.get(), moving_angle, object.color1, object.color2, object.color3, object.branches);
                 // std::cout<<"draw coral 2"<<std::endl;
                 // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
                 break;
@@ -887,13 +889,13 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         SpawnAllObjects();
 
         for (auto& one_fish : fish) {
-            one_fish.DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, shark_material.get());
+            one_fish.DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, default_material.get());
         }
         for (auto& one_sharks : sharks) {
-            one_sharks.DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, shark_material.get());
+            one_sharks.DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, default_material.get());
         }
 
-        VisualCube::DrawInstanced(main_camera->GetViewProjection(), main_camera->GetPosition(), current_time, GL_TRIANGLES, shark_material.get());
+        VisualCube::DrawInstanced(main_camera->GetViewProjection(), main_camera->GetPosition(), current_time, GL_TRIANGLES, default_material.get());
     }
 
     // unbinds the main screen, so that it can be used as a texture
@@ -1039,7 +1041,7 @@ void Renderer::DrawOneWeed(const glm::vec3 &_position, const glm::vec3 &_rotatio
         //draw stem block
         world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(x_offset+sin_offset, y_offset, 0.0f));
         world_transform_matrix = glm::scale(world_transform_matrix, scale_factor);
-        VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+        VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _weedcolor);
         world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor);
 
 
@@ -1076,7 +1078,7 @@ void Renderer::DrawOneWeed2(const glm::vec3 &_position, const glm::vec3 &_rotati
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, 0.0f, 0.0f));
     //world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, scale_factor);
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _weedcolor);
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor);
 
     float x_offset = 0.025f;
@@ -1109,7 +1111,7 @@ void Renderer::DrawOneWeed2(const glm::vec3 &_position, const glm::vec3 &_rotati
         world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(x_offset, y_offset, 0.0f));
         //world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f, bounce * rot_bounce, 0.0f));
         world_transform_matrix = glm::scale(world_transform_matrix, scale_factor);
-        VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+        VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _weedcolor);
         world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor);
         //world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f, -bounce * rot_bounce, 0.0f));
 
@@ -1639,43 +1641,43 @@ void Renderer::DrawRock(const glm::vec3 &_position, const glm::vec3 &_rotation, 
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(5.0f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 0.50f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.20f, 0.25f, 1.0f));
 
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
      world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(5.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(-2.0f, 5.0f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 0.25f, 1.0f));
 
      world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(2.50f, 0.0f, 0.70f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(-5.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.0f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.20f, 1.0f, 1.0f));
 
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-4.50f, 0.70f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(6.0f, 4.0f, 0.5f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.20f, 0.25f, 1.0f));
 
      world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-3.50f, -1.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(10.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(6.0f, 2.0f, 3.5f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(6.0f, 2.0f, 3.5f));
 
      world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(3.50f, 2.0f, -0.80f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(-45.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(5.0f, 3.0f, 1.50f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.20f, 0.25f, 1.0f));
 
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(2.0f, 0.0f, 1.80f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(-75.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(5.0f, 1.0f, 1.50f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.20f, 0.25f, 1.0f));
 }
 
@@ -1694,29 +1696,29 @@ void Renderer::DrawRock2(const glm::vec3 &_position, const glm::vec3 &_rotation,
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.10f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 3.0f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 3.0f, 1.0f));
 
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 3.0f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 3.0f, 1.0f));
 
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 3.0f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 3.0f, 1.0f));
 
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.20f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 4.0f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 4.0f, 1.0f));
 
      world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.30f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 4.0f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 4.0f, 1.0f));
 
     //second rock
@@ -1724,24 +1726,24 @@ void Renderer::DrawRock2(const glm::vec3 &_position, const glm::vec3 &_rotation,
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.0f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.0f, 1.0f));
 
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.80f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 1.80f, 1.0f));
 
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.20f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.1f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.1f, 1.0f));
 
      world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.30f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.70f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 1.70f, 1.0f));
 
 
@@ -1750,30 +1752,30 @@ void Renderer::DrawRock2(const glm::vec3 &_position, const glm::vec3 &_rotation,
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-3.0f, 0.0f, -2.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 1.0f, 1.0f));
 
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 1.0f, 1.0f));
 
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.20f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 1.0f, 1.0f));
 
      world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.30f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 1.0f, 1.0f));
 
      world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.50f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 1.0f, 1.0f));
 
     ////
@@ -1782,72 +1784,72 @@ void Renderer::DrawRock2(const glm::vec3 &_position, const glm::vec3 &_rotation,
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(3.0f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 4.30f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 4.30f, 1.0f));
 
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 4.30f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 4.30f, 1.0f));
 
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.20f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 4.30f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 4.30f, 1.0f));
 
      world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.30f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 4.30f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 4.30f, 1.0f));
 
     //fifth rock
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.30f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.30f, 1.0f));
 
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.30f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.30f, 1.0f));
 
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.20f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.30f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.30f, 1.0f));
 
      world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.30f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.30f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.30f, 1.0f));
 
     //sixth rock
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-2.0f, 0.0f, -1.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.30f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.30f, 1.0f));
 
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.30f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.30f, 1.0f));
 
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.20f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.30f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.30f, 1.0f));
 
      world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.30f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 10.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.30f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.30f, 1.0f));
 
 }
@@ -1867,40 +1869,40 @@ void Renderer::DrawRock3(const glm::vec3 &_position, const glm::vec3 &_rotation,
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(5.0f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.5f, 1.50f, 1.50f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.5f, 1.50f, 1.50f));
 
 //second
      world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 20.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.5f, 1.50f, 6.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.5f, 1.50f, 6.0f));
 
      world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(1.50f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, -30.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.0f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.0f, 1.0f));
 
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-0.50f, 1.50f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, -30.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(3.0f, 2.0f, 6.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.0f, 1.0f));
 
      world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, -40.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.0f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.0f, 1.0f));
 
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 10.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.0f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.0f, 1.0f));
 
  world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 20.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.0f, 1.0f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.344f));
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.0f, 1.0f));
 
 }
@@ -1919,44 +1921,44 @@ void Renderer::DrawPebble(const glm::vec3 &_position, const glm::vec3 &_rotation
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(5.0f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.70f, 0.20f, 0.80f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.444f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
 
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, 0.50f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.60f, 0.90f, 0.70f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.444f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
 
      world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, 0.50f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.50f, 0.90f, 0.50f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.444f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
 
      world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(3.0f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.50f, 0.50f, 0.50f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.444f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
 
      world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-13.0f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.50f, 0.50f, 0.50f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.444f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
 
  world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-3.0f, 0.0f, -2.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.70f, 0.70f, 0.70f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.444f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
 
     for (int i=0;i<6;i++){
         world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-3.0f+i, 0.0f, -2.0f+i));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.70f, 0.70f, 0.70f));
-    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, _materialOverride->color);
+    VisualCube::CalculateInstancedFromMatrix(world_transform_matrix, glm::vec3(0.444f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
 
     }

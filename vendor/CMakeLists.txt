@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 #================== SFML =================
 
 # disables all sfml docs, tests and examples from builds
+set(SFML_STATIC_LIBRARIES ON CACHE BOOL "" FORCE)
 set(SFML_BUILD_DOC OFF CACHE BOOL "" FORCE)
 set(SFML_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(SFML_BUILD_TESTS OFF CACHE BOOL "" FORCE)

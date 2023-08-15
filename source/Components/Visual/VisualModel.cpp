@@ -93,6 +93,8 @@ void VisualModel::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::ve
     current_material->shader->SetModelMatrix(_transformMatrix);
     current_material->shader->SetViewProjectionMatrix(_viewProjection);
 
+    current_material->shader->SetInt("u_instanced", 0);
+
     // camera properties
     current_material->shader->SetVec3("u_cam_pos", _cameraPosition);
 

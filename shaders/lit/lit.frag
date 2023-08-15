@@ -21,6 +21,7 @@ struct Light {
     mat4 light_view_projection;
 };
 
+uniform int u_instanced; //is the mesh instanced?
 uniform float u_time; //time
 uniform vec3 u_cam_pos; //cam position
 
@@ -42,6 +43,7 @@ in vec3 Normal; //normal of the fragment
 in vec3 WorldPos; //position of the fragment in world space
 in vec4 FragPosLightSpace[1]; //light space position of the fragment
 in vec2 FragUv; //uv of the fragment
+in vec4 FragColor; //color of the fragment
 
 layout(location = 0) out vec4 out_color; //rgba color output
 layout(location = 1) out vec4 camera_pos; //camera-space position output
@@ -191,7 +193,7 @@ void main() {
 
     approximateAmbient = approximateAmbient / u_lights.length();
 
-    vec3 colorResult = (approximateAmbient + lightsColor) * vec3(mix(vec4(u_color, 1.0), texture(u_texture, FragUv), u_texture_influence)); //pure color or texture, mixed with lighting
+    vec3 colorResult = (approximateAmbient + lightsColor) * vec3(mix(vec4((u_instanced == 1 ? FragColor.rgb : u_color), 1.0), texture(u_texture, FragUv), u_texture_influence)); //pure color or texture, mixed with lighting
 
     out_color = vec4(colorResult, u_alpha);
     camera_pos = vec4(gl_FragCoord.xyz / gl_FragCoord.w, 1.0); //true depth output

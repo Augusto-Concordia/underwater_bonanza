@@ -274,7 +274,7 @@ void VisualCube::SetupGlBuffersInstanced() {
 void VisualCube::CalculateInstancedFromMatrix(const glm::mat4 &_transformMatrix, const glm::vec3& _color) {
 
     VisualCube::cube_transforms.push_back(_transformMatrix);
-    //VisualCube::cube_colors.push_back(_color);
+    VisualCube::cube_colors.push_back(_color);
 }
 
 void VisualCube::DrawInstanced(const glm::mat4 &_viewProjection, const glm::vec3 &_cameraPosition, float _time, int _renderMode, const Shader::Material *_material) {
@@ -321,7 +321,7 @@ void VisualCube::DrawInstanced(const glm::mat4 &_viewProjection, const glm::vec3
     glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * VisualCube::cube_transforms.size(), VisualCube::cube_transforms.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, VisualCube::cube_colors_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * VisualCube::cube_colors.size(), VisualCube::cube_colors.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * VisualCube::cube_colors.size(), VisualCube::cube_colors.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 

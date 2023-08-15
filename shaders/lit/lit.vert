@@ -33,11 +33,13 @@ layout (location = 0) in vec3 vPos; //vertex input position
 layout (location = 1) in vec3 vNormal; //vertex input normal
 layout (location = 2) in vec2 vUv; //vertex input uv
 layout (location = 3) in mat4 vTransform; //model transformation matrix
+layout (location = 4) in vec3 vColor; //model transformation matrix
 
 out vec3 Normal;
 out vec3 WorldPos;
 out vec4 FragPosLightSpace[1];
 out vec2 FragUv;
+out vec4 FragColor;
 
 void main() {
     mat4 actualModelTransform = u_instanced == 1 ? vTransform : u_model_transform; //if the model transform is not provided, use the default one
@@ -51,6 +53,7 @@ void main() {
     }
 
     FragUv = vUv / u_texture_tiling;
+    FragColor = vec4(vColor, 1.0);
 
     gl_Position = u_view_projection * vec4(WorldPos, 1.0); //gl_Position is a built-in property of a vertex shader
 }

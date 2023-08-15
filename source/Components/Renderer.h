@@ -77,7 +77,9 @@ private:
     //item storage
     std::vector<ObjectProperties> spawn_list_Global;
 
-    std::unique_ptr<Shader::Material> shark_material;
+    std::shared_ptr<Shader> lit_shader;
+    std::unique_ptr<Shader::Material> default_material;
+
     std::vector<Fish> fish;
     std::vector<Shark> sharks;
 
