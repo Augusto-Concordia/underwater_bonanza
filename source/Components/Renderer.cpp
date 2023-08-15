@@ -106,8 +106,6 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     // Create the terrain generator
     main_terrain = std::make_unique<GenerateTerrain>(grid_size, iso_surface_level, glm::vec3(0.0f,0.0f,0.0f), 0, terrain_material);
 
-     CreateSpawnMap();
-
      //rock cube
     Shader::Material rock_material = {
             .shader = lit_shader,
@@ -324,8 +322,6 @@ void Renderer::CreateSpawnMap(){
                                 if (!valid_y.empty()) {
                                     // get y value
                                     int index_y = rand() % (valid_y.size());
-                                    std::cout<<"bitch!"<<valid_y.size()<<std::endl;
-                                    std::cout<<"ellooo!"<<index_y<<std::endl;
                                     y = valid_y.at(index_y);
 
                                     //to spawn or not to spawn
@@ -465,17 +461,11 @@ void Renderer::CreateSpawnMap(){
                                         if (norm_y > 0.3) {
                                             valid_y.push_back(y);
                                         }
-                                    }
-                                    if (!valid_y.empty()) {
-                                        // get y value
-                                        float min_y = 20.0f;
-                                        for (auto & y : valid_y) {
-                                            if (y < min_y) { min_y = y;}
-                                        }
-                                        y = min_y;
-                                        //int index_y = rand() % (valid_y.size());
-                                        //y = valid_y.at(index_y);
-
+                                    } 
+                                    if (!valid_y.empty()) { 
+                                        int index_y = rand() % (valid_y.size());
+                                        y = valid_y.at(index_y);
+                                        
 
                                         ObjectProperties ObjectProperties{};
 
@@ -938,6 +928,8 @@ void Renderer::SwitchScenes() {
     if (is_underwater) {
         main_terrain->GenerateChunkTerrain(true);
         main_terrain->SetupBuffers();
+
+        CreateSpawnMap();
 
         main_theme->play();
         underwater_sfx->play();

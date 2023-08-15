@@ -59,3 +59,15 @@ imgui.ini
 *.json
 underwater_bonanza
 .DS_Store
+*.jpg
+*.bmp
+*.png
+*.cmake
+build/vendor/assimp/include/assimp/config.h
+build/vendor/glfw/src/glfw3.pc
+*.frag
+*.vert
+*.mp3
+*.h
+*.pc
+vendor/assimp

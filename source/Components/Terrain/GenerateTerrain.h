@@ -35,7 +35,7 @@ private:
         [[nodiscard]] float GenerateRandomNumber(float minValue, float maxValue) const;
         float DensityFunc(glm::vec3 point);
 
-        glm::vec3 barycentricCoordinates(glm::vec2 point, glm::vec3 A, glm::vec3 B, glm::vec3 C);
+        //glm::vec3 barycentricCoordinates(glm::vec2 point, glm::vec3 A, glm::vec3 B, glm::vec3 C);
 
 public:
         GenerateTerrain(int grid_size, float iso_surface_level, glm::vec3 chunk_position, int seed, Shader::Material _material = Shader::Material()); // default constructor

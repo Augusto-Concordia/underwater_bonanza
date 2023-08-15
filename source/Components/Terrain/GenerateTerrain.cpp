@@ -367,14 +367,14 @@ float GenerateTerrain::DensityFunc(glm::vec3 point) {
     return density;
 }
 
+/*
 glm::vec3 GenerateTerrain::barycentricCoordinates(glm::vec2 point, glm::vec3 A, glm::vec3 B, glm::vec3 C) {
     // using barycentric to get u,v,w
     // if the values are negative means that point it not in triangle
-    /*    A
-        /   \
-       /   .P\
-      B ----- C
-    */
+    //     A
+    //   /   \
+    //  /   .P\
+    // B ----- C
     // subtriangles
     glm::vec3 AB = B - A;
     glm::vec3 AC = C - A;
@@ -395,10 +395,12 @@ glm::vec3 GenerateTerrain::barycentricCoordinates(glm::vec2 point, glm::vec3 A, 
 
     return glm::vec3(u, v, w);
 }
+*/
 
 std::vector<YAndNormal> GenerateTerrain::FindMatchingYValues(float x, float z) {
     std::vector<YAndNormal> matchingYValues;
 
+    /*
     for (int vertex = 0; vertex < vertices.size(); vertex += 3) {
         glm::vec3 index1 = vertices[vertex].position;
         glm::vec3 index2 = vertices[vertex+1].position;
@@ -418,6 +420,29 @@ std::vector<YAndNormal> GenerateTerrain::FindMatchingYValues(float x, float z) {
             matchingYValues.push_back(yAndNormal);
         }
     }
+    */
+   glm::vec3 closest_vertex;
+    glm::vec3 closest_norm;
+   glm::vec3 finding = glm::vec3(x, 0.0f, z);
+   float d = 100.0f;
+   for (int vertex = 0; vertex < vertices.size(); vertex += 1) { 
+
+        float pox = vertices[vertex].position.x;
+        float poz = vertices[vertex].position.z;
+        glm::vec3 current_point = glm::vec3(pox, 0.0f, poz);
+
+        if (glm::distance(finding, current_point) < d) {
+            d = glm::distance(finding, current_point);
+            closest_vertex = vertices[vertex].position;
+            closest_norm = vertices[vertex].normal;
+            
+        }
+   }
+    YAndNormal yAndNormal;
+    yAndNormal.y = closest_vertex.y;
+    yAndNormal.normal = closest_norm.y;
+    matchingYValues.push_back(yAndNormal);
+
     return matchingYValues;
 }
 
