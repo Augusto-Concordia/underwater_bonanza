@@ -24,7 +24,7 @@ struct Light {
 uniform float u_time; //time
 uniform vec3 u_cam_pos; //cam position
 
-uniform Light u_lights[4];
+uniform Light u_lights[1];
 uniform sampler2DArray u_light_depth_textures;
 
 uniform vec3 u_color; //color
@@ -40,7 +40,7 @@ uniform sampler2DArray u_caustics_texture; //caustics texture
 
 in vec3 Normal; //normal of the fragment
 in vec3 WorldPos; //position of the fragment in world space
-in vec4 FragPosLightSpace[4]; //light space position of the fragment
+in vec4 FragPosLightSpace[1]; //light space position of the fragment
 in vec2 FragUv; //uv of the fragment
 
 layout(location = 0) out vec4 out_color; //rgba color output

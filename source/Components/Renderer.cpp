@@ -208,7 +208,7 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
 
     //shark
     shark_material =  std::make_unique<Shader::Material>();
-    shark_material->shader = unlit_shader;
+    shark_material->shader = lit_shader;
     shark_material->lights = lights;
     shark_material->line_thickness = 3.0f;
 
