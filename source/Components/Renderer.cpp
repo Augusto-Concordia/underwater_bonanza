@@ -112,8 +112,8 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     Shader::Material rock_material = {
             .shader = lit_shader,
             .line_thickness = 3.0f,
+            .color = glm::vec3(0.0f, 0.0f, 1.0f),
             .lights = lights,
-            .color = glm::vec3(0.0f, 0.0f, 1.0f)
     };
 
     rock_cube = std::make_unique<VisualCube>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f), rock_material);
@@ -207,6 +207,18 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
 
     //skybox
     main_skybox = Texture::Library::CreateCubemapTexture("assets/textures/skybox");
+
+    //shark
+    shark_material =  std::make_unique<Shader::Material>();
+    shark_material->shader = unlit_shader;
+    shark_material->lights = lights;
+    shark_material->line_thickness = 3.0f;
+
+    shark = std::make_unique<Shark>(100.0f);
+    fish = std::vector<Fish>();
+    for (int i = 0; i < 10; ++i) {
+        fish.emplace_back(50.0f);
+    }
 
     // SOUNDS
 
@@ -746,18 +758,6 @@ void Renderer::SpawnAllObjects(){
                 break;
         }
     }
-
-    //shark
-    shark_material =  std::make_unique<Shader::Material>();
-    shark_material->shader = unlit_shader;
-    shark_material->lights = lights;
-    shark_material->line_thickness = 3.0f;
-
-    shark = std::make_unique<Shark>(100.0f);
-    fish = std::vector<Fish>();
-    for (int i = 0; i < 10; ++i) {
-        fish.emplace_back(50.0f);
-    }
 }
 
 void Renderer::Init() {
@@ -812,16 +812,6 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         DrawIntroScene(current_time, _deltaTime);
         return;
     }
-    main_ocean->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), current_time, GL_TRIANGLES, ocean_material.get());
-    shark->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, shark_material.get());
-
-    for (auto& one_fish : fish) {
-        one_fish.DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, shark_material.get());
-    }
-
-    Texture::Clear();
-
-    return;
 
     //animation
     moving_angle = glfwGetTime() * 20.0f;
@@ -901,20 +891,13 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
 
         SpawnAllObjects();
 
+        main_ocean->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), current_time, GL_TRIANGLES, ocean_material.get());
+        shark->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, shark_material.get());
 
-            //DrawOneWeed(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.2f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle , 0.1f , glm::vec3(1.0f, 1.0f, 1.0f) ,glm::vec3(0.3f));
-
-            // DrawOneWeed2(glm::vec3(2.0f, 1.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle, 70.0f, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f) );
-
-            // DrawOneClam(glm::vec3(3.0f, 1.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-
-            // DrawOneCoral(glm::vec3(4.0f, 1.0f, 4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-
-            // DrawOneCoral2(glm::vec3(5.0f, 1.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f),5.0f);
-
+        for (auto& one_fish : fish) {
+            one_fish.DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, shark_material.get());
+        }
     }
-
-
 
     // unbinds the main screen, so that it can be used as a texture
     main_screen->Unbind();
