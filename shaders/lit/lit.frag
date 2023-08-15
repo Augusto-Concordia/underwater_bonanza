@@ -27,7 +27,7 @@ uniform vec3 u_cam_pos; //cam position
 uniform Light u_lights[1];
 uniform sampler2DArray u_light_depth_textures;
 
-uniform vec3 u_color; //color
+uniform vec3 u_color = vec3(1.0f); //color
 uniform float u_alpha; //opacity
 uniform int u_shininess; //material shininess
 

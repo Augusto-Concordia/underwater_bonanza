@@ -54,6 +54,9 @@ private:
 
     std::unique_ptr<VisualCube> test_cube;
 
+    //camera bounding colume
+    std::unique_ptr<VisualCube>  camera_bounding_volume;
+
     //plants and seaweed
     std::unique_ptr<Leaf> leaf_cube;
     std::unique_ptr<VisualCube>  stem_cube;

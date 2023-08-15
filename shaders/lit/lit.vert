@@ -23,6 +23,7 @@ struct Light {
 
 uniform Light u_lights[1];
 
+uniform int u_instanced; //is the mesh instanced?
 uniform mat4 u_model_transform; //model matrix
 uniform mat4 u_view_projection; //view projection matrix
 
@@ -31,6 +32,7 @@ uniform vec2 u_texture_tiling; //texture (uv) tiling
 layout (location = 0) in vec3 vPos; //vertex input position
 layout (location = 1) in vec3 vNormal; //vertex input normal
 layout (location = 2) in vec2 vUv; //vertex input uv
+layout (location = 3) in mat4 vTransform; //model transformation matrix
 
 out vec3 Normal;
 out vec3 WorldPos;
@@ -38,9 +40,11 @@ out vec4 FragPosLightSpace[1];
 out vec2 FragUv;
 
 void main() {
-    Normal = mat3(transpose(inverse(u_model_transform))) * vNormal; //we need to transform the normal with the normal matrix (https://learnopengl.com/Lighting/Basic-Lighting & http://www.lighthouse3d.com/tutorials/glsl-12-tutorial/the-normal-matrix/)
+    mat4 actualModelTransform = u_instanced == 1 ? vTransform : u_model_transform; //if the model transform is not provided, use the default one
 
-    WorldPos = vec3(u_model_transform * vec4(vPos, 1.0));
+    Normal = mat3(transpose(inverse(actualModelTransform))) * vNormal; //we need to transform the normal with the normal matrix (https://learnopengl.com/Lighting/Basic-Lighting & http://www.lighthouse3d.com/tutorials/glsl-12-tutorial/the-normal-matrix/)
+
+    WorldPos = vec3(actualModelTransform * vec4(vPos, 1.0));
 
     for (int i = 0; i < u_lights.length(); i++) {
         FragPosLightSpace[i] = u_lights[i].light_view_projection * vec4(WorldPos, 1.0);

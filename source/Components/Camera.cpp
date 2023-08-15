@@ -20,6 +20,7 @@ void Camera::OneAxisMove(Camera::Translation _translation, float _delta) {
     //2 delta variables so that when we are translating into the target (CAMERA_FORWARD & CAMERA_BACKWARD),
     // we don't move the target too
     auto delta_cam = glm::vec3(0), delta_target = glm::vec3(0);
+    prev_pos = cam_position;
 
     switch (_translation) {
         case UP:
@@ -52,10 +53,10 @@ void Camera::OneAxisMove(Camera::Translation _translation, float _delta) {
 
             //camera forward & backward follows the center of the camera's view
         case CAMERA_FORWARD:
-            delta_cam = -_delta * translation_speed * cam_forward;
+            delta_target = delta_cam = -_delta * translation_speed * cam_forward;
             break;
         case CAMERA_BACKWARD:
-            delta_cam = _delta * translation_speed * cam_forward;
+            delta_target = delta_cam = _delta * translation_speed * cam_forward;
             break;
     }
 
@@ -154,6 +155,7 @@ void Camera::SetDefaultPositionAndTarget() {
 }
 
 void Camera::SetPosition(const glm::vec3 &_position) {
+    prev_pos = cam_position;
     cam_position = _position;
     distance_to_target = glm::length(cam_position - cam_target);
 
@@ -199,4 +201,36 @@ void Camera::UpdateView() {
 
 void Camera::UpdateProjection() {
     projection_matrix = glm::perspective(glm::radians(Camera::FOV), viewport_width / viewport_height, NEAR_PLANE, FAR_PLANE);
+}
+
+float Camera::SdfCube(glm::vec3 point) {
+    glm::vec3 halfExtents = glm::vec3(1.0f) * 0.5f;
+    glm::vec3 delta = glm::abs(point - cam_position) - halfExtents;
+    float distance = glm::length(glm::max(delta, glm::vec3(0.0f)));
+    return distance + glm::min(glm::max(delta.x, glm::max(delta.y, delta.z)), 0.0f);
+};
+
+void Camera::CubeIntersection(std::vector<Vertex> terrain) {
+    for (int j = 0; j < terrain.size(); j += 3) {
+        // for each triangle in mesh 
+        glm::vec3 v0 = terrain[j].position;
+        glm::vec3 v1 = terrain[j + 1].position;
+        glm::vec3 v2 = terrain[j + 2].position;
+        float sdfValue;
+        bool intersection = false;
+        sdfValue = SdfCube(v0);
+        if (sdfValue < 0.0) { intersection = true; }
+        sdfValue = SdfCube(v1);
+        if (sdfValue < 0.0) { intersection = true; }
+        sdfValue = SdfCube(v2);
+        if (sdfValue < 0.0) { intersection = true; }
+
+        if (intersection) {
+            std::cerr << "BRUH HELP!!\n" << std::endl;
+            glm::vec3 edge1 = v1 - v0;
+            glm::vec3 edge2 = v2 - v0;
+            glm::vec3 norm = glm::normalize(glm::cross(edge1, edge2));
+            cam_position = prev_pos + ( norm * 0.01f );
+        }
+    }
 }
