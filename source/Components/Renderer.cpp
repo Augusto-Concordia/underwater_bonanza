@@ -464,7 +464,7 @@ void Renderer::CreateSpawnMap(){
                                     } 
                                     if (!valid_y.empty()) { 
                                         int index_y = rand() % (valid_y.size());
-                                        y = valid_y.at(index_y) + 0.5f;
+                                        y = valid_y.at(index_y) + 0.75f;
                                         
 
                                         ObjectProperties ObjectProperties{};
@@ -1951,26 +1951,23 @@ void Renderer::InputCallback(GLFWwindow* _window, const double _deltaTime) {
     if (Input::IsKeyPressed(_window, GLFW_KEY_KP_9) || Input::IsKeyPressed(_window, GLFW_KEY_E))
         main_camera->OneAxisMove(Camera::Translation::DOWN, 0.1f);
     if (Input::IsKeyPressed(_window, GLFW_KEY_KP_4) || Input::IsKeyPressed(_window, GLFW_KEY_W))
-        main_camera->OneAxisMove(Camera::Translation::FORWARD, 0.1f);
+        main_camera->OneAxisMove(Camera::Translation::CAMERA_FORWARD, 0.1f);
     if (Input::IsKeyPressed(_window, GLFW_KEY_KP_6) || Input::IsKeyPressed(_window, GLFW_KEY_A))
         main_camera->OneAxisMove(Camera::Translation::LEFT, 0.1f);
     if (Input::IsKeyPressed(_window, GLFW_KEY_KP_8) || Input::IsKeyPressed(_window, GLFW_KEY_S))
-        main_camera->OneAxisMove(Camera::Translation::BACKWARD, 0.1f);
+        main_camera->OneAxisMove(Camera::Translation::CAMERA_BACKWARD, 0.1f);
     if (Input::IsKeyPressed(_window, GLFW_KEY_KP_2) || Input::IsKeyPressed(_window, GLFW_KEY_D))
         main_camera->OneAxisMove(Camera::Translation::RIGHT, 0.1f);
 
     //mouse triggers
     //forwards & back in camera local coordinates
     if (Input::IsMouseButtonPressed(_window, GLFW_MOUSE_BUTTON_LEFT))
-        main_camera->OneAxisMove(Camera::Translation::CAMERA_FORWARD, (float)Input::cursor_delta_y / 10.0f);
+        main_camera->OneAxisMove(Camera::Translation::CAMERA_FORWARD, (float)Input::cursor_delta_y / 15.0f);
 
     //tilt control
-    if (Input::IsMouseButtonPressed(_window, GLFW_MOUSE_BUTTON_MIDDLE))
-        main_camera->OneAxisRotate(Camera::Rotation::POSITIVE_PITCH, (float)Input::cursor_delta_y / 10.0f);
-
+    main_camera->OneAxisRotate(Camera::Rotation::POSITIVE_PITCH, -(float)Input::cursor_delta_y / 15.0f);
     //pan control
-    if (Input::IsMouseButtonPressed(_window, GLFW_MOUSE_BUTTON_RIGHT))
-        main_camera->OneAxisRotate(Camera::Rotation::POSITIVE_YAW, (float)Input::cursor_delta_x / 10.0f);
+    main_camera->OneAxisRotate(Camera::Rotation::POSITIVE_YAW, -(float)Input::cursor_delta_x / 15.0f);
 
     //camera rotation reset
     if (Input::IsKeyPressed(_window, GLFW_KEY_HOME) || Input::IsKeyPressed(_window, GLFW_KEY_KP_5))
@@ -1986,4 +1983,6 @@ void Renderer::InputCallback(GLFWwindow* _window, const double _deltaTime) {
         main_camera->OneAxisOrbit(Camera::Orbitation::ORBIT_RIGHT, 0.1f);
     if (Input::IsKeyPressed(_window, GLFW_KEY_LEFT))
         main_camera->OneAxisOrbit(Camera::Orbitation::ORBIT_LEFT, 0.1f);
+
+    main_camera->CubeIntersection(main_terrain->GetVertices());
 }

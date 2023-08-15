@@ -3,10 +3,13 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
 #include "glm/vec3.hpp"
 #include "glm/mat4x4.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/matrix_clip_space.hpp"
+
+#include "Components/Terrain/Vertex.h"
 
 class Camera {
 public:
@@ -63,6 +66,10 @@ public:
     void SetPosition(const glm::vec3& _position);
     void SetTarget(const glm::vec3& _target);
 
+        //collison
+    float SdfCube(glm::vec3 point);
+    void CubeIntersection(std::vector<Vertex> terrain);
+
     [[nodiscard]] glm::vec3 GetPosition() const;
     [[nodiscard]] glm::mat4 GetViewProjection() const;
 
@@ -81,6 +88,8 @@ private:
     glm::vec3 cam_up;
     glm::vec3 cam_right;
     glm::vec3 cam_forward;
+
+    glm::vec3 prev_pos;
 
     float viewport_height;
     float viewport_width;
