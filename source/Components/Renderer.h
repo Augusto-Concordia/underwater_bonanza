@@ -77,7 +77,7 @@ private:
     std::vector<Fish> fish;
 
     int viewport_width, viewport_height;
-
+    float coinFlip;
     float moving_angle;
     bool is_underwater = false;
 
@@ -98,6 +98,9 @@ public:
 
     void CreateSpawnMap();
 
+    float getRandomFloat(float min, float max);
+    void generateAnimals();
+    
     void DrawOneWeed(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time, float _x_offset, glm::vec3 _weedcolor , glm::vec3 _scale_factor);
     void DrawOneWeed2(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time, float height, glm::vec3 _weedcolor, glm::vec3 _leafcolor);
     void DrawOneClam(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time, glm::vec3 _color1, glm::vec3 _color2);
