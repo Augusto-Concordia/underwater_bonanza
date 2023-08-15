@@ -15,8 +15,8 @@ public:
     Shark(float x) {
         // Initialize member variable
         xPos = getRandomFloat(20.0f, 80.0f);
-yPos = getRandomFloat(10.0f, 50.0f);
-zPos = getRandomFloat(20.0f, 80.0f);
+        yPos = getRandomFloat(25.0f, 50.0f);
+        zPos = getRandomFloat(20.0f, 80.0f);
         txPos = xPos + 0.9f;
         tyPos = yPos + 0.9f;
         tzPos = zPos + 0.9f;
@@ -82,7 +82,7 @@ zPos = getRandomFloat(20.0f, 80.0f);
         glm::mat4 trapezeChild = trap * translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
         glm::mat4 br1 = trapezeChild * initialRotation1 * translate(glm::mat4(1.0f), glm::vec3(0.0f, -9.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(10.5f, 10.75f, 10.0f));
-        cube.DrawFromMatrix(_viewProjection, _cameraPosition, br1, _time, _renderMode, &body_material);
+        VisualCube::CalculateInstancedFromMatrix(br1, body_material.color);
 
         glm::mat4 cubechild = trapezeChild * initialRotation1 * translate(glm::mat4(1.0f), glm::vec3(0.0f, -10.0f, 0.0f));
 
@@ -93,7 +93,7 @@ zPos = getRandomFloat(20.0f, 80.0f);
         trapezoidal.DrawFromMatrix(_viewProjection, _cameraPosition, wing, _time, _renderMode, &head_material);
 
         br1 = cubechild * initialRotation2 * translate(glm::mat4(1.0f), glm::vec3(0.0f, -9.5f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(10.5f, 10.75f, 10.0f));
-        cube.DrawFromMatrix(_viewProjection, _cameraPosition, br1, _time, _renderMode, &body_material);
+        VisualCube::CalculateInstancedFromMatrix(br1, body_material.color);
 
         glm::mat4 trapezeChild1 = cubechild * initialRotation2 * translate(glm::mat4(1.0f), glm::vec3(0.0f, -9.5f, 0.0f));
 
@@ -211,8 +211,8 @@ public:
     Fish(float x) {
         // Initialize member variable
         xPos = getRandomFloat(20.0f, 80.0f);
-    yPos = getRandomFloat(10.0f, 50.0f);
-    zPos = getRandomFloat(20.0f, 80.0f);
+        yPos = getRandomFloat(25.0f, 50.0f);
+        zPos = getRandomFloat(20.0f, 80.0f);
         txPos = xPos + 0.9f;
         tyPos = yPos + 0.9f;
         tzPos = zPos + 0.9f;
@@ -276,12 +276,12 @@ public:
         glm::mat4 trapezeChild = trap * translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
         glm::mat4 br1 = trapezeChild * initialRotation1 * translate(glm::mat4(1.0f), glm::vec3(0.0f, -6.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(5.0f, 7.75f, 5.0f));
-        cube.DrawFromMatrix(_viewProjection, _cameraPosition, br1, _time, _renderMode, &body_material);
+        VisualCube::CalculateInstancedFromMatrix(br1, body_material.color);
 
         glm::mat4 trapezeChild1 = trapezeChild * initialRotation1 * translate(glm::mat4(1.0f), glm::vec3(0.0f, -6.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
         br1 = trapezeChild1 * initialRotation2 * translate(glm::mat4(1.0f), glm::vec3(-4.5f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(5.0f, 7.75f, 5.0f));
-        cube.DrawFromMatrix(_viewProjection, _cameraPosition, br1, _time, _renderMode, &body_material);
+        VisualCube::CalculateInstancedFromMatrix(br1, body_material.color);
 
         glm::mat4 trapezeChild2 = trapezeChild1 * initialRotation2 * translate(glm::mat4(1.0f), glm::vec3(-4.5f, 0.0f, 0.0f));
 
