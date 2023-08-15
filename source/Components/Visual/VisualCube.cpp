@@ -208,6 +208,12 @@ void VisualCube::SetupGlBuffersInstanced() {
     //we'll give its transforms later
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    //generate and bind the circles' color buffer
+    glGenBuffers(1, &VisualCube::cube_colors_buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, VisualCube::cube_colors_buffer);
+    //we'll give its colors later
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
     //generate and bind the circles' vertex array (VAO)
     glGenVertexArrays(1, &VisualCube::instanced_vertex_array_o);
     glBindVertexArray(VisualCube::instanced_vertex_array_o);
@@ -254,6 +260,15 @@ void VisualCube::SetupGlBuffersInstanced() {
     glVertexAttribDivisor(4, 1);
     glVertexAttribDivisor(5, 1);
     glVertexAttribDivisor(6, 1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VisualCube::cube_colors_buffer);
+
+    //strides are glm::vec3-size long, because we are only including the color vector in this buffer
+    glVertexAttribPointer(7, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (GLvoid *) nullptr);
+    glEnableVertexAttribArray(7);
+
+    //manually set each divisor, just to make it clear what is happening (vs. what is default)
+    glVertexAttribDivisor(7, 1);
 }
 
 void VisualCube::CalculateInstancedFromMatrix(const glm::mat4 &_transformMatrix, const glm::vec3& _color) {
@@ -304,6 +319,10 @@ void VisualCube::DrawInstanced(const glm::mat4 &_viewProjection, const glm::vec3
     //sends object transformation matrices
     glBindBuffer(GL_ARRAY_BUFFER, VisualCube::cube_transforms_buffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * VisualCube::cube_transforms.size(), VisualCube::cube_transforms.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VisualCube::cube_colors_buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * VisualCube::cube_colors.size(), VisualCube::cube_colors.data(), GL_STATIC_DRAW);
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     //draw vertices according to their indices

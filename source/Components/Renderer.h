@@ -40,6 +40,8 @@ private:
     std::unique_ptr<VisualLine> main_x_line;
     std::unique_ptr<VisualLine> main_y_line;
     std::unique_ptr<VisualLine> main_z_line;
+
+    std::unique_ptr<Shader::Material> rock_material;
     std::unique_ptr<VisualCube> rock_cube;
 
     std::shared_ptr<std::vector<Light>> lights;
@@ -76,7 +78,6 @@ private:
     std::vector<ObjectProperties> spawn_list_Global;
 
     std::unique_ptr<Shader::Material> shark_material;
-    std::unique_ptr<Shark> shark;
     std::vector<Fish> fish;
     std::vector<Shark> sharks;
 

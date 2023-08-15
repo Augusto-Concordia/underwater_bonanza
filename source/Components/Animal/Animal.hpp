@@ -137,7 +137,7 @@ public:
         targetRotation = glm::rotate(glm::mat4(1.0f), glm::radians(cAngleY), glm::vec3(0.0f, 1.0f, 0.0f));
 
         if (glm::distance(sharkPos, targetPos) <= 1.0f) {
-            targetPos = glm::vec3(getRandomFloat(-30.0f, 30.0f), getRandomFloat(-30.0f, 30.0f), getRandomFloat(-30.0f, 30.0f));
+            targetPos = glm::vec3(getRandomFloat(25.0f, 75.0f), getRandomFloat(10.0f, 30.0f), getRandomFloat(25.0f, 75.0f));
             travel = targetPos - sharkPos;
             travel = glm::normalize(travel);
 
@@ -324,7 +324,7 @@ public:
         targetRotation = glm::rotate(glm::mat4(1.0f), glm::radians(cAngleY), glm::vec3(0.0f, 1.0f, 0.0f));
 
         if (glm::distance(fishPos, targetPos) <= 1.0f) {
-            targetPos = glm::vec3(getRandomFloat(-30.0f, 30.0f), getRandomFloat(-30.0f, 30.0f), getRandomFloat(-30.0f, 30.0f));
+            targetPos = glm::vec3(getRandomFloat(25.0f, 75.0f), getRandomFloat(10.0f, 30.0f), getRandomFloat(25.0f, 75.0f));
             travel = targetPos - fishPos;
             travel = glm::normalize(travel);
 

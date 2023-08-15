@@ -14,6 +14,7 @@ private:
     inline static Shader::Material instanced_material;
 
     inline static GLuint cube_transforms_buffer = 0;
+    inline static GLuint cube_colors_buffer = 0;
     inline static GLuint instanced_vertex_buffer_o = 0;
     inline static GLuint instanced_vertex_array_o = 0;
 
