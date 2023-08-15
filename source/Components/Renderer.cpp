@@ -10,7 +10,7 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     viewport_width = _initialWidth;
     viewport_height = _initialHeight;
 
-    main_camera = std::make_unique<Camera>(glm::vec3(8.0f, 8.0f, 8.0f), glm::vec3(0.0f), _initialWidth, _initialHeight);
+    main_camera = std::make_unique<Camera>(glm::vec3(8.0f, 8.0f, 8.0f), glm::vec3(25.0f , 5.0f, 25.0f), _initialWidth, _initialHeight);
 
     lights = std::make_shared<std::vector<Light>>();
     lights->emplace_back(glm::vec3(2.0f, 100.0f, 2.0f), glm::vec3(1.0f), 0.1f, 0.2f, 0.4f, Light::Type::DIRECTIONAL);
@@ -1944,6 +1944,20 @@ void Renderer::InputCallback(GLFWwindow* _window, const double _deltaTime) {
 
     if (Input::IsKeyReleased(_window, GLFW_KEY_ENTER))
         SwitchScenes();
+
+    //check if we are going out of bounds
+    if (20.0f > main_camera->GetPosition().x) {
+        main_camera->SetPosition(glm::vec3(20.0f, main_camera->GetPosition().y, main_camera->GetPosition().z));
+    }
+    if (main_camera->GetPosition().x > (main_terrain->GetGridSize() - 20.0f) ) {
+        main_camera->SetPosition(glm::vec3((main_terrain->GetGridSize() - 20.0f), main_camera->GetPosition().y, main_camera->GetPosition().z));
+    }
+    if (20.0f > main_camera->GetPosition().z) {
+        main_camera->SetPosition(glm::vec3(main_camera->GetPosition().x, main_camera->GetPosition().y, 20.0f));
+    }
+    if (main_camera->GetPosition().z > (main_terrain->GetGridSize() - 20.0f) ) {
+        main_camera->SetPosition(glm::vec3(main_camera->GetPosition().x, main_camera->GetPosition().y, (main_terrain->GetGridSize() - 20.0f)));
+    }
 
     //camera translates (side to side and zoom forwards & back)
     if (Input::IsKeyPressed(_window, GLFW_KEY_KP_7) || Input::IsKeyPressed(_window, GLFW_KEY_Q))
