@@ -14,9 +14,9 @@ public:
     // Constructor
     Shark(float x) {
         // Initialize member variable
-        xPos = getRandomFloat(-30.0f, 30.0f);
-        yPos = getRandomFloat(-30.0f, 30.0f);
-        zPos = getRandomFloat(-30.0f, 30.0f);
+        xPos = getRandomFloat(20.0f, 80.0f);
+yPos = getRandomFloat(10.0f, 50.0f);
+zPos = getRandomFloat(20.0f, 80.0f);
         txPos = xPos + 0.9f;
         tyPos = yPos + 0.9f;
         tzPos = zPos + 0.9f;
@@ -210,9 +210,9 @@ public:
     // Constructor
     Fish(float x) {
         // Initialize member variable
-        xPos = getRandomFloat(-30.0f, 30.0f);
-        yPos = getRandomFloat(-30.0f, 30.0f);
-        zPos = getRandomFloat(-30.0f, 30.0f);
+        xPos = getRandomFloat(20.0f, 80.0f);
+yPos = getRandomFloat(10.0f, 50.0f);
+zPos = getRandomFloat(20.0f, 80.0f);
         txPos = xPos + 0.9f;
         tyPos = yPos + 0.9f;
         tzPos = zPos + 0.9f;
