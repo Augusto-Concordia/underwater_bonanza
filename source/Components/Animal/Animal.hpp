@@ -110,18 +110,16 @@ public:
 
         dt = glfwGetTime() - time;
         time += dt;
-        sharkPos += travel * speed * dt;
+        sharkPos += travel * speed / 100.0f;
 
 
         if (glm::abs(cAngleZ - tAngleZ) > 0.1) {
             if (cAngleZ - tAngleZ > 0) {
                 cAngleZ = cAngleZ - rotationSpeed * dt;
-
             }
             else {
                 cAngleZ = cAngleZ + rotationSpeed * dt;
             }
-
         }
 
         if (glm::abs(cAngleY - tAngleY) > 0.1) {
@@ -131,16 +129,15 @@ public:
             else {
                 cAngleY += rotationSpeed * dt;
             }
-
-
         }
+
         // cAngleY = 0.0f;
         cAngleZ = 0.0f;
         travelRotation = glm::rotate(glm::mat4(1.0f), glm::radians(cAngleZ), glm::vec3(0.0f, 0.0f, 1.0f));
         targetRotation = glm::rotate(glm::mat4(1.0f), glm::radians(cAngleY), glm::vec3(0.0f, 1.0f, 0.0f));
 
         if (glm::distance(sharkPos, targetPos) <= 1.0f) {
-            targetPos = glm::vec3(getRandomFloat(-5.0f, 5.0f), getRandomFloat(-5.0f, 5.0f), getRandomFloat(-5.0f, 5.0f));
+            targetPos = glm::vec3(getRandomFloat(-30.0f, 30.0f), getRandomFloat(-30.0f, 30.0f), getRandomFloat(-30.0f, 30.0f));
             travel = targetPos - sharkPos;
             travel = glm::normalize(travel);
 
@@ -151,24 +148,6 @@ public:
             }
             tAngleY = angle;
             std::cout << "T angle Y: " << tAngleY << " T angle Z: " << tAngleZ << std::endl;
-            /*
-            float angle = getRandomFloat(0.0f, 360.0f); //getRandomFloat(0.0f, 360.0f);
-            travel = glm::vec3(-cos(glm::radians(angle)), 0.0f, glm::glm::sin(glm::radians(angle)));
-            targetPos = (getRandomFloat(10.0f, 30.0f) * travel + sharkPos);
-            float fakeDistance = glm::distance(targetPos, sharkPos);
-            targetPos.y = getRandomFloat(-30.0f,30.0f);
-            //TERRAIN HEIGHT
-            float angle2 = glm::acos(fakeDistance / glm::distance(sharkPos, targetPos));
-            travel = targetPos - sharkPos;
-            travel = glm::normalize(travel);
-
-            //cAngleY = angle;
-            //cAngleZ = degrees(angle2);
-            tAngleY = angle;
-            tAngleZ = degrees(-angle2);
-            std::cout<< "T angle Y: " << tAngleY << "T angle Z: " << tAngleZ << std::endl;
-            //cAngleZ = 0.0f;
-            //cAngleY = tAngleY;*/
         }
 
 
@@ -281,7 +260,7 @@ public:
         }
 
         time = glfwGetTime();
-        initialRotation = glm::rotate(_transformMatrix, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        initialRotation = glm::rotate(_transformMatrix, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         initialScale = scale(_transformMatrix, glm::vec3(taille, taille, taille));
         initialRotation1 = glm::rotate(_transformMatrix, glm::radians(glm::sin(time * 2) * 20), glm::vec3(1.0f, 0.0f, 0.0f));
         initialRotation2 = glm::rotate(_transformMatrix, glm::radians(-glm::sin(time * 2 + 20) * 20), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -311,7 +290,7 @@ public:
 
         glm::mat4 trapezeChild3 = trapezeChild2 * initialRotation3 * translate(glm::mat4(1.0f), glm::vec3(-7.5f, 0.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
-        trapeze = trapezeChild3 * initialRotation4 * translate(glm::mat4(1.0f), glm::vec3(0.0f, 2.75f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(3.75f, 1.0f, 1.0f));
+        trapeze = trapezeChild3 * initialRotation4 * translate(glm::mat4(1.0f), glm::vec3(0.0f, 6.75f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(3.75f, 1.0f, 1.0f));
         trapezoidal.DrawFromMatrix(_viewProjection, _cameraPosition, trapeze, _time, _renderMode, &tail_material);
     }
     
@@ -320,7 +299,7 @@ public:
         //time = glfwGetTime();
         dt = glfwGetTime() - time;
         time += dt;
-        fishPos += travel * speed * dt;
+        fishPos += travel * speed / 100.0f;
 
         if (glm::abs(cAngleZ - tAngleZ) > 0.1) {
             if (cAngleZ - tAngleZ > 0) {
@@ -345,20 +324,7 @@ public:
         targetRotation = glm::rotate(glm::mat4(1.0f), glm::radians(cAngleY), glm::vec3(0.0f, 1.0f, 0.0f));
 
         if (glm::distance(fishPos, targetPos) <= 1.0f) {
-            /*float angle = getRandomFloat(-180.0f, 180.0f);
-            travel = glm::vec3(-cos(glm::radians(angle)), 0.0f, glm::sin(glm::radians(angle)));
-            targetPos = (getRandomFloat(10.0f, 30.0f) * travel + fishPos);
-            float fakeDistance = glm::distance(targetPos, fishPos);
-            targetPos.y = getRandomFloat(-20.0f, 20.0f);
-            //TERRAIN HEIGHT
-            float angle2 = glm::acos(fakeDistance / glm::distance(fishPos, targetPos));
-            travel = targetPos - fishPos;
-            travel = glm::normalize(travel);
-
-            tAngleY = angle;
-            tAngleZ = degrees(angle2);
-            */
-            targetPos = glm::vec3(getRandomFloat(-5.0f, 5.0f), getRandomFloat(-5.0f, 5.0f), getRandomFloat(-5.0f, 5.0f));
+            targetPos = glm::vec3(getRandomFloat(-30.0f, 30.0f), getRandomFloat(-30.0f, 30.0f), getRandomFloat(-30.0f, 30.0f));
             travel = targetPos - fishPos;
             travel = glm::normalize(travel);
 

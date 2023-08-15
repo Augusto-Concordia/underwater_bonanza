@@ -99,8 +99,8 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
 
     // Create the terrain generator
     main_terrain = std::make_unique<GenerateTerrain>(grid_size, iso_surface_level, glm::vec3(0.0f,0.0f,0.0f), seed, terrain_material);
-    main_terrain->GenerateChunkTerrain();
-    main_terrain->SetupBuffers();
+    //main_terrain->GenerateChunkTerrain();
+    //main_terrain->SetupBuffers();
 
     //leaf
     Shader::Material Leaf_material =  {
