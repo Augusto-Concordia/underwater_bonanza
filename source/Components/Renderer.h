@@ -27,8 +27,9 @@ struct ObjectProperties {
     float height;
     float branches;
 };
+#include "Components/Animal/Animal.hpp"
 
-class Renderer { 
+class Renderer {
 private:
     std::unique_ptr<Screen> main_screen;
     std::shared_ptr<Camera> main_camera;
@@ -56,12 +57,10 @@ private:
     //plants and seaweed
     std::unique_ptr<Leaf> leaf_cube;
     std::unique_ptr<VisualCube>  stem_cube;
-
     //clam
     std::unique_ptr<VisualCube>  clam_cube;
     std::unique_ptr<VisualCube>  pearl_cube;
     std::unique_ptr<VisualCube>  lip_cube;
-
     //coral
     std::unique_ptr<VisualCube>  coral_cube;
     std::unique_ptr<VisualCube>  coral_cube_2;
@@ -72,7 +71,11 @@ private:
 
     //item storage
     std::vector<ObjectProperties> spawn_list_Global;
-    
+
+    std::unique_ptr<Shader::Material> shark_material;
+    std::unique_ptr<Shark> shark;
+    std::vector<Fish> fish;
+
     int viewport_width, viewport_height;
 
     float moving_angle;
@@ -80,9 +83,6 @@ private:
 
     GLuint shadow_map_fbo = 0;
     GLuint shadow_map_texture = 0;
-
-
-
 
 public:
     Renderer(int _initialWidth, int _initialHeight);

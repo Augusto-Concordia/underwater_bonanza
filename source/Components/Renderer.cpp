@@ -203,7 +203,7 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
 
     //ocean flow map
     ocean_flow_map = Texture::Library::CreateTexture("assets/textures/flowMap.png");
-    //main_ocean = std::make_unique<VisualModel>("assets/models/ocean.obj", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), *ocean_material);
+    main_ocean = std::make_unique<VisualModel>("assets/models/ocean.obj", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), *ocean_material);
 
     //skybox
     main_skybox = Texture::Library::CreateCubemapTexture("assets/textures/skybox");
@@ -239,11 +239,11 @@ void Renderer::CreateSpawnMap(){
     //findMatchingYValues(float x, float z)
 
     //it is a grid of 100x100
-    //we go through a bunch of xz points and find appropraite y 
+    //we go through a bunch of xz points and find appropraite y
     //check normal to make sure we can spawn
-    //loop through smaller grids that way we can populate in famillies 
+    //loop through smaller grids that way we can populate in famillies
 
-    //we need to return an array of an array of information to spawn 
+    //we need to return an array of an array of information to spawn
 
     float grid_size = 100;
     int skip_size = 10;
@@ -267,13 +267,13 @@ void Renderer::CreateSpawnMap(){
     glm::vec3 stem_color_choice[3] = {glm::vec3(0.086, 0.42, 0.102), glm::vec3(0.224, 0.51, 0.239), glm::vec3(0.337, 0.58, 0.349) };
 
     glm::vec3 clam_color_choice[3] = {glm::vec3(106.0f/255.0f, 90.0f/255.0f, 205.0f/255.0f), glm::vec3(1.0f,0.51f,0.612f), glm::vec3(1.0f,0.627f,0.129f)}; //shell
-    glm::vec3 clam_color_choice_2[3] = {glm::vec3(181.0f/255.0f, 165.0f/255.0f, 213.0f/255.0f), glm::vec3(1.0f,0.627f,0.702f), glm::vec3(1.0f,0.757f,0.435f)}; //pearl ... really means secondary 
+    glm::vec3 clam_color_choice_2[3] = {glm::vec3(181.0f/255.0f, 165.0f/255.0f, 213.0f/255.0f), glm::vec3(1.0f,0.627f,0.702f), glm::vec3(1.0f,0.757f,0.435f)}; //pearl ... really means secondary
 
     glm::vec3 coral_color_choice_1[5] = {glm::vec3(1.0f, 0.7f, 0.0f),glm::vec3(0.0f, 1.0f, 0.816f),glm::vec3(0.878f, 0.322f, 0.424f), glm::vec3(0.565f, 0.871f, 0.282f),glm::vec3(1.0f, 0.475f, 0.396f)}; //darkest
     glm::vec3 coral_color_choice_2[5] = {glm::vec3(1.0f, 0.8f, 0.0f),glm::vec3(0.435, 1.0f, 0.898f),glm::vec3(1.0f, 0.231f, 0.373f),glm::vec3(0.663f, 1.0f, 0.357f),glm::vec3(1.0f, 0.596f, 0.537f)}; //dark
     glm::vec3 coral_color_choice_3[5] = {glm::vec3(1.0f, 1.0f, 0.0f),glm::vec3(0.663f, 0.988f, 0.929f),glm::vec3(1.0f, 0.376f, 0.49f),glm::vec3(0.733f, 1.0f, 0.49f),glm::vec3(1.0f, 0.769f, 0.733f)}; //light
     float scaleF;
-            
+
     int max_flower_spawn;
     float height;
 
@@ -288,15 +288,15 @@ void Renderer::CreateSpawnMap(){
 
                 //rest spawnd number
                 spawnd = 0;
-                
+
                 //now give criteria based on type
                 switch(type) {
                     case 0: // generic seaweed
                     //seaweed 1 , generic one
-                    //make a familly spawn 
+                    //make a familly spawn
 
-                    //we have to spawn similar seaweed in a bunch to make it look real 
-                    //our grid is a 10x10 
+                    //we have to spawn similar seaweed in a bunch to make it look real
+                    //our grid is a 10x10
                         for (float x = g_row; x < g_row + skip_size; x+=0.75) {
                             for (float z = g_col; z < g_col + skip_size; z+=0.75) {
                                 // check y value
@@ -308,7 +308,7 @@ void Renderer::CreateSpawnMap(){
                                     if (norm_y > 0.3f) {
                                         valid_y.push_back(y);
                                     }
-                                } 
+                                }
                                 if (!valid_y.empty()) {
                                     // get y value
                                     int index_y = rand() % (valid_y.size());
@@ -316,19 +316,19 @@ void Renderer::CreateSpawnMap(){
                                     std::cout<<"ellooo!"<<index_y<<std::endl;
                                     y = valid_y.at(index_y);
 
-                                    //to spawn or not to spawn 
+                                    //to spawn or not to spawn
                                     to_spawn_2 = rand() % 10;
                                     if (to_spawn_2 == 1) {
                                         ObjectProperties ObjectProperties{};
-                                        //what to spawn 
+                                        //what to spawn
                                         //information in this order :
-                                        // type, x_offset, color, scaleFactor , x,y,z 
+                                        // type, x_offset, color, scaleFactor , x,y,z
                                         //type we have
                                         ObjectProperties.type = type;
                                         //x_offset
                                         ObjectProperties.x_offset = 0.1f; // 0.03 -> 0.06
                                         std::cout<<"x_offset "<<ObjectProperties.x_offset<<std::endl;
-                                        //color, pick one fromn the array 
+                                        //color, pick one fromn the array
                                         int color_nb = rand() % 3;
                                         ObjectProperties.color1 = stem_color_choice[color_nb];
                                         std::cout<<"x color "<<ObjectProperties.color1.x <<std::endl;
@@ -360,8 +360,8 @@ void Renderer::CreateSpawnMap(){
                                         if (norm_y > 0.3) {
                                             valid_y.push_back(y);
                                         }
-                                    } 
-                                    if (!valid_y.empty()) { 
+                                    }
+                                    if (!valid_y.empty()) {
                                         // get y value
                                         int index_y = rand() % (valid_y.size());
                                         y = valid_y.at(index_y);
@@ -371,7 +371,7 @@ void Renderer::CreateSpawnMap(){
                                         ObjectProperties.type = type;
                                         //x_offset
                                         ObjectProperties.height  = rand() % 21 + 60 ; // 60 - 80;
-                                        //color, pick one fromn the array 
+                                        //color, pick one fromn the array
                                         int color_nb = rand() % 3;
                                         ObjectProperties.color1 = stem_color_choice[color_nb];
 
@@ -395,7 +395,7 @@ void Renderer::CreateSpawnMap(){
                     case 2: // clam
                         for (int x = g_row; x < g_row + skip_size; ++x) {
                             for (int z = g_col; z < g_col + skip_size; ++z) {
-              
+
                                 to_spawn_2 = rand() % 2;
                                 if (to_spawn_2 == 1 && spawnd < 1) {
                                     //pos
@@ -408,26 +408,26 @@ void Renderer::CreateSpawnMap(){
                                         if (norm_y > 0.3) {
                                             valid_y.push_back(y);
                                         }
-                                    } 
-                                    if (!valid_y.empty()) { 
+                                    }
+                                    if (!valid_y.empty()) {
                                         // get y value
                                         int index_y = rand() % (valid_y.size());
-                                        y = valid_y.at(index_y); 
-                                        
+                                        y = valid_y.at(index_y);
+
                                         ObjectProperties ObjectProperties{};
 
                                         //type we have
                                         ObjectProperties.type = type;
                                         //scale
                                         ObjectProperties.scaleF = 0.5f; //0.3-0.7
-                                        //color, pick one fromn the array 
+                                        //color, pick one fromn the array
                                         int color_nb = rand() % 3;
                                         ObjectProperties.color1 = clam_color_choice[color_nb];
                                         ObjectProperties.color2 = clam_color_choice_2[color_nb];
 
                                         //pos
                                         ObjectProperties.pos = glm::vec3(position_x,y,z);
-                                        
+
                                         // put into big list
                                         spawn_list_Global.push_back(ObjectProperties);
                                         spawnd += 1;
@@ -453,17 +453,17 @@ void Renderer::CreateSpawnMap(){
                                         if (norm_y > 0.3) {
                                             valid_y.push_back(y);
                                         }
-                                    } 
-                                    if (!valid_y.empty()) { 
+                                    }
+                                    if (!valid_y.empty()) {
                                         // get y value
                                         float min_y = 20.0f;
                                         for (auto & y : valid_y) {
                                             if (y < min_y) { min_y = y;}
-                                        } 
+                                        }
                                         y = min_y;
                                         //int index_y = rand() % (valid_y.size());
                                         //y = valid_y.at(index_y);
-                                        
+
 
                                         ObjectProperties ObjectProperties{};
 
@@ -471,7 +471,7 @@ void Renderer::CreateSpawnMap(){
                                         ObjectProperties.type = type;
                                         //scale
                                         ObjectProperties.scaleF = 0.5; //0.3-0.7
-                                        //color, pick one fromn the array 
+                                        //color, pick one fromn the array
                                         int color_nb = rand() % 5;
                                         ObjectProperties.color1 = coral_color_choice_1[color_nb];
                                         ObjectProperties.color2 = coral_color_choice_2[color_nb];
@@ -479,7 +479,7 @@ void Renderer::CreateSpawnMap(){
 
                                         //pos
                                         ObjectProperties.pos = glm::vec3(position_x,y,z);
-                                        
+
                                         // put into big list
                                         spawn_list_Global.push_back(ObjectProperties);
                                         spawnd += 1;
@@ -491,7 +491,7 @@ void Renderer::CreateSpawnMap(){
                     case 4: // coral 2
                         for (int x = g_row; x < g_row + skip_size; ++x) {
                             for (int z = g_col; z < g_col + skip_size; ++z) {
-              
+
 
                                 to_spawn_2 = rand() % 3;
                                 if (to_spawn_2 == 1 && spawnd < 10) {
@@ -505,11 +505,11 @@ void Renderer::CreateSpawnMap(){
                                         if (norm_y > 0.3) {
                                             valid_y.push_back(y);
                                         }
-                                    } 
-                                    if (!valid_y.empty()) { 
+                                    }
+                                    if (!valid_y.empty()) {
                                         // get y value
                                         int index_y = rand() % (valid_y.size());
-                                        y = valid_y.at(index_y); 
+                                        y = valid_y.at(index_y);
 
                                         ObjectProperties ObjectProperties{};
 
@@ -519,7 +519,7 @@ void Renderer::CreateSpawnMap(){
                                         ObjectProperties.scaleF = 0.5f; //0.3-0.7
                                         //number of branches
                                         ObjectProperties.branches = rand() % 4 + 4; //4-7
-                                        //color, pick one fromn the array 
+                                        //color, pick one fromn the array
                                         int color_nb = rand() % 5;
                                         ObjectProperties.color1 = coral_color_choice_1[color_nb];
                                         ObjectProperties.color2 = coral_color_choice_2[color_nb];
@@ -527,7 +527,7 @@ void Renderer::CreateSpawnMap(){
 
                                         //pos
                                         ObjectProperties.pos = glm::vec3(position_x,y,z);
-                                        
+
                                         // put into big list
                                         spawn_list_Global.push_back(ObjectProperties);
                                         spawnd += 1;
@@ -536,7 +536,7 @@ void Renderer::CreateSpawnMap(){
                             }
                         }
                         break;
-                    case 5: //rock 1 
+                    case 5: //rock 1
                         for (int x = g_row; x < g_row + skip_size; x+=2) {
                             for (int z = g_col; z < g_col + skip_size; z+=2) {
                                 to_spawn_2 = rand() % 3;
@@ -551,11 +551,11 @@ void Renderer::CreateSpawnMap(){
                                         if (norm_y > 0.3) {
                                             valid_y.push_back(y);
                                         }
-                                    } 
-                                    if (!valid_y.empty()) { 
+                                    }
+                                    if (!valid_y.empty()) {
                                         // get y value
                                         int index_y = rand() % (valid_y.size());
-                                        y = valid_y.at(index_y); 
+                                        y = valid_y.at(index_y);
 
                                         ObjectProperties ObjectProperties{};
 
@@ -566,7 +566,7 @@ void Renderer::CreateSpawnMap(){
 
                                         //pos
                                         ObjectProperties.pos = glm::vec3(position_x,y,z);
-                                        
+
                                         // put into big list
                                         spawn_list_Global.push_back(ObjectProperties);
                                         spawnd += 1;
@@ -591,11 +591,11 @@ void Renderer::CreateSpawnMap(){
                                         if (norm_y > 0.3) {
                                             valid_y.push_back(y);
                                         }
-                                    } 
-                                    if (!valid_y.empty()) { 
+                                    }
+                                    if (!valid_y.empty()) {
                                         // get y value
                                         int index_y = rand() % (valid_y.size());
-                                        y = valid_y.at(index_y); 
+                                        y = valid_y.at(index_y);
 
                                         ObjectProperties ObjectProperties{};
 
@@ -606,7 +606,7 @@ void Renderer::CreateSpawnMap(){
 
                                         //pos
                                         ObjectProperties.pos = glm::vec3(position_x,y,z);
-                                        
+
                                         // put into big list
                                         spawn_list_Global.push_back(ObjectProperties);
                                         spawnd += 1;
@@ -630,11 +630,11 @@ void Renderer::CreateSpawnMap(){
                                         if (norm_y > 0.3) {
                                             valid_y.push_back(y);
                                         }
-                                    } 
-                                    if (!valid_y.empty()) { 
+                                    }
+                                    if (!valid_y.empty()) {
                                         // get y value
                                         int index_y = rand() % (valid_y.size());
-                                        y = valid_y.at(index_y); 
+                                        y = valid_y.at(index_y);
 
                                         ObjectProperties ObjectProperties{};
 
@@ -644,7 +644,7 @@ void Renderer::CreateSpawnMap(){
                                         ObjectProperties.scaleF = 0.5f; //0.3-0.7
                                         //pos
                                         ObjectProperties.pos = glm::vec3(position_x,y,z);
-                                        
+
                                         // put into big list
                                         spawn_list_Global.push_back(ObjectProperties);
                                         spawnd += 1;
@@ -668,11 +668,11 @@ void Renderer::CreateSpawnMap(){
                                         if (norm_y > 0.3) {
                                             valid_y.push_back(y);
                                         }
-                                    } 
-                                    if (!valid_y.empty()) { 
+                                    }
+                                    if (!valid_y.empty()) {
                                         // get y value
                                         int index_y = rand() % (valid_y.size());
-                                        y = valid_y.at(index_y); 
+                                        y = valid_y.at(index_y);
 
                                         ObjectProperties ObjectProperties{};
 
@@ -683,7 +683,7 @@ void Renderer::CreateSpawnMap(){
 
                                         //pos
                                         ObjectProperties.pos = glm::vec3(position_x,y,z);
-                                        
+
                                         // put into big list
                                         spawn_list_Global.push_back(ObjectProperties);
                                         spawnd += 1;
@@ -699,9 +699,9 @@ void Renderer::CreateSpawnMap(){
 }
 
 void Renderer::SpawnAllObjects(){
-    // confirmed that we are spawning in this chunk 
+    // confirmed that we are spawning in this chunk
     //now the way and where we spawn depends on the object we roll
-    for (auto & object : spawn_list_Global) { 
+    for (auto & object : spawn_list_Global) {
         int type = object.type;
         // std::cout<<"HELOOOOO"<<type<<std::endl;
         switch(type) {
@@ -716,7 +716,7 @@ void Renderer::SpawnAllObjects(){
                 // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
                 break;
             case 2: // clam
-            
+
                 DrawOneClam(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle, object.color1, object.color2);
                 // std::cout<<"draw clam"<<std::endl;
                 // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
@@ -732,7 +732,7 @@ void Renderer::SpawnAllObjects(){
                 // std::cout<<"draw coral 2"<<std::endl;
                 // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
                 break;
-            case 5: //rock 1 
+            case 5: //rock 1
                 DrawRock(object.pos, glm::vec3(0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle/ 20.0f);
                 break;
             case 6: //rock 2
@@ -745,7 +745,19 @@ void Renderer::SpawnAllObjects(){
                 DrawPebble(object.pos, glm::vec3(0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), nullptr, moving_angle/ 20.0f);
                 break;
         }
-    } 
+    }
+
+    //shark
+    shark_material =  std::make_unique<Shader::Material>();
+    shark_material->shader = unlit_shader;
+    shark_material->lights = lights;
+    shark_material->line_thickness = 3.0f;
+
+    shark = std::make_unique<Shark>(100.0f);
+    fish = std::vector<Fish>();
+    for (int i = 0; i < 10; ++i) {
+        fish.emplace_back(50.0f);
+    }
 }
 
 void Renderer::Init() {
@@ -800,6 +812,16 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         DrawIntroScene(current_time, _deltaTime);
         return;
     }
+    main_ocean->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), current_time, GL_TRIANGLES, ocean_material.get());
+    shark->DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, shark_material.get());
+
+    for (auto& one_fish : fish) {
+        one_fish.DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, shark_material.get());
+    }
+
+    Texture::Clear();
+
+    return;
 
     //animation
     moving_angle = glfwGetTime() * 20.0f;
@@ -842,7 +864,7 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), second_world_transform_matrix, current_time, GL_TRIANGLES, shadow_mapper_material.get());
 
         main_terrain->DrawChunk(light.GetViewProjection(), light.GetPosition(), glm::mat4(1.0f), current_time, GL_TRIANGLES, shadow_mapper_material.get());
-        
+
     }
 
     // COLOR PASS
@@ -892,7 +914,7 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
 
     }
 
-    
+
 
     // unbinds the main screen, so that it can be used as a texture
     main_screen->Unbind();
@@ -972,7 +994,7 @@ void Renderer::DrawOneWeed(const glm::vec3 &_position, const glm::vec3 &_rotatio
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, _rotation);
     world_transform_matrix = glm::scale(world_transform_matrix, _scale);
 
-    //glm::vec3(0.3f, 0.3f, 0.3f); 
+    //glm::vec3(0.3f, 0.3f, 0.3f);
     auto scale_factor =  _scale_factor ;     // scale for one cube
 
 
@@ -988,7 +1010,7 @@ void Renderer::DrawOneWeed(const glm::vec3 &_position, const glm::vec3 &_rotatio
     stem_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix, time, GL_TRIANGLES, _materialOverride);
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor);
 
-    
+
     // float x_offset = 0.05f;
     // float rot_bounce = 90.0f;
 
@@ -1361,6 +1383,9 @@ void Renderer::DrawOneClam(const glm::vec3 &_position, const glm::vec3 &_rotatio
     lip_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix,time, GL_TRIANGLES, _materialOverride);
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f / scale_factor_lip);
 
+
+
+
 }
 
 
@@ -1568,7 +1593,20 @@ void Renderer::DrawOneCoral2(const glm::vec3 &_position, const glm::vec3 &_rotat
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(0.0f, -height/4, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,0.0f, -angle_upward));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f,angle_side, 0.0f));
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
 
 void Renderer::DrawOneLeaf(glm::mat4 world_transform_matrix, const glm::mat4& _viewProjection,const glm::vec3& _eyePosition, const Shader::Material *_materialOverride){
     auto scale_factor = glm::vec3(1.0f, 1.0f, 1.0f);         // scale for one cube
@@ -1679,7 +1717,7 @@ void Renderer::DrawRock2(const glm::vec3 &_position, const glm::vec3 &_rotation,
     rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix,time, GL_TRIANGLES, _materialOverride);
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 4.0f, 1.0f));
 
-    //second rock 
+    //second rock
 
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
@@ -1705,7 +1743,7 @@ void Renderer::DrawRock2(const glm::vec3 &_position, const glm::vec3 &_rotation,
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 1.70f, 1.0f));
 
 
-    ////third rock 
+    ////third rock
 
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-3.0f, 0.0f, -2.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
@@ -1737,7 +1775,7 @@ void Renderer::DrawRock2(const glm::vec3 &_position, const glm::vec3 &_rotation,
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 1.0f, 1.0f));
 
     ////
-    //fourth rock 
+    //fourth rock
 
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(3.0f, 0.0f, 0.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
@@ -1786,7 +1824,7 @@ void Renderer::DrawRock2(const glm::vec3 &_position, const glm::vec3 &_rotation,
     rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix,time, GL_TRIANGLES, _materialOverride);
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.30f, 1.0f));
 
-    //sixth rock 
+    //sixth rock
     world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-2.0f, 0.0f, -1.0f));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.30f, 1.0f));
@@ -1809,7 +1847,7 @@ void Renderer::DrawRock2(const glm::vec3 &_position, const glm::vec3 &_rotation,
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 2.30f, 1.0f));
     rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix,time, GL_TRIANGLES, _materialOverride);
     world_transform_matrix = glm::scale(world_transform_matrix, 1.0f/glm::vec3(1.0f, 2.30f, 1.0f));
-    
+
 }
 
 void Renderer::DrawRock3(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time)
@@ -1910,14 +1948,14 @@ void Renderer::DrawPebble(const glm::vec3 &_position, const glm::vec3 &_rotation
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.70f, 0.70f, 0.70f));
     rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix,time, GL_TRIANGLES, _materialOverride);
-    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f)); 
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
 
     for (int i=0;i<6;i++){
         world_transform_matrix = glm::translate(world_transform_matrix, glm::vec3(-3.0f+i, 0.0f, -2.0f+i));
     world_transform_matrix = Transform::RotateDegrees(world_transform_matrix,  glm::vec3(0.0f, 0.0f, 0.0f));
     world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(0.70f, 0.70f, 0.70f));
     rock_cube->DrawFromMatrix(_viewProjection, _eyePosition, world_transform_matrix,time, GL_TRIANGLES, _materialOverride);
-    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f)); 
+    world_transform_matrix = glm::scale(world_transform_matrix, glm::vec3(1.0f, 1.0f, 1.0f));
 
     }
 
