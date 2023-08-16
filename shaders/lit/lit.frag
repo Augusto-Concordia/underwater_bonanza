@@ -82,8 +82,8 @@ vec4 CalculateCaustics(sampler2DArray _causticsTexture, vec4 _frapPosLightSpace,
     int currentCausticsIndex = nextCausticsIndexDirection == 1 ? (discreteTime % _textureCount) : (_textureCount - (discreteTime % _textureCount));
     int nextCausticsIndex = currentCausticsIndex + nextCausticsIndexDirection;
 
-    vec4 currentCausticsFactor = texture(_causticsTexture, vec3(_frapPosLightSpace.x, _frapPosLightSpace.y, currentCausticsIndex));
-    vec4 nextCausticsFactor = texture(_causticsTexture, vec3(_frapPosLightSpace.x, _frapPosLightSpace.y, nextCausticsIndex));
+    vec4 currentCausticsFactor = texture(_causticsTexture, vec3(_frapPosLightSpace.x * 2.0f, _frapPosLightSpace.y * 2.0f, currentCausticsIndex));
+    vec4 nextCausticsFactor = texture(_causticsTexture, vec3(_frapPosLightSpace.x * 2.0f, _frapPosLightSpace.y * 2.0f, nextCausticsIndex));
 
     //the mix ratio is the fractional part of the time, to make the transition between caustics textures smooth
     float causticsMixRatio = fract(u_time);
@@ -98,6 +98,13 @@ vec3 CalculateDirectionalLight(Light _light, vec4 _fragPosLightSpace, int _index
     vec3 lightTargetDir = normalize(lightTargetVec); // this is used for lighting calculations, because it's a directional light, so the position of the light does not matter
     float lightDistance = dot(_light.position - WorldPos, lightTargetDir);
 
+    //shadow calculation
+    float shadowScalar = CalculateShadowScalar(_index, _fragPosLightSpace, _light.shadows_influence, norm, lightTargetDir);
+
+    if (shadowScalar < 0.1f) {
+        return vec3(0.0);
+    }
+
     float diffFactor = max(dot(norm, lightTargetDir), 0.0);
     vec3 diffuse = diffFactor * _light.diffuse_strength * _light.color;
 
@@ -107,9 +114,6 @@ vec3 CalculateDirectionalLight(Light _light, vec4 _fragPosLightSpace, int _index
 
     float specularFactor = pow(max(dot(viewDir, reflectDir), 0.0), u_shininess);
     vec3 specular = specularFactor * _light.specular_strength * _light.color;
-
-    //shadow calculation
-    float shadowScalar = CalculateShadowScalar(_index, _fragPosLightSpace, _light.shadows_influence, norm, lightTargetDir);
 
     //caustics calculation
     vec3 caustics = CalculateCaustics(u_caustics_texture, _fragPosLightSpace * 0.5, u_caustics_texture_count, u_time).rgb * _light.color * max(norm.y, 0.0);
@@ -128,6 +132,13 @@ vec3 CalculateSpotLight(Light _light, vec4 _fragPosLightSpace, int _index) {
     vec3 lightDir = normalize(_light.position - WorldPos);
     float lightDistance = length(_light.position - WorldPos);
 
+    //shadow calculation
+    float shadowScalar = CalculateShadowScalar(_index, _fragPosLightSpace, _light.shadows_influence, norm, lightTargetDir);
+
+    if (shadowScalar < 0.1f) {
+        return vec3(0.0);
+    }
+
     //spotlight calculation
     float theta = dot(lightDir, lightTargetDir);
 
@@ -140,9 +151,6 @@ vec3 CalculateSpotLight(Light _light, vec4 _fragPosLightSpace, int _index) {
 
     float specularFactor = pow(max(dot(viewDir, reflectDir), 0.0), u_shininess);
     vec3 specular = specularFactor * _light.specular_strength * _light.color;
-
-    //shadow calculation
-    float shadowScalar = CalculateShadowScalar(_index, _fragPosLightSpace, _light.shadows_influence, norm, lightDir);
 
     vec3 colorResult = (diffuse + specular) * max(theta - _light.spot_cutoff, 0.0) * //spotlight
                             shadowScalar * //shadows
