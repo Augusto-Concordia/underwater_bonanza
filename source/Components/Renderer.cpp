@@ -13,13 +13,18 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     main_camera = std::make_unique<Camera>(glm::vec3(40.0f, 40.0f, 25.0f), glm::vec3(25.0f , 25.0f, 25.0f), _initialWidth, _initialHeight);
 
     lights = std::make_shared<std::vector<Light>>();
-    lights->emplace_back(glm::vec3(50.0f, 100.0f, 50.0f), glm::vec3(1.0f), 0.1f, 0.2f, 0.4f, Light::Type::DIRECTIONAL);
+    lights->emplace_back(glm::vec3(60.0f, 100.0f, 60.0f), glm::vec3(1.0f), 0.1f, 0.2f, 0.4f, Light::Type::DIRECTIONAL);
+    lights->emplace_back(glm::vec3(30.0f, 10.0f, 30.0f), glm::vec3(0.09f, 0.95f, 0.08f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
+    lights->emplace_back(glm::vec3(40.0f, 10.0f, 20.0f), glm::vec3(0.99f, 0.05f, 0.08f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
+    lights->emplace_back(glm::vec3(20.0f, 12.0f, 40.0f), glm::vec3(0.09f, 0.05f, 0.78f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
     lights->emplace_back(glm::vec3(30.0f, 10.0f, 30.0f), glm::vec3(0.09f, 0.95f, 0.08f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
     lights->emplace_back(glm::vec3(40.0f, 10.0f, 20.0f), glm::vec3(0.99f, 0.05f, 0.08f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
     lights->emplace_back(glm::vec3(20.0f, 12.0f, 40.0f), glm::vec3(0.09f, 0.05f, 0.78f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
 
+    lights->at(0).SetTarget(glm::vec3(50.0f, 0.0f, 50.0f));
+
     for (int i = 1; i < lights->size(); ++i) {
-        lights->at(i).SetRange(500.0f);
+        lights->at(i).SetRange(175.0f);
     }
 
     /*lights->at(1).SetTarget(glm::vec3(30.0f, 12.0f, 30.0f));
@@ -300,6 +305,7 @@ void Renderer::CreateSpawnMap(){
     float height;
 
     spawn_list_Global.clear();
+    light_placed = -1;
 
     for (int g_row = 0; g_row < grid_size; g_row += skip_size) {
         for (int g_col = 0; g_col < grid_size; g_col += skip_size) {
@@ -355,7 +361,7 @@ void Renderer::CreateSpawnMap(){
                                         ObjectProperties.color1 = stem_color_choice[color_nb];
                                         std::cout<<"x color "<<ObjectProperties.color1.x <<std::endl;
                                         //scaleFactor
-                                        ObjectProperties.scaleF = 0.3f; //leave default for now
+                                        ObjectProperties.scaleF = 0.6f; //leave default for now
                                         //pos
                                         ObjectProperties.pos = glm::vec3(x,y,z);
                                         std::cout<<"x pos "<<ObjectProperties.pos.x <<std::endl;
@@ -400,7 +406,7 @@ void Renderer::CreateSpawnMap(){
                                         color_nb = rand() % 4;
                                         ObjectProperties.color2 = petal_color_choice[color_nb];
                                         //scaleFactor
-                                        ObjectProperties.scaleF = 0.5f; //leave default for now
+                                        ObjectProperties.scaleF = 0.9f; //leave default for now
 
                                         //pos
                                         ObjectProperties.pos = glm::vec3(position_x,y,z);
@@ -441,7 +447,7 @@ void Renderer::CreateSpawnMap(){
                                         //type we have
                                         ObjectProperties.type = type;
                                         //scale
-                                        ObjectProperties.scaleF = 0.5f; //0.3-0.7
+                                        ObjectProperties.scaleF = 0.9f; //0.3-0.7
                                         //color, pick one fromn the array
                                         int color_nb = rand() % 3;
                                         ObjectProperties.color1 = clam_color_choice[color_nb];
@@ -486,7 +492,7 @@ void Renderer::CreateSpawnMap(){
                                         //type we have
                                         ObjectProperties.type = type;
                                         //scale
-                                        ObjectProperties.scaleF = 0.5; //0.3-0.7
+                                        ObjectProperties.scaleF = 0.7; //0.3-0.7
                                         //color, pick one fromn the array
                                         int color_nb = rand() % 5;
                                         ObjectProperties.color1 = coral_color_choice_1[color_nb];
@@ -532,7 +538,7 @@ void Renderer::CreateSpawnMap(){
                                         //type we have
                                         ObjectProperties.type = type;
                                         //scale
-                                        ObjectProperties.scaleF = 0.5f; //0.3-0.7
+                                        ObjectProperties.scaleF = 0.9f; //0.3-0.7
                                         //number of branches
                                         ObjectProperties.branches = rand() % 4 + 4; //4-7
                                         //color, pick one fromn the array
@@ -714,55 +720,67 @@ void Renderer::CreateSpawnMap(){
     }
 }
 
-void Renderer::SpawnAllObjects(){
+void Renderer::SpawnAllObjects(const Shader::Material* _material){
     // confirmed that we are spawning in this chunk
     //now the way and where we spawn depends on the object we roll
-    int light_placed = lights->size() - 1;
+    if (light_placed == -1) light_placed = lights->size() - 1;
 
     for (auto & object : spawn_list_Global) {
         int type = object.type;
         // std::cout<<"HELOOOOO"<<type<<std::endl;
         switch(type) {
             case 0: // basic seaweed
-                DrawOneWeed(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), default_material.get(), moving_angle , object.x_offset , object.color1 , glm::vec3(0.3f, 0.3f, 0.3f));
+                if (light_placed > 0 && rand() % 100 > 98) {
+                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(-1.0f, 74.0f, 2.0f));
+                    lights->at(light_placed).SetTarget(object.pos);
+                    light_placed--;
+                }
+
+                DrawOneWeed(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), _material, moving_angle , object.x_offset , object.color1 , glm::vec3(0.3f, 0.3f, 0.3f));
                 // std::cout<<"draw seawwed"<<std::endl;
                 // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
                 break;
             case 1: // tall seaweed
-                DrawOneWeed2(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), default_material.get(), moving_angle, object.height, object.color1, object.color2);
+                if (light_placed > 0 && rand() % 100 > 98) {
+                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(-1.0f, 74.0f, 2.0f));
+                    lights->at(light_placed).SetTarget(object.pos);
+                    light_placed--;
+                }
+
+                DrawOneWeed2(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), _material, moving_angle, object.height, object.color1, object.color2);
                 // std::cout<<"draw plant"<<std::endl;
                 // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
                 break;
             case 2: // clam
-                if (light_placed > 0 && rand() % 100 > 92) {
-                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(0.0f, 12.0f, 0.0f));
+                if (light_placed > 0 && rand() % 100 > 98) {
+                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(2.0f, 74.0f, 1.0f));
                     lights->at(light_placed).SetTarget(object.pos);
                     light_placed--;
                 }
 
-                DrawOneClam(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), default_material.get(), moving_angle, object.color1, object.color2);
+                DrawOneClam(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), _material, moving_angle, object.color1, object.color2);
                 // std::cout<<"draw clam"<<std::endl;
                 // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
                 break;
             case 3: // coral 1
-                if (light_placed > 0 && rand() % 100 > 92) {
-                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(0.0f, 12.0f, 0.0f));
+                if (light_placed > 0 && rand() % 100 > 98) {
+                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(-1.0f, 74.0f, 2.0f));
                     lights->at(light_placed).SetTarget(object.pos);
                     light_placed--;
                 }
 
-                DrawOneCoral(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), default_material.get(), moving_angle, object.color1, object.color2, object.color3);
+                DrawOneCoral(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), _material, moving_angle, object.color1, object.color2, object.color3);
                 // std::cout<<"draw coral"<<std::endl;
                 // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
                 break;
             case 4: // coral 2
-                if (light_placed > 0 && rand() % 100 > 92) {
-                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(0.0f, 12.0f, 0.0f));
+                if (light_placed > 0 && rand() % 100 > 98) {
+                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(-2.0f, 74.0f, -1.0f));
                     lights->at(light_placed).SetTarget(object.pos);
                     light_placed--;
                 }
             // std::cout<<"HELOOOOO"<<type<<std::endl;
-                DrawOneCoral2(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), default_material.get(), moving_angle, object.color1, object.color2, object.color3, object.branches);
+                DrawOneCoral2(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), _material, moving_angle, object.color1, object.color2, object.color3, object.branches);
                 // std::cout<<"draw coral 2"<<std::endl;
                 // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
                 break;
@@ -865,6 +883,8 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
 
         //todo: Draw shadow-caster elements HERE (i.e. the cubes below)
 
+        SpawnAllObjects(shadow_mapper_material.get());
+
         //test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), first_world_transform_matrix, GL_TRIANGLES, shadow_mapper_material.get());
 
         test_cube->DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), second_world_transform_matrix, current_time, GL_TRIANGLES, shadow_mapper_material.get());
@@ -872,10 +892,10 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
         main_terrain->DrawChunk(light.GetViewProjection(), light.GetPosition(), glm::mat4(1.0f), current_time, GL_TRIANGLES, shadow_mapper_material.get());
 
         for (auto& one_fish : fish) {
-            one_fish.DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, shadow_mapper_material.get());
+            one_fish.DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, shadow_mapper_material.get());
         }
         for (auto& one_sharks : sharks) {
-            one_sharks.DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, shadow_mapper_material.get());
+            one_sharks.DrawFromMatrix(light.GetViewProjection(), light.GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, shadow_mapper_material.get());
         }
 
         VisualCube::DrawInstanced(light.GetViewProjection(), light.GetPosition(), current_time, GL_TRIANGLES, shadow_mapper_material.get());
@@ -904,7 +924,7 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
 
         main_terrain->DrawChunk(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::mat4(1.0f), current_time);
 
-        SpawnAllObjects();
+        SpawnAllObjects(default_material.get());
 
         for (auto& one_fish : fish) {
             one_fish.DrawFromMatrix(main_camera->GetViewProjection(), main_camera->GetPosition(), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), current_time, GL_TRIANGLES, default_material.get());
@@ -949,11 +969,11 @@ void Renderer::generateAnimals() {
     sharks.clear();
     for (int i = 0; i < 40; ++i) {
         float coin = getRandomFloat(-30.0f, 30.0f);
-        if (coin < 0.0f) {
-            fish.emplace_back(getRandomFloat(1.0f,4.0f));
+        if (coin < 20.0f) {
+            fish.emplace_back(getRandomFloat(4.0f,6.0f));
         }
         else {
-            sharks.emplace_back(getRandomFloat(1.0f, 4.0f));
+            sharks.emplace_back(getRandomFloat(8.0f, 9.0f));
         }
 
     }

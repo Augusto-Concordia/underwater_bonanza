@@ -110,7 +110,7 @@ public:
 
         dt = glfwGetTime() - time;
         time += dt;
-        sharkPos += travel * speed / 100.0f;
+        sharkPos += travel * speed / 400.0f;
 
 
         if (glm::abs(cAngleZ - tAngleZ) > 0.1) {
@@ -299,7 +299,7 @@ public:
         //time = glfwGetTime();
         dt = glfwGetTime() - time;
         time += dt;
-        fishPos += travel * speed / 100.0f;
+        fishPos += travel * speed / 300.0f;
 
         if (glm::abs(cAngleZ - tAngleZ) > 0.1) {
             if (cAngleZ - tAngleZ > 0) {

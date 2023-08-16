@@ -87,6 +87,7 @@ private:
     float coinFlip;
     float moving_angle;
     bool is_underwater = false;
+    int light_placed;
 
     GLuint shadow_map_fbo = 0;
     GLuint shadow_map_texture = 0;
@@ -120,6 +121,6 @@ public:
     void DrawRock3(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time);
     void DrawPebble(const glm::vec3 &_position, const glm::vec3 &_rotation, const glm::vec3 &_scale, const glm::mat4& _viewProjection, const glm::vec3& _eyePosition, const Shader::Material *_materialOverride, float time);
 
-    void SpawnAllObjects();
+    void SpawnAllObjects(const Shader::Material *_material);
 };
 

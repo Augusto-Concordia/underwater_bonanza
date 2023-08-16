@@ -80,8 +80,8 @@ vec4 CalculateCaustics(sampler2DArray _causticsTexture, vec4 _frapPosLightSpace,
     int currentCausticsIndex = nextCausticsIndexDirection == 1 ? (discreteTime % _textureCount) : (_textureCount - (discreteTime % _textureCount));
     int nextCausticsIndex = currentCausticsIndex + nextCausticsIndexDirection;
 
-    vec4 currentCausticsFactor = texture(_causticsTexture, vec3(_frapPosLightSpace.x, _frapPosLightSpace.y, currentCausticsIndex));
-    vec4 nextCausticsFactor = texture(_causticsTexture, vec3(_frapPosLightSpace.x, _frapPosLightSpace.y, nextCausticsIndex));
+    vec4 currentCausticsFactor = texture(_causticsTexture, vec3(_frapPosLightSpace.x * 2.0f, _frapPosLightSpace.y * 2.0f, currentCausticsIndex));
+    vec4 nextCausticsFactor = texture(_causticsTexture, vec3(_frapPosLightSpace.x * 2.0f, _frapPosLightSpace.y * 2.0f, nextCausticsIndex));
 
     //the mix ratio is the fractional part of the time, to make the transition between caustics textures smooth
     float causticsMixRatio = fract(u_time);
@@ -195,9 +195,9 @@ void main() {
 
     vec3 norm = normalize(Normal);
 
-    vec3 terrainColor = mix(vec3(0.433), vec3(1.000, 0.871, 0.678), Map(norm.y, -1.0, 1.0, 0.0, 1.0));
+    vec3 terrainColor = mix(vec3(0.433), vec3(1.000, 0.871, 0.678), Map(norm.y, -1.0, 1.0, 0.0, 8.0f));
 
-    vec3 colorResult = (approximateAmbient + lightsColor) + vec3(terrainColor); //pure color or texture, mixed with lighting
+    vec3 colorResult = (approximateAmbient + lightsColor) * vec3(terrainColor); //pure color or texture, mixed with lighting
 
     out_color = vec4(colorResult, u_alpha);
     camera_pos = vec4(gl_FragCoord.xyz / gl_FragCoord.w, 1.0); //true depth output
