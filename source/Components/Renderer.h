@@ -72,6 +72,12 @@ private:
     std::unique_ptr<Shader::Material> fishStatic_material;
     std::unique_ptr<VisualModel> fishStatic;
 
+    std::unique_ptr<Shader::Material> seagull_material;
+    std::unique_ptr<VisualModel> seagull;
+
+    std::unique_ptr<Shader::Material> seagullStand_material;
+    std::unique_ptr<VisualModel> seagullStand;
+
     std::unique_ptr<Shader::Material> skybox_material;
     std::unique_ptr<VisualModel> skybox;
 
@@ -117,6 +123,7 @@ private:
 
     bool animateCamera = true;
     float cutsceneStartTime = -1;
+    float underwaterStartTime = -1;
     bool cutscenePressedSpace = false;
     bool fishingRodThrown = false;
 

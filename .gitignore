@@ -74,3 +74,5 @@ out/build/x64-Release/.ninja_deps
 out/build/x64-Release/.ninja_log
 out/build/x64-Release/build.ninja
 out/build/x64-Release/
+out/build/x64-Debug/underwater_bonanza.ilk
+out/build/x64-Debug/underwater_bonanza.pdb

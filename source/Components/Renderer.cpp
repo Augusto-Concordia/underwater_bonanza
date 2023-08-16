@@ -305,6 +305,27 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     //boat_material->texture = Texture::Library::CreateTexture("assets/textures/boatTexture.png");
     fishStatic = std::make_unique<VisualModel>("assets/models/fish_static.obj", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), *fishWire_material);
 
+    seagull_material = std::make_unique<Shader::Material>();
+    seagull_material->shader = model_shader;
+    seagull_material->lights = lights;
+    seagull_material->line_thickness = 3.0f;
+    seagull_material->color = glm::vec3(1.0f, 1.0f, 1.0f);
+    seagull_material->texture_influence = 1.0f;
+    //objectTexture = Texture::Library::CreateTexture("assets/textures/objectTexture.png");
+    //boat_material->texture = Texture::Library::CreateTexture("assets/textures/boatTexture.png");
+    seagull = std::make_unique<VisualModel>("assets/models/seagull_flying.obj", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), *seagull_material);
+
+    seagullStand_material = std::make_unique<Shader::Material>();
+    seagullStand_material->shader = model_shader;
+    seagullStand_material->lights = lights;
+    seagullStand_material->line_thickness = 3.0f;
+    seagullStand_material->color = glm::vec3(1.0f, 1.0f, 1.0f);
+    seagullStand_material->texture_influence = 1.0f;
+    //objectTexture = Texture::Library::CreateTexture("assets/textures/objectTexture.png");
+    //boat_material->texture = Texture::Library::CreateTexture("assets/textures/boatTexture.png");
+    seagullStand = std::make_unique<VisualModel>("assets/models/seagull_standing.obj", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), *seagull_material);
+
+
     skybox_material = std::make_unique<Shader::Material>();
     skybox_material->shader = skybox_shader;
     skybox_material->lights = lights;
@@ -979,7 +1000,7 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
     moving_angle = glfwGetTime() * 20.0f;
 
     // SHADOW MAP PASS
-
+    
     // binds the shadow map framebuffer and the depth texture to draw on it
     glBindFramebuffer(GL_FRAMEBUFFER, shadow_map_fbo);
     glViewport(0, 0, Light::LIGHTMAP_SIZE, Light::LIGHTMAP_SIZE);
@@ -988,10 +1009,10 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
     first_world_transform_matrix = glm::scale(first_world_transform_matrix, glm::vec3(2.0f));
 
     glm::mat4 second_world_transform_matrix = glm::translate(glm::mat4(1.0f), main_camera->GetPosition());
-    second_world_transform_matrix =  glm::scale(second_world_transform_matrix, glm::vec3(500.0f));
+    second_world_transform_matrix = glm::scale(second_world_transform_matrix, glm::vec3(500.0f));
 
     glm::mat4 third_world_transform_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 3.0f, 0.0f));
-    third_world_transform_matrix =  glm::scale(third_world_transform_matrix, glm::vec3(1.5f));
+    third_world_transform_matrix = glm::scale(third_world_transform_matrix, glm::vec3(1.5f));
 
     for (int i = 0; i < lights->size(); ++i) {
         const auto& light = lights->at(i);
@@ -1055,7 +1076,7 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
 
         VisualCube::DrawInstanced(main_camera->GetViewProjection(), main_camera->GetPosition(), current_time, GL_TRIANGLES, default_material.get());
     }
-
+    
     // unbinds the main screen, so that it can be used as a texture
     main_screen->Unbind();
 
@@ -1078,6 +1099,35 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0); //unbinds the shadow map framebuffer
+    
+
+    if (underwaterStartTime == -1)
+        underwaterStartTime = current_time;
+
+    if (Input::IsKeyReleased(_window, GLFW_KEY_SPACE) && cutscenePressedSpace == false) {
+        cutscenePressedSpace = true;
+        transition_sfx->play();
+        underwaterStartTime = current_time;
+        return;
+    }
+
+    if (cutscenePressedSpace == true)
+    {
+        float soundVolume = glm::clamp(1 - (current_time - underwaterStartTime), 0.0f, 1.0f);
+        main_theme->setVolume(soundVolume);
+        underwater_sfx->setVolume(soundVolume);
+        if (current_time - underwaterStartTime > 3.0f)
+            SwitchScenes();
+    }
+
+    float startWhiteFadeValue = glm::clamp(1 - (current_time - underwaterStartTime), 0.0f, 1.0f);
+    float endWhiteFadeValue = glm::clamp((current_time - underwaterStartTime), 0.0f, 1.0f);
+    float finalWhiteFadeValue = cutscenePressedSpace ? endWhiteFadeValue : startWhiteFadeValue;
+    whiteFadeUI->material.alpha = finalWhiteFadeValue;
+    if (finalWhiteFadeValue > 0.0f) {
+        pressSpaceUI->material.shader->SetFloat("wobbleFactor", 0.0f);
+        whiteFadeUI->DrawFromMatrix(glm::mat4(1.0f), glm::vec3(1.0f), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), _deltaTime);
+    }
 }
 
 float Renderer::getRandomFloat(float min, float max) {
@@ -1118,12 +1168,16 @@ void Renderer::SwitchScenes() {
         main_terrain->SetupBuffers();
 
         CreateSpawnMap();
-
+        main_theme->setVolume(100.0f);
+        underwater_sfx->setVolume(100.0f);
         main_theme->play();
         underwater_sfx->play();
 
         main_camera->SetPosition(glm::vec3(50.0f, 40.0f, 50.0f));
         main_camera->SetTarget(glm::vec3(30.0f));
+
+        underwaterStartTime = -1;
+        cutscenePressedSpace = false;
     } else {
         main_theme->stop();
         underwater_sfx->stop();
@@ -1139,7 +1193,7 @@ void Renderer::DrawIntroScene(GLFWwindow* _window, const double _time, const dou
     float panDuration = 13.5f;
 
     if (cutsceneStartTime == -1) {
-        std::cout << "-1\n";
+        //std::cout << "-1\n";
         cutsceneStartTime = _time;
         waves_sfx->setVolume(100.0f);
         waves_sfx->play();
@@ -1149,7 +1203,7 @@ void Renderer::DrawIntroScene(GLFWwindow* _window, const double _time, const dou
 
     if(cutsceneStartTime == -2) 
     {
-        std::cout << "-2\n";
+        //std::cout << "-2\n";
         cutsceneStartTime = _time - panDuration;
         waves_sfx->setVolume(100.0f);
         waves_sfx->play();
@@ -1184,6 +1238,13 @@ void Renderer::DrawIntroScene(GLFWwindow* _window, const double _time, const dou
             uiValue = glm::clamp( 1-((realTime - 10) / 1.5f), 0.0f, 1.0f);
         titleScreenUI->material.alpha = uiValue;
         blackFadeUI->material.alpha = blackValue;
+
+        seagull->position = glm::vec3(10, 10+sin(realTime*5)*0.2f, -10) + glm::vec3(0, 0, 1) * (realTime - 1) * 5.0f;
+        seagull->rotation = glm::vec3(0, 200, 0);
+
+        seagullStand->position = glm::vec3(1.1f, 0.72f, 2.7f);
+        seagullStand->rotation = glm::vec3(0.0f, -110.0f, 0.0f);
+        seagullStand->scale = glm::vec3(0.5f);
     }
 
     float fishingRodThrowDuration = 16;
@@ -1279,7 +1340,7 @@ void Renderer::DrawIntroScene(GLFWwindow* _window, const double _time, const dou
 
     if (realTime >= fishJumpDuration && cutscenePressedSpace)
     {
-        std::cout << "time: " << realTime << "\n";
+        //std::cout << "time: " << realTime << "\n";
         SwitchScenes();
         return;
     }
@@ -1334,7 +1395,7 @@ void Renderer::DrawIntroScene(GLFWwindow* _window, const double _time, const dou
     {
         glm::vec3 camPos = main_camera->GetPosition();
         glm::vec3 camFrwd = main_camera->GetCamForward();
-        std::cout << "x: " << camFrwd.x << "y: " << camFrwd.y << "z: " << camFrwd.z << "\n";
+        //std::cout << "x: " << camFrwd.x << "y: " << camFrwd.y << "z: " << camFrwd.z << "\n";
         glm::vec3 camTarget = -camFrwd;
         glm::vec3 camOldTarget = camPos + camFrwd;
         //main_camera->SetPosition(glm::vec3(0.0f));
@@ -1380,6 +1441,16 @@ void Renderer::DrawIntroScene(GLFWwindow* _window, const double _time, const dou
     fishStatic_material->shader->SetTexture("u_texture", 3);
     fishStatic_material->shader->SetFloat("u_texture_influence", 1.0f);
     fishStatic->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), (float)_time, GL_TRIANGLES, fishStatic_material.get());
+
+    objectTexture->UseSingle(GL_TEXTURE3);
+    seagull_material->shader->SetTexture("u_texture", 3);
+    seagull_material->shader->SetFloat("u_texture_influence", 1.0f);
+    seagull->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), (float)_time, GL_TRIANGLES, fishStatic_material.get());
+
+    objectTexture->UseSingle(GL_TEXTURE3);
+    seagullStand_material->shader->SetTexture("u_texture", 3);
+    seagullStand_material->shader->SetFloat("u_texture_influence", 1.0f);
+    seagullStand->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), (float)_time, GL_TRIANGLES, fishStatic_material.get());
 
     //UI
     if (blackValue > 0.0f) {
@@ -2392,18 +2463,21 @@ void Renderer::InputCallback(GLFWwindow* _window, const double _deltaTime) {
         animateCamera = !animateCamera;
     }
 
-    //check if we are going out of bounds
-    if (20.0f > main_camera->GetPosition().x) {
-        main_camera->SetPosition(glm::vec3(20.0f, main_camera->GetPosition().y, main_camera->GetPosition().z));
-    }
-    if (main_camera->GetPosition().x > (main_terrain->GetGridSize() - 20.0f) ) {
-        main_camera->SetPosition(glm::vec3((main_terrain->GetGridSize() - 20.0f), main_camera->GetPosition().y, main_camera->GetPosition().z));
-    }
-    if (20.0f > main_camera->GetPosition().z) {
-        main_camera->SetPosition(glm::vec3(main_camera->GetPosition().x, main_camera->GetPosition().y, 20.0f));
-    }
-    if (main_camera->GetPosition().z > (main_terrain->GetGridSize() - 20.0f) ) {
-        main_camera->SetPosition(glm::vec3(main_camera->GetPosition().x, main_camera->GetPosition().y, (main_terrain->GetGridSize() - 20.0f)));
+    if (is_underwater)
+    {
+        //check if we are going out of bounds
+        if (20.0f > main_camera->GetPosition().x) {
+            main_camera->SetPosition(glm::vec3(20.0f, main_camera->GetPosition().y, main_camera->GetPosition().z));
+        }
+        if (main_camera->GetPosition().x > (main_terrain->GetGridSize() - 20.0f)) {
+            main_camera->SetPosition(glm::vec3((main_terrain->GetGridSize() - 20.0f), main_camera->GetPosition().y, main_camera->GetPosition().z));
+        }
+        if (20.0f > main_camera->GetPosition().z) {
+            main_camera->SetPosition(glm::vec3(main_camera->GetPosition().x, main_camera->GetPosition().y, 20.0f));
+        }
+        if (main_camera->GetPosition().z > (main_terrain->GetGridSize() - 20.0f)) {
+            main_camera->SetPosition(glm::vec3(main_camera->GetPosition().x, main_camera->GetPosition().y, (main_terrain->GetGridSize() - 20.0f)));
+        }
     }
 
     //camera translates (side to side and zoom forwards & back)
