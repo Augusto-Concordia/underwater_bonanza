@@ -2,7 +2,7 @@
 
 #version 330 core
 
-#define LIGHT_COUNT 4
+#define LIGHT_COUNT 7
 
 struct Light {
     vec3 position;
@@ -146,7 +146,7 @@ void main() {
     for (int i = 0; i < volumetricSteps; i++) {
         vec3 lightsContribution = vec3(0.0f);
 
-        for(int j = 0; j < 1; j++) {
+        for(int j = 0; j < u_lights.length(); j++) {
             Light light = u_lights[j];
 
             // calculate the fragment position in light space
@@ -167,19 +167,23 @@ void main() {
 
             float lightTypeScalar = 1.0f;
             float lightRays = 0.0f;
+            float lightScattering = 0.0f;
 
             if (light.type == 0) { // Directional
                 lightRays = Voronoi2D(vec2(fragPosLightSpace.x + u_time * 0.03f, fragPosLightSpace.y * 5.0f + u_time * 0.1f) * 10.0f);
                 lightDistance = max(dot(light.position - currentVolumetricPos, lightTargetDir), 0.0) / u_caustics_strength;
+                lightScattering = ComputeScattering(lightRays);
             } else if (light.type == 1) { // Point
                 lightTypeScalar = dot(lightDir, lightTargetDir);
                 lightDistance = length(light.position - currentVolumetricPos);
+                lightScattering = ComputeScattering(dot(volumetricNormRay, lightDir));
             } else if (light.type == 2) { // Spot
                 lightTypeScalar = dot(lightDir, lightTargetDir);
                 lightDistance = length(light.position - currentVolumetricPos);
+                lightScattering = ComputeScattering(dot(volumetricNormRay, lightDir)) * 10.0f;
             }
 
-            lightsContribution += (ComputeScattering(dot(volumetricNormRay, lightDir)) + ComputeScattering(lightRays)) * light.color * //shadows
+            lightsContribution += (lightScattering) * light.color * //shadows
             lightTypeScalar *  //light type (i.e. if it's a spotlight)
             2.0f / (light.attenuation.x + light.attenuation.y * lightDistance + light.attenuation.z * lightDistance * lightDistance); //attenuation
         }

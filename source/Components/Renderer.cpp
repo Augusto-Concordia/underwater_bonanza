@@ -10,7 +10,7 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     viewport_width = _initialWidth;
     viewport_height = _initialHeight;
 
-    main_camera = std::make_unique<Camera>(glm::vec3(40.0f, 40.0f, 25.0f), glm::vec3(25.0f , 25.0f, 25.0f), _initialWidth, _initialHeight);
+    main_camera = std::make_unique<Camera>(glm::vec3(50.0f, 40.0f, 50.0f), glm::vec3(25.0f , 25.0f, 25.0f), _initialWidth, _initialHeight);
 
     lights = std::make_shared<std::vector<Light>>();
     lights->emplace_back(glm::vec3(60.0f, 100.0f, 60.0f), glm::vec3(1.0f), 0.1f, 0.2f, 0.4f, Light::Type::DIRECTIONAL);
@@ -24,7 +24,7 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     lights->at(0).SetTarget(glm::vec3(50.0f, 0.0f, 50.0f));
 
     for (int i = 1; i < lights->size(); ++i) {
-        lights->at(i).SetRange(175.0f);
+        lights->at(i).SetRange(25.0f);
     }
 
     /*lights->at(1).SetTarget(glm::vec3(30.0f, 12.0f, 30.0f));
@@ -849,8 +849,8 @@ void Renderer::SpawnAllObjects(const Shader::Material* _material){
         // std::cout<<"HELOOOOO"<<type<<std::endl;
         switch(type) {
             case 0: // basic seaweed
-                if (light_placed > 0 && rand() % 100 > 98) {
-                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(-1.0f, 74.0f, 2.0f));
+                if (light_placed > 0 && rand() % 100 > 97) {
+                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(-1.0f, 5.0f, 2.0f));
                     lights->at(light_placed).SetTarget(object.pos);
                     light_placed--;
                 }
@@ -860,8 +860,8 @@ void Renderer::SpawnAllObjects(const Shader::Material* _material){
                 // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
                 break;
             case 1: // tall seaweed
-                if (light_placed > 0 && rand() % 100 > 98) {
-                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(-1.0f, 74.0f, 2.0f));
+                if (light_placed > 0 && rand() % 100 > 97) {
+                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(-1.0f, 5.0f, 2.0f));
                     lights->at(light_placed).SetTarget(object.pos);
                     light_placed--;
                 }
@@ -871,8 +871,8 @@ void Renderer::SpawnAllObjects(const Shader::Material* _material){
                 // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
                 break;
             case 2: // clam
-                if (light_placed > 0 && rand() % 100 > 98) {
-                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(2.0f, 74.0f, 1.0f));
+                if (light_placed > 0 && rand() % 100 > 97) {
+                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(2.0f, 5.0f, 1.0f));
                     lights->at(light_placed).SetTarget(object.pos);
                     light_placed--;
                 }
@@ -882,8 +882,8 @@ void Renderer::SpawnAllObjects(const Shader::Material* _material){
                 // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
                 break;
             case 3: // coral 1
-                if (light_placed > 0 && rand() % 100 > 98) {
-                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(-1.0f, 74.0f, 2.0f));
+                if (light_placed > 0 && rand() % 100 > 97) {
+                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(-1.0f, 5.0f, 2.0f));
                     lights->at(light_placed).SetTarget(object.pos);
                     light_placed--;
                 }
@@ -893,8 +893,8 @@ void Renderer::SpawnAllObjects(const Shader::Material* _material){
                 // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
                 break;
             case 4: // coral 2
-                if (light_placed > 0 && rand() % 100 > 98) {
-                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(-2.0f, 74.0f, -1.0f));
+                if (light_placed > 0 && rand() % 100 > 97) {
+                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(-2.0f, 5.0f, -1.0f));
                     lights->at(light_placed).SetTarget(object.pos);
                     light_placed--;
                 }
@@ -1120,6 +1120,9 @@ void Renderer::SwitchScenes() {
 
         main_theme->play();
         underwater_sfx->play();
+
+        main_camera->SetPosition(glm::vec3(50.0f, 40.0f, 50.0f));
+        main_camera->SetTarget(glm::vec3(30.0f));
     } else {
         main_theme->stop();
         underwater_sfx->stop();
@@ -1277,6 +1280,7 @@ void Renderer::DrawIntroScene(GLFWwindow* _window, const double _time, const dou
     {
         std::cout << "time: " << realTime << "\n";
         SwitchScenes();
+        return;
     }
 
 
@@ -2402,17 +2406,17 @@ void Renderer::InputCallback(GLFWwindow* _window, const double _deltaTime) {
 
     //camera translates (side to side and zoom forwards & back)
     if (Input::IsKeyPressed(_window, GLFW_KEY_KP_7) || Input::IsKeyPressed(_window, GLFW_KEY_Q))
-        main_camera->OneAxisMove(Camera::Translation::UP, 0.1f);
+        main_camera->OneAxisMove(Camera::Translation::UP, 0.2f);
     if (Input::IsKeyPressed(_window, GLFW_KEY_KP_9) || Input::IsKeyPressed(_window, GLFW_KEY_E))
-        main_camera->OneAxisMove(Camera::Translation::DOWN, 0.1f);
+        main_camera->OneAxisMove(Camera::Translation::DOWN, 0.2f);
     if (Input::IsKeyPressed(_window, GLFW_KEY_KP_4) || Input::IsKeyPressed(_window, GLFW_KEY_W))
-        main_camera->OneAxisMove(Camera::Translation::CAMERA_FORWARD, 0.1f);
+        main_camera->OneAxisMove(Camera::Translation::CAMERA_FORWARD, 0.2f);
     if (Input::IsKeyPressed(_window, GLFW_KEY_KP_6) || Input::IsKeyPressed(_window, GLFW_KEY_A))
-        main_camera->OneAxisMove(Camera::Translation::LEFT, 0.1f);
+        main_camera->OneAxisMove(Camera::Translation::LEFT, 0.2f);
     if (Input::IsKeyPressed(_window, GLFW_KEY_KP_8) || Input::IsKeyPressed(_window, GLFW_KEY_S))
-        main_camera->OneAxisMove(Camera::Translation::CAMERA_BACKWARD, 0.1f);
+        main_camera->OneAxisMove(Camera::Translation::CAMERA_BACKWARD, 0.2f);
     if (Input::IsKeyPressed(_window, GLFW_KEY_KP_2) || Input::IsKeyPressed(_window, GLFW_KEY_D))
-        main_camera->OneAxisMove(Camera::Translation::RIGHT, 0.1f);
+        main_camera->OneAxisMove(Camera::Translation::RIGHT, 0.2f);
 
     //mouse triggers
     //forwards & back in camera local coordinates
