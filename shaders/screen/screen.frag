@@ -2,6 +2,8 @@
 
 #version 330 core
 
+#define LIGHT_COUNT 4
+
 struct Light {
     vec3 position;
     vec3 target;
@@ -25,7 +27,7 @@ uniform float u_time; //time
 uniform vec3 u_cam_pos; //camera position
 uniform vec3 u_cam_target; //camera target
 
-uniform Light u_lights[1]; //lights array
+uniform Light u_lights[LIGHT_COUNT]; //lights array
 
 uniform float u_caustics_strength = 2.0f; //caustics strength
 
@@ -144,7 +146,7 @@ void main() {
     for (int i = 0; i < volumetricSteps; i++) {
         vec3 lightsContribution = vec3(0.0f);
 
-        for(int j = 0; j < u_lights.length(); j++) {
+        for(int j = 0; j < 1; j++) {
             Light light = u_lights[j];
 
             // calculate the fragment position in light space

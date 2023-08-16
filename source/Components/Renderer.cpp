@@ -13,10 +13,18 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     main_camera = std::make_unique<Camera>(glm::vec3(40.0f, 40.0f, 25.0f), glm::vec3(25.0f , 25.0f, 25.0f), _initialWidth, _initialHeight);
 
     lights = std::make_shared<std::vector<Light>>();
-    lights->emplace_back(glm::vec3(50.0f, 150.0f, 50.0f), glm::vec3(1.0f), 0.1f, 0.2f, 0.4f, Light::Type::DIRECTIONAL);
-    //lights->emplace_back(glm::vec3(30.0f, 10.0f, 0.0f), glm::vec3(0.09f, 0.95f, 0.08f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
-    //lights->emplace_back(glm::vec3(-30.0f, 10.0f, 0.0f), glm::vec3(0.99f, 0.05f, 0.08f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
-    //lights->emplace_back(glm::vec3(0.0f, 34.0f, 36.0f), glm::vec3(0.09f, 0.05f, 0.78f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
+    lights->emplace_back(glm::vec3(50.0f, 100.0f, 50.0f), glm::vec3(1.0f), 0.1f, 0.2f, 0.4f, Light::Type::DIRECTIONAL);
+    lights->emplace_back(glm::vec3(30.0f, 10.0f, 30.0f), glm::vec3(0.09f, 0.95f, 0.08f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
+    lights->emplace_back(glm::vec3(40.0f, 10.0f, 20.0f), glm::vec3(0.99f, 0.05f, 0.08f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
+    lights->emplace_back(glm::vec3(20.0f, 12.0f, 40.0f), glm::vec3(0.09f, 0.05f, 0.78f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
+
+    for (int i = 1; i < lights->size(); ++i) {
+        lights->at(i).SetRange(500.0f);
+    }
+
+    /*lights->at(1).SetTarget(glm::vec3(30.0f, 12.0f, 30.0f));
+    lights->at(2).SetTarget(glm::vec3(40.0f, 12.0f, 20.0f));
+    lights->at(3).SetTarget(glm::vec3(20.0f, 12.0f, 40.0f));*/
 
     lit_shader = Shader::Library::CreateShader("shaders/lit/lit.vert", "shaders/lit/lit.frag");
     auto terrain_lit_shader = Shader::Library::CreateShader("shaders/terrain/lit.vert", "shaders/terrain/lit.frag");
@@ -709,6 +717,8 @@ void Renderer::CreateSpawnMap(){
 void Renderer::SpawnAllObjects(){
     // confirmed that we are spawning in this chunk
     //now the way and where we spawn depends on the object we roll
+    int light_placed = lights->size() - 1;
+
     for (auto & object : spawn_list_Global) {
         int type = object.type;
         // std::cout<<"HELOOOOO"<<type<<std::endl;
@@ -724,17 +734,33 @@ void Renderer::SpawnAllObjects(){
                 // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
                 break;
             case 2: // clam
+                if (light_placed > 0 && rand() % 100 > 92) {
+                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(0.0f, 12.0f, 0.0f));
+                    lights->at(light_placed).SetTarget(object.pos);
+                    light_placed--;
+                }
 
                 DrawOneClam(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), default_material.get(), moving_angle, object.color1, object.color2);
                 // std::cout<<"draw clam"<<std::endl;
                 // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
                 break;
             case 3: // coral 1
+                if (light_placed > 0 && rand() % 100 > 92) {
+                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(0.0f, 12.0f, 0.0f));
+                    lights->at(light_placed).SetTarget(object.pos);
+                    light_placed--;
+                }
+
                 DrawOneCoral(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), default_material.get(), moving_angle, object.color1, object.color2, object.color3);
                 // std::cout<<"draw coral"<<std::endl;
                 // std::cout<<object.pos.x << " y " << object.pos.y << " z" << object.pos.z<<std::endl;
                 break;
             case 4: // coral 2
+                if (light_placed > 0 && rand() % 100 > 92) {
+                    lights->at(light_placed).SetPosition(object.pos + glm::vec3(0.0f, 12.0f, 0.0f));
+                    lights->at(light_placed).SetTarget(object.pos);
+                    light_placed--;
+                }
             // std::cout<<"HELOOOOO"<<type<<std::endl;
                 DrawOneCoral2(object.pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(object.scaleF), main_camera->GetViewProjection(), main_camera->GetPosition(), default_material.get(), moving_angle, object.color1, object.color2, object.color3, object.branches);
                 // std::cout<<"draw coral 2"<<std::endl;
@@ -804,7 +830,7 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
     // processes input
     InputCallback(_window, _deltaTime);
     std::cout<<"delta: "<<_deltaTime<< std::endl;
-    std::cout<<"framerate: " << 1000.0 / _deltaTime   << std::endl;
+    std::cout<<"framerate: " << 1.0 / _deltaTime   << std::endl;
 
     if (!is_underwater) {
         DrawIntroScene(current_time, _deltaTime);
@@ -813,14 +839,6 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
 
     //animation
     moving_angle = glfwGetTime() * 20.0f;
-
-    // moves the main light
-    auto light_turning_radius = 4.0f;
-    for (int i = 1; i < lights->size(); ++i) {
-        auto& light = lights->at(i);
-
-        light.SetPosition(glm::vec3(glm::cos(glfwGetTime() * 2.0f + i) * light_turning_radius, 3.0f * glm::sin(glfwGetTime() / 2.0f + i) + 5.0f, glm::sin(glfwGetTime() + i) *  light_turning_radius));
-    }
 
     // SHADOW MAP PASS
 

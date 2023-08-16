@@ -2,6 +2,8 @@
 
 #version 330 core
 
+#define LIGHT_COUNT 4
+
 struct Light {
     vec3 position;
     vec3 target;
@@ -21,7 +23,7 @@ struct Light {
     mat4 light_view_projection;
 };
 
-uniform Light u_lights[1];
+uniform Light u_lights[LIGHT_COUNT];
 
 uniform int u_instanced; //is the mesh instanced?
 uniform mat4 u_model_transform; //model matrix
@@ -33,11 +35,11 @@ layout (location = 0) in vec3 vPos; //vertex input position
 layout (location = 1) in vec3 vNormal; //vertex input normal
 layout (location = 2) in vec2 vUv; //vertex input uv
 layout (location = 3) in mat4 vTransform; //model transformation matrix
-layout (location = 4) in vec3 vColor; //model transformation matrix
+layout (location = 7) in vec3 vColor; //model transformation matrix
 
 out vec3 Normal;
 out vec3 WorldPos;
-out vec4 FragPosLightSpace[1];
+out vec4 FragPosLightSpace[LIGHT_COUNT];
 out vec2 FragUv;
 out vec4 FragColor;
 

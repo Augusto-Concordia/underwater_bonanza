@@ -72,7 +72,7 @@ void Light::UpdateProjection() {
             projection_matrix = glm::perspective(glm::radians(Light::FOV), (float)Light::LIGHTMAP_SIZE / (float)Light::LIGHTMAP_SIZE, Light::NEAR_PLANE, Light::FAR_PLANE);
             break;
         case Light::Type::DIRECTIONAL:
-            projection_matrix = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, Light::NEAR_PLANE, Light::FAR_PLANE);
+            projection_matrix = glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, Light::NEAR_PLANE, Light::FAR_PLANE);
     }
 }
 

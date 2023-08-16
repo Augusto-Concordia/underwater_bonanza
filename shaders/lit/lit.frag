@@ -2,6 +2,8 @@
 
 #version 330 core
 
+#define LIGHT_COUNT 4
+
 struct Light {
     vec3 position;
     vec3 target;
@@ -25,7 +27,7 @@ uniform int u_instanced; //is the mesh instanced?
 uniform float u_time; //time
 uniform vec3 u_cam_pos; //cam position
 
-uniform Light u_lights[1];
+uniform Light u_lights[LIGHT_COUNT];
 uniform sampler2DArray u_light_depth_textures;
 
 uniform vec3 u_color = vec3(1.0f); //color
@@ -41,7 +43,7 @@ uniform sampler2DArray u_caustics_texture; //caustics texture
 
 in vec3 Normal; //normal of the fragment
 in vec3 WorldPos; //position of the fragment in world space
-in vec4 FragPosLightSpace[1]; //light space position of the fragment
+in vec4 FragPosLightSpace[LIGHT_COUNT]; //light space position of the fragment
 in vec2 FragUv; //uv of the fragment
 in vec4 FragColor; //color of the fragment
 
