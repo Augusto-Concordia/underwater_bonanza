@@ -66,7 +66,7 @@ float CalculateShadowScalar(int _index, vec4 _fragPosLightSpace, float _influenc
     // get current linear depth as stored in the depth buffer
     float currentDepth = projectedCoords.z;
 
-    return (currentDepth - max(0.0001 * (1.0 - dot(_norm, _lightDir)), 0.000025)) < closestDepth ? 1.0 : _influence; //bias calculation comes from: https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
+    return (currentDepth - max(0.0001, 0.000025)) < closestDepth ? 1.0 : _influence; //bias calculation comes from: https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
 }
 
 vec4 CalculateCaustics(sampler2DArray _causticsTexture, vec4 _frapPosLightSpace, int _textureCount, float _time) {
@@ -116,7 +116,7 @@ vec3 CalculateDirectionalLight(Light _light, vec4 _fragPosLightSpace, int _index
     vec3 specular = specularFactor * _light.specular_strength * _light.color;
 
     //caustics calculation
-    vec3 caustics = CalculateCaustics(u_caustics_texture, _fragPosLightSpace * 0.5, u_caustics_texture_count, u_time).rgb * _light.color * max(norm.y, 0.0);
+    vec3 caustics = CalculateCaustics(u_caustics_texture, _fragPosLightSpace * 0.5, u_caustics_texture_count, u_time).rgb * _light.color;
 
     vec3 colorResult = (caustics + diffuse + specular) * //lighting
     shadowScalar * //shadows
@@ -203,7 +203,9 @@ void main() {
 
     approximateAmbient = approximateAmbient / u_lights.length();
 
-    vec3 colorResult = (approximateAmbient + lightsColor) * vec3(mix(vec4((u_instanced == 1 ? FragColor.rgb : u_color), 1.0), texture(u_texture, FragUv), u_texture_influence)); //pure color or texture, mixed with lighting
+    vec4 objectColor = vec4(u_instanced == 1 ? FragColor.rgb : u_color, 1.0);
+
+    vec3 colorResult = (approximateAmbient + lightsColor) * vec3(mix(objectColor * 4.0f, texture(u_texture, FragUv), u_texture_influence)); //pure color or texture, mixed with lighting
 
     out_color = vec4(colorResult, u_alpha);
     camera_pos = vec4(gl_FragCoord.xyz / gl_FragCoord.w, 1.0); //true depth output

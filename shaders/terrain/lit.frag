@@ -64,7 +64,7 @@ float CalculateShadowScalar(int _index, vec4 _fragPosLightSpace, float _influenc
     // get current linear depth as stored in the depth buffer
     float currentDepth = projectedCoords.z;
 
-    return (currentDepth - max(0.0005 * (1.0 - dot(_norm, _lightDir)), 0.000025)) < closestDepth ? 1.0 : _influence; //bias calculation comes from: https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
+    return (currentDepth - max(0.0005, 0.000025)) < closestDepth ? 1.0 : _influence; //bias calculation comes from: https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
 }
 
 vec4 CalculateCaustics(sampler2DArray _causticsTexture, vec4 _frapPosLightSpace, int _textureCount, float _time) {

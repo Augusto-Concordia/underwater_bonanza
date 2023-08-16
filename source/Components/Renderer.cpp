@@ -13,7 +13,7 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     main_camera = std::make_unique<Camera>(glm::vec3(50.0f, 40.0f, 50.0f), glm::vec3(25.0f , 25.0f, 25.0f), _initialWidth, _initialHeight);
 
     lights = std::make_shared<std::vector<Light>>();
-    lights->emplace_back(glm::vec3(60.0f, 100.0f, 60.0f), glm::vec3(1.0f), 0.1f, 0.2f, 0.4f, Light::Type::DIRECTIONAL);
+    lights->emplace_back(glm::vec3(60.0f, 100.0f, 60.0f), glm::vec3(1.0f), 0.2f, 0.2f, 0.4f, Light::Type::DIRECTIONAL);
     lights->emplace_back(glm::vec3(30.0f, 10.0f, 30.0f), glm::vec3(0.09f, 0.95f, 0.08f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
     lights->emplace_back(glm::vec3(40.0f, 10.0f, 20.0f), glm::vec3(0.99f, 0.05f, 0.08f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
     lights->emplace_back(glm::vec3(20.0f, 12.0f, 40.0f), glm::vec3(0.09f, 0.05f, 0.78f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
@@ -21,6 +21,7 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     lights->emplace_back(glm::vec3(40.0f, 10.0f, 20.0f), glm::vec3(0.99f, 0.05f, 0.08f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
     lights->emplace_back(glm::vec3(20.0f, 12.0f, 40.0f), glm::vec3(0.09f, 0.05f, 0.78f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
 
+    lights->at(0).SetRange(500.0f);
     lights->at(0).SetTarget(glm::vec3(50.0f, 0.0f, 50.0f));
 
     for (int i = 1; i < lights->size(); ++i) {
@@ -167,8 +168,8 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     Shader::Material Leaf_material =  {
             .shader = lit_shader,
             .line_thickness = 3.0f,
-            .lights = lights,
             //.color = glm::vec3(0.0f, 0.0f, 1.0f),
+            .lights = lights,
             // .texture = Texture::Library::CreateTexture("assets/fuzz.jpg"),
             // .texture_tiling = glm::vec2(1.0f)
     };
@@ -410,14 +411,14 @@ void Renderer::CreateSpawnMap(){
 
 
     glm::vec3 petal_color_choice[4] = {glm::vec3(0.424, 0.949, 0.851), glm::vec3(1, 0.416, 0.753), glm::vec3(0.98, 0.839, 0.322), glm::vec3(0.631, 0.506, 0.929)};
-    glm::vec3 stem_color_choice[3] = {glm::vec3(0.086, 0.42, 0.102), glm::vec3(0.224, 0.51, 0.239), glm::vec3(0.337, 0.58, 0.349) };
+    glm::vec3 stem_color_choice[3] = {glm::vec3(0.172, 0.84, 0.204), glm::vec3(0.448, 1.0, 0.478), glm::vec3(0.674, 1.0, 0.701) };
 
     glm::vec3 clam_color_choice[3] = {glm::vec3(106.0f/255.0f, 90.0f/255.0f, 205.0f/255.0f), glm::vec3(1.0f,0.51f,0.612f), glm::vec3(1.0f,0.627f,0.129f)}; //shell
     glm::vec3 clam_color_choice_2[3] = {glm::vec3(181.0f/255.0f, 165.0f/255.0f, 213.0f/255.0f), glm::vec3(1.0f,0.627f,0.702f), glm::vec3(1.0f,0.757f,0.435f)}; //pearl ... really means secondary
 
-    glm::vec3 coral_color_choice_1[5] = {glm::vec3(1.0f, 0.7f, 0.0f),glm::vec3(0.0f, 1.0f, 0.816f),glm::vec3(0.878f, 0.322f, 0.424f), glm::vec3(0.565f, 0.871f, 0.282f),glm::vec3(1.0f, 0.475f, 0.396f)}; //darkest
-    glm::vec3 coral_color_choice_2[5] = {glm::vec3(1.0f, 0.8f, 0.0f),glm::vec3(0.435, 1.0f, 0.898f),glm::vec3(1.0f, 0.231f, 0.373f),glm::vec3(0.663f, 1.0f, 0.357f),glm::vec3(1.0f, 0.596f, 0.537f)}; //dark
-    glm::vec3 coral_color_choice_3[5] = {glm::vec3(1.0f, 1.0f, 0.0f),glm::vec3(0.663f, 0.988f, 0.929f),glm::vec3(1.0f, 0.376f, 0.49f),glm::vec3(0.733f, 1.0f, 0.49f),glm::vec3(1.0f, 0.769f, 0.733f)}; //light
+    glm::vec3 coral_color_choice_1[5] = {glm::vec3(1.0f, 0.7f, 0.2f),glm::vec3(0.0f, 1.0f, 0.816f),glm::vec3(0.878f, 0.322f, 0.424f), glm::vec3(0.565f, 0.871f, 0.282f),glm::vec3(1.0f, 0.475f, 0.396f)}; //darkest
+    glm::vec3 coral_color_choice_2[5] = {glm::vec3(1.0f, 0.8f, 0.3f),glm::vec3(0.435, 1.0f, 0.898f),glm::vec3(1.0f, 0.231f, 0.373f),glm::vec3(0.663f, 1.0f, 0.357f),glm::vec3(1.0f, 0.596f, 0.537f)}; //dark
+    glm::vec3 coral_color_choice_3[5] = {glm::vec3(1.0f, 1.0f, 0.4f),glm::vec3(0.663f, 0.988f, 0.929f),glm::vec3(1.0f, 0.376f, 0.49f),glm::vec3(0.733f, 1.0f, 0.49f),glm::vec3(1.0f, 0.769f, 0.733f)}; //light
     float scaleF;
 
     int max_flower_spawn;
@@ -1532,7 +1533,8 @@ void Renderer::DrawOneWeed2(const glm::vec3 &_position, const glm::vec3 &_rotati
             world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f, bounce * rot_bounce + sin_offset*25, 0.0f));
             world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f, 0.0f, 45.0f));
 
-            DrawOneLeaf(secondary_transform_matrix, _viewProjection, _eyePosition, _materialOverride);
+            leaf_cube->material.shader = _materialOverride->shader;
+            DrawOneLeaf(secondary_transform_matrix, _viewProjection, _eyePosition, &leaf_cube->material);
 
             secondary_transform_matrix = world_transform_matrix;
             world_transform_matrix = Transform::RotateDegrees(world_transform_matrix, glm::vec3(0.0f, 0.0f, -45.0f));

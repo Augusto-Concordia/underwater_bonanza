@@ -80,6 +80,8 @@ void Leaf::DrawFromMatrix(const glm::mat4 &_viewProjection, const glm::vec3 &_ca
     current_material->shader->SetTexture("u_texture", 1);
     current_material->shader->SetVec2("u_texture_tiling", current_material->texture_tiling);
 
+    current_material->shader->SetInt("u_instanced", 0);
+
     // line & point properties
     glLineWidth(current_material->line_thickness);
     glPointSize(current_material->point_size);
