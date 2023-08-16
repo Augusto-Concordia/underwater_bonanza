@@ -21,7 +21,7 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     lights->emplace_back(glm::vec3(40.0f, 10.0f, 20.0f), glm::vec3(0.99f, 0.05f, 0.08f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
     lights->emplace_back(glm::vec3(20.0f, 12.0f, 40.0f), glm::vec3(0.09f, 0.05f, 0.78f), 0.2f, 1.0f, 0.4f, Light::Type::SPOT);
 
-    lights->at(0).SetRange(500.0f);
+    lights->at(0).SetRange(600.0f);
     lights->at(0).SetTarget(glm::vec3(50.0f, 0.0f, 50.0f));
 
     for (int i = 1; i < lights->size(); ++i) {
@@ -1014,7 +1014,7 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
     glm::mat4 third_world_transform_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 3.0f, 0.0f));
     third_world_transform_matrix = glm::scale(third_world_transform_matrix, glm::vec3(1.5f));
 
-    for (int i = 0; i < lights->size(); ++i) {
+    for (int i = 0; i < 1; ++i) {
         const auto& light = lights->at(i);
 
         glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadow_map_texture, 0, i);
@@ -2466,16 +2466,16 @@ void Renderer::InputCallback(GLFWwindow* _window, const double _deltaTime) {
     if (is_underwater)
     {
         //check if we are going out of bounds
-        if (20.0f > main_camera->GetPosition().x) {
+        if (10.0f > main_camera->GetPosition().x) {
             main_camera->SetPosition(glm::vec3(20.0f, main_camera->GetPosition().y, main_camera->GetPosition().z));
         }
-        if (main_camera->GetPosition().x > (main_terrain->GetGridSize() - 20.0f)) {
-            main_camera->SetPosition(glm::vec3((main_terrain->GetGridSize() - 20.0f), main_camera->GetPosition().y, main_camera->GetPosition().z));
+        if (main_camera->GetPosition().x > (main_terrain->GetGridSize() - 10.0f)) {
+            main_camera->SetPosition(glm::vec3((main_terrain->GetGridSize() - 10.0f), main_camera->GetPosition().y, main_camera->GetPosition().z));
         }
         if (20.0f > main_camera->GetPosition().z) {
-            main_camera->SetPosition(glm::vec3(main_camera->GetPosition().x, main_camera->GetPosition().y, 20.0f));
+            main_camera->SetPosition(glm::vec3(main_camera->GetPosition().x, main_camera->GetPosition().y, 10.0f));
         }
-        if (main_camera->GetPosition().z > (main_terrain->GetGridSize() - 20.0f)) {
+        if (main_camera->GetPosition().z > (main_terrain->GetGridSize() - 10.0f)) {
             main_camera->SetPosition(glm::vec3(main_camera->GetPosition().x, main_camera->GetPosition().y, (main_terrain->GetGridSize() - 20.0f)));
         }
     }
