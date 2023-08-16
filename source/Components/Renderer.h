@@ -35,7 +35,10 @@ private:
     std::shared_ptr<Camera> main_camera;
     std::unique_ptr<Shader::Material> shadow_mapper_material;
 
-    std::unique_ptr<VisualPlane> uiPlane;
+    std::unique_ptr<VisualPlane> titleScreenUI;
+    std::unique_ptr<VisualPlane> blackFadeUI;
+    std::unique_ptr<VisualPlane> whiteFadeUI;
+    std::unique_ptr<VisualPlane> pressSpaceUI;
 
     std::unique_ptr<VisualLine> main_x_line;
     std::unique_ptr<VisualLine> main_y_line;
@@ -51,6 +54,26 @@ private:
     std::unique_ptr<Shader::Material> ocean_material;
     std::shared_ptr<Texture> main_skybox;
     std::shared_ptr<Texture> ocean_flow_map;
+
+    std::unique_ptr<Shader::Material> boat_material;
+    std::unique_ptr<VisualModel> boat;
+    std::shared_ptr<Texture> boatTexture;
+
+    std::unique_ptr<Shader::Material> fishingRod_material;
+    std::unique_ptr<VisualModel> fishingRod;
+    std::shared_ptr<Texture> objectTexture;
+
+    std::unique_ptr<Shader::Material> fishingRodTurn_material;
+    std::unique_ptr<VisualModel> fishingRodTurn;
+
+    std::unique_ptr<Shader::Material> fishWire_material;
+    std::unique_ptr<VisualModel> fishWire;
+
+    std::unique_ptr<Shader::Material> fishStatic_material;
+    std::unique_ptr<VisualModel> fishStatic;
+
+    std::unique_ptr<Shader::Material> skybox_material;
+    std::unique_ptr<VisualModel> skybox;
 
     std::unique_ptr<GenerateTerrain> main_terrain;
 
@@ -71,8 +94,8 @@ private:
     std::unique_ptr<VisualCube>  coral_cube_2;
     std::unique_ptr<VisualCube>  coral_cube_3;
 
-    std::unique_ptr<sf::SoundBuffer> main_theme_buffer, underwater_sfx_buffer;
-    std::unique_ptr<sf::Sound> main_theme, underwater_sfx;
+    std::unique_ptr<sf::SoundBuffer> main_theme_buffer, underwater_sfx_buffer, transition_buffer, waves_buffer, fishingRod_buffer;
+    std::unique_ptr<sf::Sound> main_theme, underwater_sfx, transition_sfx, waves_sfx, fishingRod_sfx;
 
     //item storage
     std::vector<ObjectProperties> spawn_list_Global;
@@ -92,6 +115,11 @@ private:
     GLuint shadow_map_fbo = 0;
     GLuint shadow_map_texture = 0;
 
+    bool animateCamera = true;
+    float cutsceneStartTime = -1;
+    bool cutscenePressedSpace = false;
+    bool fishingRodThrown = false;
+
 public:
     Renderer(int _initialWidth, int _initialHeight);
 
@@ -102,7 +130,7 @@ public:
     void InputCallback(GLFWwindow* _window, double _deltaTime);
 
     void SwitchScenes();
-    void DrawIntroScene(double _time, double _deltaTime);
+    void DrawIntroScene(GLFWwindow* _window, double _time, double _deltaTime);
 
     void CreateSpawnMap();
 

@@ -29,7 +29,7 @@ uniform int u_instanced; //is the mesh instanced?
 uniform mat4 u_model_transform; //model matrix
 uniform mat4 u_view_projection; //view projection matrix
 
-uniform vec2 u_texture_tiling; //texture (uv) tiling
+uniform vec2 u_texture_tiling = vec2(1.0, 1.0); //texture (uv) tiling
 
 layout (location = 0) in vec3 vPos; //vertex input position
 layout (location = 1) in vec3 vNormal; //vertex input normal

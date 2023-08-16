@@ -35,6 +35,8 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     auto terrain_lit_shader = Shader::Library::CreateShader("shaders/terrain/lit.vert", "shaders/terrain/lit.frag");
     auto unlit_shader = Shader::Library::CreateShader("shaders/unlit/unlit.vert", "shaders/unlit/unlit.frag");
     auto ocean_shader = Shader::Library::CreateShader("shaders/ocean/ocean.vert", "shaders/ocean/ocean.frag");
+    auto skybox_shader = Shader::Library::CreateShader("shaders/skybox/skybox.vert", "shaders/skybox/skybox.frag");
+    auto model_shader = Shader::Library::CreateShader("shaders/model/model.vert", "shaders/model/model.frag");
 
     auto screen_shader = Shader::Library::CreateShader("shaders/screen/screen.vert", "shaders/screen/screen.frag");
     auto shadow_mapper_shader = Shader::Library::CreateShader("shaders/shadows/shadow_mapper.vert", "shaders/shadows/shadow_mapper.frag");
@@ -61,16 +63,45 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     };
     //main_grid = std::make_unique<VisualGrid>(100, 100, 1.0f, glm::vec3(0.0f), glm::vec3(90.0f, 0.0f, 0.0f), grid_material);
 
-    Shader::Material uiImage_Material = {
+    Shader::Material titleScreen_Material = {
             .shader = unlit_shader,
             .line_thickness = 3.0f,
             .color = glm::vec3(1.0f, 1.0f, 1.0f),
-            .alpha = 0.5f,
+            .alpha = 0.0f,
             .texture= Texture::Library::CreateTexture("assets/prettyBlue_logo.png"),
             .texture_influence = 1.0f,
     };
-    uiPlane = std::make_unique<VisualPlane>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.5f, 0.5f, 0.5f), uiImage_Material);
-
+    Shader::Material blackFadeUI_Material = {
+            .shader = unlit_shader,
+            .line_thickness = 3.0f,
+            .color = glm::vec3(1.0f, 1.0f, 1.0f),
+            .alpha = 0.0f,
+            .texture = Texture::Library::CreateTexture("assets/black.png"),
+            .texture_influence = 1.0f,
+    };
+    Shader::Material whiteFadeUI_Material = {
+            .shader = unlit_shader,
+            .line_thickness = 3.0f,
+            .color = glm::vec3(1.0f, 1.0f, 1.0f),
+            .alpha = 0.0f,
+            .texture = Texture::Library::CreateTexture("assets/white.png"),
+            .texture_influence = 1.0f,
+    };
+    Shader::Material pressSpaceUI_Material = {
+            .shader = unlit_shader,
+            .line_thickness = 3.0f,
+            .color = glm::vec3(1.0f, 1.0f, 1.0f),
+            .alpha = 0.0f,
+            .texture = Texture::Library::CreateTexture("assets/pressSpace.png"),
+            .texture_influence = 1.0f,
+    };
+   
+    titleScreenUI = std::make_unique<VisualPlane>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.5f, 0.5f, 0.5f), titleScreen_Material);
+    blackFadeUI = std::make_unique<VisualPlane>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.5f, 0.5f, 0.5f), blackFadeUI_Material);
+    whiteFadeUI = std::make_unique<VisualPlane>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.5f, 0.5f, 0.5f), whiteFadeUI_Material);
+    pressSpaceUI = std::make_unique<VisualPlane>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.5f, 0.5f, 0.5f), pressSpaceUI_Material);
+    
+    
     //axis lines
     Shader::Material x_line_material = {
             .shader = unlit_shader,
@@ -221,6 +252,67 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
     //skybox
     main_skybox = Texture::Library::CreateCubemapTexture("assets/textures/skybox");
 
+    boat_material = std::make_unique<Shader::Material>();
+    boat_material->shader = model_shader;
+    boat_material->lights = lights;
+    boat_material->line_thickness = 3.0f;
+    boat_material->color = glm::vec3(1.0f, 1.0f, 1.0f);
+    boat_material->texture_influence = 1.0f;
+    boatTexture = Texture::Library::CreateTexture("assets/textures/boatTexture.png");
+    //boat_material->texture = Texture::Library::CreateTexture("assets/textures/boatTexture.png");
+    boat = std::make_unique<VisualModel>("assets/models/boat.obj", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), *boat_material);
+
+    fishingRod_material = std::make_unique<Shader::Material>();
+    fishingRod_material->shader = model_shader;
+    fishingRod_material->lights = lights;
+    fishingRod_material->line_thickness = 3.0f;
+    fishingRod_material->color = glm::vec3(1.0f, 1.0f, 1.0f);
+    fishingRod_material->texture_influence = 1.0f;
+    objectTexture = Texture::Library::CreateTexture("assets/textures/objectTexture.png");
+    //boat_material->texture = Texture::Library::CreateTexture("assets/textures/boatTexture.png");
+    fishingRod = std::make_unique<VisualModel>("assets/models/fishingRod.obj", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), *fishingRod_material);
+
+
+    fishingRodTurn_material = std::make_unique<Shader::Material>();
+    fishingRodTurn_material->shader = model_shader;
+    fishingRodTurn_material->lights = lights;
+    fishingRodTurn_material->line_thickness = 3.0f;
+    fishingRodTurn_material->color = glm::vec3(1.0f, 1.0f, 1.0f);
+    fishingRodTurn_material->texture_influence = 1.0f;
+    //objectTexture = Texture::Library::CreateTexture("assets/textures/objectTexture.png");
+    //boat_material->texture = Texture::Library::CreateTexture("assets/textures/boatTexture.png");
+    fishingRodTurn = std::make_unique<VisualModel>("assets/models/fishingRod_turn.obj", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), *fishingRodTurn_material);
+
+    fishWire_material = std::make_unique<Shader::Material>();
+    fishWire_material->shader = model_shader;
+    fishWire_material->lights = lights;
+    fishWire_material->line_thickness = 3.0f;
+    fishWire_material->color = glm::vec3(1.0f, 1.0f, 1.0f);
+    fishWire_material->texture_influence = 1.0f;
+    //objectTexture = Texture::Library::CreateTexture("assets/textures/objectTexture.png");
+    //boat_material->texture = Texture::Library::CreateTexture("assets/textures/boatTexture.png");
+    fishWire = std::make_unique<VisualModel>("assets/models/fishWire.obj", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), *fishWire_material);
+
+
+    fishStatic_material = std::make_unique<Shader::Material>();
+    fishStatic_material->shader = model_shader;
+    fishStatic_material->lights = lights;
+    fishStatic_material->line_thickness = 3.0f;
+    fishStatic_material->color = glm::vec3(1.0f, 1.0f, 1.0f);
+    fishStatic_material->texture_influence = 1.0f;
+    //objectTexture = Texture::Library::CreateTexture("assets/textures/objectTexture.png");
+    //boat_material->texture = Texture::Library::CreateTexture("assets/textures/boatTexture.png");
+    fishStatic = std::make_unique<VisualModel>("assets/models/fish_static.obj", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), *fishWire_material);
+
+    skybox_material = std::make_unique<Shader::Material>();
+    skybox_material->shader = skybox_shader;
+    skybox_material->lights = lights;
+    skybox_material->line_thickness = 3.0f;
+    skybox_material->color = glm::vec3(1.0f, 1.0f, 1.0f);
+    skybox_material->texture_influence = 1.0f;
+    skybox = std::make_unique<VisualModel>("assets/models/skybox.obj", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), *skybox_material);
+
+
     //shark
     default_material =  std::make_unique<Shader::Material>();
     default_material->shader = lit_shader;
@@ -239,6 +331,9 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
 
     main_theme_buffer = std::make_unique<sf::SoundBuffer>();
     underwater_sfx_buffer = std::make_unique<sf::SoundBuffer>();
+    transition_buffer = std::make_unique<sf::SoundBuffer>();
+    waves_buffer = std::make_unique<sf::SoundBuffer>();
+    fishingRod_buffer = std::make_unique<sf::SoundBuffer>();
 
     if (!main_theme_buffer->loadFromFile("assets/sounds/main_theme.mp3")) {
         std::cerr << "Failed to load main theme sound!" << std::endl;
@@ -248,17 +343,41 @@ Renderer::Renderer(int _initialWidth, int _initialHeight) {
         std::cerr << "Failed to load underwater sfx sound!" << std::endl;
     }
 
+    if (!transition_buffer->loadFromFile("assets/sounds/transition.mp3")) {
+        std::cerr << "Failed to load transition sfx sound!" << std::endl;
+    }
+
+    if (!waves_buffer->loadFromFile("assets/sounds/waves.mp3")) {
+        std::cerr << "Failed to load waves sfx sound!" << std::endl;
+    }
+
+    if (!fishingRod_buffer->loadFromFile("assets/sounds/fishingRod.mp3")) {
+        std::cerr << "Failed to load fishingRod sfx sound!" << std::endl;
+    }
+
     main_theme = std::make_unique<sf::Sound>();
     underwater_sfx = std::make_unique<sf::Sound>();
+    transition_sfx = std::make_unique<sf::Sound>();
+    waves_sfx = std::make_unique<sf::Sound>();
+    fishingRod_sfx = std::make_unique<sf::Sound>();
 
     main_theme->setBuffer(*main_theme_buffer);
     underwater_sfx->setBuffer(*underwater_sfx_buffer);
+    transition_sfx->setBuffer(*transition_buffer);
+    waves_sfx->setBuffer(*waves_buffer);
+    fishingRod_sfx->setBuffer(*fishingRod_buffer);
 
     main_theme->setVolume(100.0f);
     underwater_sfx->setVolume(100.0f);
+    transition_sfx->setVolume(100.0f);
+    waves_sfx->setVolume(100.0f);
+    fishingRod_sfx->setVolume(100.0f);
 
     main_theme->setLoop(true);
     underwater_sfx->setLoop(true);
+    transition_sfx->setLoop(false);
+    waves_sfx->setLoop(true);
+    fishingRod_sfx->setLoop(false);
 }
 
 void Renderer::CreateSpawnMap(){
@@ -847,11 +966,11 @@ void Renderer::Render(GLFWwindow* _window, const double _deltaTime) {
 
     // processes input
     InputCallback(_window, _deltaTime);
-    std::cout<<"delta: "<<_deltaTime<< std::endl;
-    std::cout<<"framerate: " << 1.0 / _deltaTime   << std::endl;
+    //std::cout<<"delta: "<<_deltaTime<< std::endl;
+    //std::cout<<"framerate: " << 1 / _deltaTime   << std::endl;
 
     if (!is_underwater) {
-        DrawIntroScene(current_time, _deltaTime);
+        DrawIntroScene(_window, current_time, _deltaTime);
         return;
     }
 
@@ -993,6 +1112,7 @@ void Renderer::SwitchScenes() {
     is_underwater = !is_underwater;
 
     if (is_underwater) {
+        waves_sfx->stop();
         main_terrain->GenerateChunkTerrain(true);
         main_terrain->SetupBuffers();
 
@@ -1003,10 +1123,196 @@ void Renderer::SwitchScenes() {
     } else {
         main_theme->stop();
         underwater_sfx->stop();
+        
+        cutsceneStartTime = -2;
+        cutscenePressedSpace = false;
+        fishingRodThrown = false;
     }
 }
 
-void Renderer::DrawIntroScene(const double _time, const double _deltaTime) {
+//flag
+void Renderer::DrawIntroScene(GLFWwindow* _window, const double _time, const double _deltaTime) {
+    float panDuration = 13.5f;
+
+    if (cutsceneStartTime == -1) {
+        std::cout << "-1\n";
+        cutsceneStartTime = _time;
+        waves_sfx->setVolume(100.0f);
+        waves_sfx->play();
+        fishWire->position = glm::vec3(0.0f, -1000.0f, 0.0f);
+        fishStatic->position = glm::vec3(0.0f, -1000.0f, 0.0f);
+    }
+
+    if(cutsceneStartTime == -2) 
+    {
+        std::cout << "-2\n";
+        cutsceneStartTime = _time - panDuration;
+        waves_sfx->setVolume(100.0f);
+        waves_sfx->play();
+        fishWire->position = glm::vec3(0.0f, -1000.0f, 0.0f);
+        fishStatic->position = glm::vec3(0.0f, -1000.0f, 0.0f);
+    }
+
+    float realTime = _time - cutsceneStartTime;
+
+    glm::vec3 camPos = glm::vec3(15, 15, 5);
+    glm::vec3 camTarget = glm::vec3(0, 0, 0);
+
+    glm::vec3 startPanPos = glm::vec3(15, 15, 5);
+    glm::vec3 endPanPos = glm::vec3(6, 6, 1);
+
+    
+    if (realTime < 1) {
+        titleScreenUI->material.alpha = 0.0f;
+        blackFadeUI->material.alpha = 1.0f;
+    }
+
+    
+    float blackValue = glm::clamp(1 - ((realTime - 1) / 1.0f), 0.0f, 1.0f);
+    float uiValue = 0.0f;
+    float pressSpaceValue = 0.0f;
+    if (realTime >= 1 && realTime <= panDuration) {
+        float value = (realTime - 1) / panDuration;
+        camPos = glm::mix(startPanPos, endPanPos, value);
+
+        uiValue = glm::clamp((realTime-4) / 3, 0.0f, 1.0f);
+        if(realTime>=10)
+            uiValue = glm::clamp( 1-((realTime - 10) / 1.5f), 0.0f, 1.0f);
+        titleScreenUI->material.alpha = uiValue;
+        blackFadeUI->material.alpha = blackValue;
+    }
+
+    float fishingRodThrowDuration = 16;
+    if (realTime >= panDuration && realTime < fishingRodThrowDuration)
+    {
+        if (fishingRodThrown == false)
+        {
+            fishingRod_sfx->play();
+            fishingRodThrown = true;
+        }
+        float rotValue = sin( (realTime - panDuration) * 5.0f);
+        if ((realTime - panDuration) * 5.0f > 1.8)
+            rotValue = sin(1.8);
+
+        camPos = glm::vec3(-0.5, 1.5, 2.65);
+        camTarget = glm::vec3(-0.4, 1.5, 2.7);
+
+        fishingRod->position = glm::vec3(0, 1, 2.5);
+        fishingRod->rotation = glm::vec3(-45.0f * rotValue, 0.0f, 0.0f);
+    }
+
+    float fishingRodTurnDuration = 19;
+    if (realTime >= fishingRodThrowDuration && realTime < fishingRodTurnDuration)
+    {
+        float t = realTime - fishingRodThrowDuration;
+         
+        fishWire->position = glm::vec3(0, 0.96 + t*0.05f,  2.9);
+
+        camPos = glm::vec3(0.2, 1.1, 2.8);
+        camTarget = glm::vec3(0, 1.15, 2.9);
+
+    }
+
+    glm::vec3 fishInPos = glm::vec3(0.1, 0.55f, 2.55);
+    float fishFallDuration = 19;
+    /*if (realTime >= fishingRodTurnDuration && realTime < fishFallDuration)
+    {
+        float value = realTime - fishingRodTurnDuration;
+        camPos = glm::vec3(0, 0.7, 2.5);
+        camTarget = glm::vec3(0.1, 0.55, 2.55);
+
+        float ampl = 1.0f;
+        float hitTime = 1.5707f / 5.0f;
+        if (value > hitTime + hitTime * 5)
+            ampl = 0.0f;
+        else if (value > hitTime + hitTime*2)
+            ampl = 0.01f;
+        else if (value > hitTime)
+            ampl = 0.05f;
+
+        if (value > hitTime + hitTime * 5)
+
+        fishStatic->position = glm::vec3(0.1, 0.55 + glm::abs(cos(value * 5.0f)) * ampl, 2.55);
+        fishStatic->rotation = glm::vec3(0.0f, 30.0f, 0.0f);
+    }*/
+
+    
+    if (realTime >= fishFallDuration && !cutscenePressedSpace)
+    {
+        if (Input::IsKeyReleased(_window, GLFW_KEY_SPACE)) {
+            cutscenePressedSpace = true;
+            cutsceneStartTime = _time - fishFallDuration;
+            transition_sfx->play();
+            return;
+        }
+
+        pressSpaceValue = glm::clamp((realTime - fishFallDuration) / 0.5f, 0.0f, 1.0f);
+        pressSpaceUI->material.alpha = pressSpaceValue;
+
+        camPos = glm::vec3(0, 0.7, 2.5);
+        camTarget = glm::vec3(0.1, 0.55, 2.55);
+
+        fishStatic->position = glm::vec3(0.1, 0.55, 2.55);
+        fishStatic->rotation = glm::vec3(0.0f, 30.0f, 0.0f);
+    }
+
+    float whiteValue = 0.0f;
+    float fishJumpDuration = 22;
+    if (realTime >= fishFallDuration && cutscenePressedSpace)
+    {
+        float value = realTime - fishFallDuration;
+        whiteValue = glm::clamp(((realTime - fishFallDuration - 0.2f) / 1.0f), 0.0f, 1.0f);
+        whiteFadeUI->material.alpha = whiteValue;
+        fishStatic->position = glm::vec3(0.1, 0.55 + value*0.6f, 2.55 + value*0.3f);
+        fishStatic->rotation = glm::vec3(0.0f, 30.0f, value * 45.0f);
+
+        float soundValue = glm::clamp( 1 - ((realTime - fishFallDuration) / 0.5f), 0.0f, 1.0f);
+        waves_sfx->setVolume(soundValue*100);
+
+        camPos = glm::vec3(0, 0.7, 2.5);
+        camTarget = glm::vec3(0.1, 0.55, 2.55);
+    }
+
+    if (realTime >= fishJumpDuration && cutscenePressedSpace)
+    {
+        std::cout << "time: " << realTime << "\n";
+        SwitchScenes();
+    }
+
+
+    if (animateCamera) {
+        main_camera->SetPosition(camPos);
+        main_camera->SetTarget(camTarget);
+    }
+
+
+
+
+    glBindFramebuffer(GL_FRAMEBUFFER, shadow_map_fbo);
+    glViewport(0, 0, Light::LIGHTMAP_SIZE, Light::LIGHTMAP_SIZE);
+
+    for (int i = 0; i < lights->size(); ++i) {
+        const auto& light = lights->at(i);
+
+        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadow_map_texture, 0, i);
+
+        // clears the depth canvas to black
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+        boat->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), (float)_time, GL_TRIANGLES, boat_material.get());
+        main_ocean->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), (float)_time, GL_TRIANGLES, ocean_material.get());
+
+    }
+
+    // COLOR PASS
+
+    // binds the screen to draw on it
+    main_screen->Bind();
+
+    // activates the shadow map depth texture & binds it to the second texture unit, so that it can be used for shadow mapping
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, shadow_map_texture);
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // resets the viewport to the window size
@@ -1016,15 +1322,78 @@ void Renderer::DrawIntroScene(const double _time, const double _deltaTime) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     main_skybox->UseCubemap(GL_TEXTURE1);
+    skybox_material->shader->SetTexture("skybox", 1);
+
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    {
+        glm::vec3 camPos = main_camera->GetPosition();
+        glm::vec3 camFrwd = main_camera->GetCamForward();
+        std::cout << "x: " << camFrwd.x << "y: " << camFrwd.y << "z: " << camFrwd.z << "\n";
+        glm::vec3 camTarget = -camFrwd;
+        glm::vec3 camOldTarget = camPos + camFrwd;
+        //main_camera->SetPosition(glm::vec3(0.0f));
+        //main_camera->SetTarget(camTarget);
+        glm::mat4 skyView = main_camera->GetProjection() * glm::mat4(glm::mat3(main_camera->GetView()));
+        skybox->Draw(skyView, main_camera->GetPosition(), (float)_time, GL_TRIANGLES, skybox_material.get());
+        //main_camera->SetPosition(camPos);
+        //main_camera->SetTarget(camOldTarget);
+    }
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+
+    main_skybox->UseCubemap(GL_TEXTURE1);
     ocean_flow_map->UseSingle(GL_TEXTURE2);
 
     ocean_material->shader->SetTexture("skybox", 1);
     ocean_material->shader->SetTexture("oceanFlowMap", 2);
 
-    //main_x_line->Draw(main_camera->GetViewProjection(), main_camera->GetPosition());
-    uiPlane->DrawFromMatrix(glm::mat4(1.0f), glm::vec3(1.0f), glm::mat4(1.0f), _time);
+    main_ocean->position = glm::vec3(-15.0f, 0.0f, -15.0f);
     main_ocean->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), (float)_time, GL_TRIANGLES, ocean_material.get());
+    
+    boatTexture->UseSingle(GL_TEXTURE3);
+    boat_material->shader->SetTexture("u_texture", 3);
+    boat_material->shader->SetFloat("u_texture_influence", 1.0f);
+    boat->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), (float)_time, GL_TRIANGLES, boat_material.get());
 
+    objectTexture->UseSingle(GL_TEXTURE3);
+    fishingRod_material->shader->SetTexture("u_texture", 3);
+    fishingRod_material->shader->SetFloat("u_texture_influence", 1.0f);
+    fishingRod->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), (float)_time, GL_TRIANGLES, fishingRod_material.get());
+
+    objectTexture->UseSingle(GL_TEXTURE3);
+    fishingRodTurn_material->shader->SetTexture("u_texture", 3);
+    fishingRodTurn_material->shader->SetFloat("u_texture_influence", 1.0f);
+    fishingRodTurn->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), (float)_time, GL_TRIANGLES, fishingRodTurn_material.get());
+
+    objectTexture->UseSingle(GL_TEXTURE3);
+    fishWire_material->shader->SetTexture("u_texture", 3);
+    fishWire_material->shader->SetFloat("u_texture_influence", 1.0f);
+    fishWire->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), (float)_time, GL_TRIANGLES, fishWire_material.get());
+
+    objectTexture->UseSingle(GL_TEXTURE3);
+    fishStatic_material->shader->SetTexture("u_texture", 3);
+    fishStatic_material->shader->SetFloat("u_texture_influence", 1.0f);
+    fishStatic->Draw(main_camera->GetViewProjection(), main_camera->GetPosition(), (float)_time, GL_TRIANGLES, fishStatic_material.get());
+
+    //UI
+    if (blackValue > 0.0f) {
+        pressSpaceUI->material.shader->SetFloat("wobbleFactor", 0.0f);
+        blackFadeUI->DrawFromMatrix(glm::mat4(1.0f), glm::vec3(1.0f), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), _time);
+    }
+    if (whiteValue > 0.0f) {
+        pressSpaceUI->material.shader->SetFloat("wobbleFactor", 0.0f);
+        whiteFadeUI->DrawFromMatrix(glm::mat4(1.0f), glm::vec3(1.0f), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), _time);
+    }
+    if (uiValue > 0.0f) {
+        titleScreenUI->material.shader->SetFloat("wobbleFactor", 1.0f);
+        titleScreenUI->DrawFromMatrix(glm::mat4(1.0f), glm::vec3(1.0f), glm::scale(glm::mat4(1.0f), glm::vec3(0.7f)), _time);
+    }
+    if (pressSpaceValue > 0.0f)
+    {
+        pressSpaceUI->material.shader->SetFloat("wobbleFactor", 0.0f);
+        pressSpaceUI->DrawFromMatrix(glm::mat4(1.0f), glm::vec3(1.0f), glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)), _time);
+    }
     Texture::Clear();
 }
 
@@ -2011,6 +2380,11 @@ void Renderer::InputCallback(GLFWwindow* _window, const double _deltaTime) {
 
     if (Input::IsKeyReleased(_window, GLFW_KEY_ENTER))
         SwitchScenes();
+
+    if (Input::IsKeyReleased(_window, GLFW_KEY_X))
+    {
+        animateCamera = !animateCamera;
+    }
 
     //check if we are going out of bounds
     if (20.0f > main_camera->GetPosition().x) {

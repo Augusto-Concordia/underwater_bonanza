@@ -172,6 +172,14 @@ glm::vec3 Camera::GetPosition() const {
     return cam_position;
 }
 
+glm::mat4 Camera::GetView() const {
+    return view_matrix;
+}
+
+glm::mat4 Camera::GetProjection() const {
+    return projection_matrix;
+}
+
 glm::mat4 Camera::GetViewProjection() const {
     return projection_matrix * view_matrix;
 }

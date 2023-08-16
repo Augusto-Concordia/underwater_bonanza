@@ -8,6 +8,8 @@ uniform float u_alpha; //opacity
 uniform float u_texture_influence = 0.0; //are textures enabled?
 uniform float u_time; //time
 
+uniform float wobbleFactor = 0.0f; //time
+
 uniform sampler2D u_texture; //object texture
 
 in vec2 FragUv;
@@ -19,7 +21,7 @@ layout(location = 2) out vec4 world_pos; //world-space position output
 
 //entrypoint
 void main() {
-    float wobbleAmount = sin(u_time+WorldPos.y*30) * 0.01f;
+    float wobbleAmount = sin(u_time+WorldPos.y*30) * (wobbleFactor == 1.0f ? 0.01f : 0.0f);
     vec2 wobbleOffset = vec2(wobbleAmount, 0.0f);
     vec2 finalUV = FragUv+wobbleOffset;
     //finalUV.x = clmap(finalUV.x, 0.0f, 1.0f);

@@ -60,7 +60,7 @@ int main() {
 
     Renderer main_renderer = Renderer(INITIAL_WIDTH, INITIAL_HEIGHT);
 
-    int display_w, display_h, previous_display_w, previous_display_h;
+    int display_w = 0, display_h = 0, previous_display_w = 0, previous_display_h = 0;
     double previous_time = glfwGetTime();
 
     main_renderer.Init();

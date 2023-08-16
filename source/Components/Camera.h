@@ -42,7 +42,7 @@ public:
         ORBIT_RIGHT
     };
 
-    float translation_speed = 4.5f;
+    float translation_speed = 1.0f;
     float rotation_speed = 5.0f;
     float orbit_speed = 24.0f;
 
@@ -72,6 +72,8 @@ public:
 
     [[nodiscard]] glm::vec3 GetPosition() const;
     [[nodiscard]] glm::mat4 GetViewProjection() const;
+    [[nodiscard]] glm::mat4 GetView() const;
+    [[nodiscard]] glm::mat4 GetProjection() const;
 
     [[nodiscard]] glm::vec3 GetCamUp() const;
     [[nodiscard]] glm::vec3 GetCamRight() const;
