@@ -12,8 +12,8 @@
 int main() {
     std::cout << "Starting..." << std::endl;
 
-    const uint16_t INITIAL_WIDTH = 1024;
-    const uint16_t INITIAL_HEIGHT = 768;
+    const uint16_t INITIAL_WIDTH = 1920;
+    const uint16_t INITIAL_HEIGHT = 1080;
 
     //initialize GL context
     if (!glfwInit()) {

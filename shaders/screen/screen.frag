@@ -2,7 +2,7 @@
 
 #version 330 core
 
-#define LIGHT_COUNT 7
+#define LIGHT_COUNT 1
 
 struct Light {
     vec3 position;
