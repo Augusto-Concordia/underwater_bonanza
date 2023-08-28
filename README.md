@@ -1,4 +1,4 @@
-![demo screenshot 1](https://github.com/Augusto-Concordia/underwater_bonanza/assets/33916325/4011ee48-ccd9-44e8-a181-568676c1d79d)
+![demo screenshot 1](https://github.com/Augusto-Concordia/underwater_bonanza/assets/33916325/f748500b-7286-4c20-bbca-33eaf91bd0da)
 
 # Pretty Blue (underwater_bonanza)
 Final Project - COMP 371 - Team 18
@@ -29,9 +29,10 @@ The goal of this project is to create a graphics program using OpenGL to enable 
 [![Thumbnail of Project Trailer](https://img.youtube.com/vi/eNTy1FF-BFI/0.jpg)](https://www.youtube.com/watch?v=eNTy1FF-BFI)
 
 ### Screenshots
-![demo screenshot 2](https://github.com/Augusto-Concordia/underwater_bonanza/assets/33916325/d5f0d6d8-2c09-46cd-86fb-cf5f2d805224)
-![demo screenshot 3](https://github.com/Augusto-Concordia/underwater_bonanza/assets/33916325/7e62d8e7-650c-420f-b0bb-6a74ccaf4ba1)
-![demo screenshot 4](https://github.com/Augusto-Concordia/underwater_bonanza/assets/33916325/46ab37be-661a-4641-beec-634deb977621)
+
+![demo screenshot 2](https://github.com/Augusto-Concordia/underwater_bonanza/assets/33916325/448bbf30-4293-4bb7-bb81-68c2d9d54bf3)
+![demo screenshot 3](https://github.com/Augusto-Concordia/underwater_bonanza/assets/33916325/cfc569ea-b497-401f-aa37-38eb258adafa)
+![demo screenshot 4](https://github.com/Augusto-Concordia/underwater_bonanza/assets/33916325/75effe78-d79e-47a4-932d-96d5755b588b)
 
 
 ## Getting Started
