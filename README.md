@@ -8,6 +8,7 @@ Final Project - COMP 371 - Team 18
 - Gabrielle Guidote
 - Jack Spiratos
 - Augusto Mota Pinheiro
+- Merouane Issad
 
 ## Goals
 The goal of this project is to create a graphics program using OpenGL to enable walking through a procedurally created virtual world. Our virtual world starts above sea level, and as the user moves, they are introduced to the depths of the ocean. There, one can see and navigate through sea life, including fish, sharks, seaweeds, rocks, caves, and more. This terrain is procedurally created.
